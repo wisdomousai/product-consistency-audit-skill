@@ -189,7 +189,7 @@ Not a gap:
 1. Rebuild the writer and reader table for the state in the candidate and confirm each writer's values and each reader's handling.
 2. Confirm the external writer is reachable in the deployed configuration and by the person or process named.
 3. Look for invalidation, refresh or reconciliation the candidate missed: event handlers, cache busting, per-request reads, scheduled jobs.
-4. Look for a source that states the surfaces differ on purpose for different audiences. If one exists, reject.
+4. Look for a source that states the surfaces differ on purpose for different audiences. If one exists, reject. The source must pass the provenance test in P4 (PRINCIPLES.md).
 5. For removal and archive findings, confirm what the sources promise the affected person keeps, and check its reachability.
 6. If sources do not say which surface owns the state or how quickly changes must reach other surfaces, the verdict is `needs_owner_intent`.
 7. Check that the remediation names the writer or reader where the fix belongs and does not create a new disagreement on another surface.

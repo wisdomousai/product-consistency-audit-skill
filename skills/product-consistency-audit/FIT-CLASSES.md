@@ -131,7 +131,7 @@ You are not given a class. Find intent gaps outside the classes already assigned
 - What happens when features meet that were built at different times: an invitation sent before a plan change, a draft created before a role change, an account linked after a workspace was archived?
 - Which tests encode an example rather than a rule? What does the code do outside that example?
 
-Pursue anomalies inside your assigned scope until the fit is settled. If a comment explains why something exists, verify the explanation against the intent sources.
+Pursue anomalies inside your assigned scope until the fit is clear. If a comment explains why something exists, verify the explanation against the intent sources.
 
 ## Obvious things
 

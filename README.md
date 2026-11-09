@@ -17,7 +17,7 @@ Agent instruction files (`CLAUDE.md`, `AGENTS.md`, `.cursorrules` and similar) a
 3. **Candidate validation**: a fresh agent states the intent from the sources before it sees the hunter's reading, then tries to refute the candidate: by finding an exit the hunter missed, or a stated need that justifies an overfit element.
 4. **Structured output**: `confirmed`, `needs_owner_intent` and `rejected` records go into `findings.json`, checked against `report-schema.json` by a zero-dependency validator.
 5. **Record verification**: fresh agents re-check every final record.
-6. **Owner review**: instead of a long report, you get a one-screen summary and a grilling session. Findings become a tree of decisions: open intent questions first, then the rules or memories behind each overfit cluster (keep, narrow or remove), then fixes, then order. Each round asks every decision whose prerequisites are settled, numbered, with a recommended answer you can accept with "yes". Your answers are recorded in `decisions.json` and `DECISIONS.md`, and later runs treat them as the highest-ranked source of intent.
+6. **Owner review**: instead of a long report, you get a one-screen summary and a grilling session. Findings become a tree of decisions: open intent questions first, then the rules or memories behind each overfit cluster (keep, narrow or remove), then fixes, then order. Each round asks every decision whose prerequisites are decided, numbered, with a recommended answer you can accept with "yes". Your answers are recorded in `decisions.json` and `DECISIONS.md`, and later runs treat them as the highest-ranked source of intent.
 
 Every finding cites the principles in [`PRINCIPLES.md`](skills/product-consistency-audit/PRINCIPLES.md) it breaks. Runs are additive: later runs read earlier ledgers, findings and decisions, revalidate changed source, and do not re-report what you accepted as intended.
 
@@ -26,7 +26,7 @@ Every finding cites the principles in [`PRINCIPLES.md`](skills/product-consisten
 | File | Purpose |
 |------|---------|
 | `SKILL.md` | Modes, execution boundary, setup, planning, core rules, workflow and anti-patterns |
-| `PRINCIPLES.md` | The thirteen audit principles every phase works from |
+| `PRINCIPLES.md` | The audit principles every phase works from |
 | `RECONNAISSANCE.md` | Phase 1 agents, the intent register and the coverage ledger |
 | `HUNTING.md` | Phase 2 hunter prompts, method, candidate gate and coverage critics |
 | `FIT-CLASSES.md` | Underfit, overfit and inconsistency classes, plus wildcard and checklist hunters |
@@ -42,6 +42,7 @@ Every finding cites the principles in [`PRINCIPLES.md`](skills/product-consisten
 | `report-schema.json` | JSON schema for the three `findings.json` verdicts |
 | `validate-findings.cjs` | Validator for `findings.json` |
 | `validate-coverage-ledger.cjs` | Validator for `coverage-ledger.json` |
+| `validate-intent-register.cjs` | Validator for `intent-register.json` |
 | `*.test.cjs` | Validator tests (`node <file>`) |
 
 ## Installation

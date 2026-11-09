@@ -21,7 +21,7 @@ Select this file when reconnaissance finds any of these surfaces:
 
 **Person and goal.** Name the person precisely: first-time visitor, returning member, invited person who has no account yet, invited person who already has an account under another email, member whose role an admin changed, person whose session expired mid-task, member without their own login, person signed in on another app of the same product. Their goal is usually to reach a specific page, often one a link or email sent them to.
 
-**Chain map.** For each entry point, write down every hop: URL, the gate, the cookies, tokens or records it reads, the destination on success and on each failure, and any parameter carried forward. Repeat for each identity state the person can be in at that hop. Stop when the chain ends or repeats.
+**Chain map.** For each entry point, write down every hop: URL, the gate, the cookies, tokens or records it reads, the destination on success and on each failure, and any parameter passed forward. Repeat for each identity state the person can be in at that hop. Stop when the chain ends or repeats.
 
 **Evidence methods.**
 
@@ -88,7 +88,7 @@ What to look for:
 - Form submissions and server actions that fail on an expired session with a generic error and discard input.
 - Background requests that fail silently on expiry, leaving the page looking saved.
 
-What establishes a gap: the expiry point, the parameter or state that should carry the person back, the hop where it is lost or rejected, and what the person loses or where they land.
+What establishes a gap: the expiry point, the parameter or state that should bring the person back, the hop where it is lost or rejected, and what the person loses or where they land.
 
 Not a gap:
 

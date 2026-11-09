@@ -32,6 +32,7 @@ This skill is agent-neutral:
 - **Task tool** is the platform's delegation or sub-agent mechanism.
 - **`research` agent** is a delegated agent for focused source reading and factual verification. It does not run the target.
 - **`general` agent** is a delegated agent for broad investigation and bounded local walkthroughs.
+- **Continuing an agent** means sending a follow-up message to an agent that has already returned, so it keeps its context. A continuation does not count as a new invocation against the budget.
 
 Use equivalent platform capabilities while preserving the role, write-isolation, prompt and independence boundaries.
 
@@ -40,8 +41,9 @@ Use equivalent platform capabilities while preserving the role, write-isolation,
 These rules apply in both modes. The target is the owner's product, so the boundary protects real people, money and data rather than the host.
 
 - Source and git history are read-only. Use `git log`, `git show` and `git blame`; never check out, reset, stash or change branches in the target.
-- Run the target only on localhost servers the parent starts, using the target's own documented local setup. Reconnaissance finds how to sign in as fixture people without real accounts, which data store is disposable, and which settings keep model, email, payment, storage and identity providers on fakes or local outboxes.
-- Before any walkthrough the parent confirms those settings by name, without printing secret values. If a setting cannot be confirmed, walkthroughs are blocked for the run and evidence stays `source` or `history`.
+- Run the target only on localhost servers the parent starts, using the target's own documented local setup. Reconnaissance finds how to sign in as fixture people without real accounts, which data store is disposable, and which settings keep model, email, payment, storage and identity providers on fakes or local outboxes. It also lists every tool (CLI, MCP server, desktop app, SDK, script) that falls back to a production or hosted URL when an origin setting is unset.
+- Before any walkthrough the parent confirms those settings by name, without printing secret values, including the origin setting of every tool that defaults to a hosted URL. If a setting cannot be confirmed, walkthroughs are blocked for the run and evidence stays `source` or `history`. A tool whose origin cannot be pinned to localhost is never run.
+- Agent memories and session transcripts kept outside the repository, such as per-user project memory directories, are read only when the owner names them or agrees to their use, and are never modified.
 - Never contact production or preview deployments, use real accounts or credentials, send email, take payments, spend paid model or API quota, create or delete cloud database branches or projects, or pull environment files from a hosting provider.
 - Never edit target source, configuration or environment files, and never add test files to the target. Walkthrough scripts, notes and screenshots live in the agent's `scratch/` directory.
 - The parent serializes walkthroughs that share a data store and gives each walkthrough its own fixture person.
@@ -55,7 +57,7 @@ In full audit mode, resolve these values before reconnaissance:
 - **Target**: the absolute repository root under review.
 - **Repo name**: a stable repository identifier from the directory or local Git remote.
 - **Output directory**: a new writable directory outside the target, defaulting to `~/product-consistency-audit/<repo-name>/run-<N>`, where `<N>` is the next unused integer. Use a directory inside the target only when the user selects it and version control ignores the whole directory.
-- **Source ref**: the reviewed commit and whether the worktree is dirty.
+- **Source ref**: the reviewed commit and whether the worktree is dirty. For a dirty worktree, record the changed paths as `dirty_paths` in `run-metadata.json` and audit the working copy as it is. A finding whose trace includes a dirty path says so in `evidence`, and the owner session asks whether those edits are the plan before recommending a fix that builds on them.
 
 ### Write isolation
 
@@ -70,8 +72,10 @@ The parent creates and is the only writer of shared run files:
 - `decision-tree.json`
 - `decisions.json`
 - `DECISIONS.md`
+- `recon/`, holding each reconnaissance report verbatim as `recon/<agent>.md`
+- `briefs/`, holding shared hunter and verifier briefs ([HUNTING.md](HUNTING.md), [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md))
 
-Each hunter or verifier receives a unique root under `<output-dir>/agents/<agent-id>/` with `scratch/` and `artifacts/` directories. Agent IDs match `^[a-z0-9][a-z0-9_-]{0,63}$` and must not equal a Windows device name (`con`, `prn`, `aux`, `nul`, `com1` to `com9`, `lpt1` to `lpt9`). An agent writes only inside its own `scratch/`. After the agent finishes, the parent copies the walkthrough notes or screenshots it will cite into that agent's `artifacts/`, as regular files only. Agents never write shared files, target files, or another agent's directory.
+Each hunter or verifier receives a unique root under `<output-dir>/agents/<agent-id>/` with `scratch/` and `artifacts/` directories. Agent IDs match `^[a-z0-9][a-z0-9_-]{0,63}$` and must not equal a Windows device name (`con`, `prn`, `aux`, `nul`, `com1` to `com9`, `lpt1` to `lpt9`). A verifier using the file-order mechanism also has a parent-written `sealed/` directory. An agent writes only inside its own `scratch/`, apart from input files the parent places there (such as `assigned-units.json`), which the agent reads and never changes. Every delegated agent except reconnaissance writes its result to `agents/<agent-id>/scratch/result.json` and replies with only the path and a short summary; the parent reads the file, and a missing or malformed file is a failed result. Reconnaissance agents reply with their report, which the parent saves under `recon/`. After the agent finishes, the parent copies the walkthrough notes or screenshots it will cite into that agent's `artifacts/`, as regular files only. Agents never write shared files, target files, or another agent's directory.
 
 Before delegation, the parent writes `run-metadata.json` with at least `run_id`, `repo`, `target`, `source_ref`, `profile`, `scope_paths`, `budget` (null if unset), `execution_policy: "read-only-source-history-and-local-walkthrough"`, `walkthrough_capability` (enabled or blocked, with the reason), selected companion files, prior-run paths, shared-file owners, and `run_status: "in_progress"`.
 
@@ -84,9 +88,9 @@ No single pass is complete. Build a deterministic coverage plan before hunting a
 If prior runs exist, read every compatible `coverage-ledger.json`, `findings.json` and `intent-register.json` before planning:
 
 1. Compare the relevant current source and instruction files with each prior record and unit. A prior source ref alone is not evidence that a path is unchanged. A changed instruction file or memory counts as changed source for every unit that cites it.
-2. Carry a prior `confirmed` record into the current candidate set only when its source, intent sources and conditions are unchanged. Link it to a current `planned` unit, exclude only that root cause from hunters, and send it through current verification.
+2. Bring a prior `confirmed` record into the current candidate set only when its source, intent sources and conditions are unchanged. Link it to a current `planned` unit, exclude only that root cause from hunters, and send it through current verification.
 3. When relevant source or intent sources for a prior `confirmed` record changed, create a planned revalidation unit and do not exclude that root cause from hunting.
-4. Read prior `decisions.json`. An owner's recorded statement of intent is an intent source ranked above every written source, and a finding the owner accepted as intended is not reported again unless its source changed. Prior `needs_owner_intent` records without an answer become current work with the same fingerprint.
+4. Read prior `decisions.json`. A recorded decision is an intent source with the provenance its `answered_as` field gives under P4. At `owner_statement` rank it outranks every written source and clears a later candidate on the same point; a finding the owner accepted as intended at that rank is not reported again unless its source changed. A `bulk_accepted` answer has bulk rank and is asked again when a candidate depends on it. Prior `needs_owner_intent` records without an answer become current work with the same fingerprint.
 5. Prior `deferred`, `blocked`, `out_of_scope` and changed-source units become current work. A prior `rejected` record suppresses only its unchanged claim, never coverage of its unit.
 6. A prior `quick` or scoped ledger contributes only its recorded evidence and gaps, never an implied "the rest is fine."
 
@@ -96,13 +100,13 @@ If no prior ledger exists, say so in the final coverage statement.
 
 Pick a profile from the user's request or propose one from the target's size. Record it in `run-metadata.json` and state it in `SUMMARY.md`. The default is `standard`.
 
-- **`quick`**: coarsen units to surface × gate × fit class with the fixed capability value `profile/quick/all-in-scope-capabilities`. A single hunter wave is followed by a final coverage critic, and each candidate gets a fresh verifier who covers both validation passes. Critic discoveries are recorded as `deferred`.
+- **`quick`**: coarsen units to surface × gate × fit class with the fixed capability value `profile/quick/all-in-scope-capabilities`. A single hunter wave is followed by a final coverage critic. Each verifier covers both validation passes and may take up to three candidates whose root causes are independent of each other. Critic discoveries are recorded as `deferred`.
 - **`standard`**: the workflow as written.
 - **`deep`**: split units per capability and lifecycle mode (first visit, returning, expired, role changed, downgraded, removed), run critic waves to a clean pass, keep candidate validation and record verification as separate fresh agents, and give prior covered same-source units a second pass.
 
 A **scoped run** audits named paths, named capabilities, a companion domain, or the diff between two refs. Seed units only for in-scope surfaces and record discovered excluded surfaces as `out_of_scope`. A scoped or `quick` run presents itself as partial coverage.
 
-Profiles change breadth and redundancy, never the evidence bar.
+Profiles change breadth and redundancy. The evidence bar is the same in every profile.
 
 #### Cost budget
 
@@ -112,11 +116,13 @@ Before launching reconnaissance, reserve the five baseline reconnaissance calls,
 
 Spend in this order: reserve critics and a validation reserve (about 30% of the balance after critics) before each hunter wave; assign hunters in priority order until the hunting allowance is spent; mark units the budget cannot reach as `deferred` with reason `budget_cannot_reserve_critics_and_validation`. If validation runs out, stop hunting, validate candidates in fingerprint order while budget remains, set `run_status: "incomplete"` with `incomplete_reason: "validation_budget_exhausted"`, and keep every unvalidated candidate in the ledger only. Never exceed a user-set budget silently.
 
+Cap candidates per hunter so validation can fund every candidate it receives. Subtract the verifier invocations that prior records brought into the run will need from the validation reserve. Divide the rest by the verifier invocations one candidate costs in the profile (two in `standard` and `deep`, one in `quick`), multiply by the candidates a verifier may take (one, or at most three in `quick`, an upper bound that holds only when that many independent root causes turn up), divide by the number of hunters in the wave, and round down. When the cap comes out below one, assign fewer hunters and defer the remaining units. Hunters return candidates beyond the cap under `uncovered`, and the parent seeds them as `deferred` units with reason `budget_cannot_reserve_critics_and_validation`.
+
 ## Core principles in practice
 
 [PRINCIPLES.md](PRINCIPLES.md) holds the full text. These rules apply them to evidence.
 
-### Require a person, an intent and a reachable situation
+### Candidate evidence
 
 For every candidate, name the person and their goal (P1), the intent and the sources it comes from (P4), the gate, state or model element involved, the reachable situation, and what the person can or cannot do there. Do not report a style preference, a missing best practice, or a pattern that affects no person and makes no change harder.
 
@@ -130,7 +136,7 @@ An intent drawn only from the code under review is circular (P4). When sources c
 
 ### Use bounded evidence
 
-Source tracing establishes the path. Git history establishes where a rule, state or branch came from. A local walkthrough, under the execution boundary, establishes what a person sees. Use the narrowest method that settles the claim, stop at the first observed stuck state, wrong answer or contradiction, and record the method in `reproduction.method`.
+Source tracing establishes the path. Git history establishes where a rule, state or branch came from. A local walkthrough, under the execution boundary, establishes what a person sees. Use the narrowest method that decides the claim, stop at the first observed stuck state, wrong answer or contradiction, and record the method in `reproduction.method`.
 
 ### Separate priority from certainty
 
@@ -152,7 +158,7 @@ For underfit and inconsistency, name the decision point where the missing exit, 
 
 In full audit mode, follow all six phases in order:
 
-1. **Reconnaissance**: map people, goals, intent sources and their origins, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md).
+1. **Reconnaissance**: map people, goals, intent sources and their origins, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md), and validate the register with `validate-intent-register.cjs`.
 2. **Coverage-led hunting waves**: assign isolated hunters from the ledger and collect structured results with [HUNTING.md](HUNTING.md), [FIT-CLASSES.md](FIT-CLASSES.md) and the selected companions.
 3. **Candidate validation**: give every candidate to a fresh verifier that re-derives the intent before reading the hunter's wording, as defined in [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md).
 4. **Structured output**: write final `confirmed`, `needs_owner_intent` and `rejected` records to `findings.json`; validate with `report-schema.json` and `validate-findings.cjs`, and validate the ledger with `validate-coverage-ledger.cjs`.

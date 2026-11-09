@@ -15,7 +15,7 @@ Select this file when reconnaissance finds text that tells a person what the pro
 
 **Bar for a finding.** Text describes behaviour the product does not have at that moment for the person who reads it (P13), or sends them to a path that does not work for them (P8). A finding names the text and its location, the person who reads it, the behaviour on the path it describes for that person, and the difference. Wording preferences with no difference in meaning are out of scope.
 
-**Where intent is written.** Public text is itself an intent source (P4). It can be the stale side or the current side of a disagreement. Decide which by its history and other sources: the commit that wrote the text, product docs and decision records, instruction files about copy (read under INSTRUCTIONS-AND-MEMORY.md), and the history of the behaviour. When text and behaviour disagree and no source settles which one states the intent, record `needs_owner_intent`.
+**Where intent is written.** Public text is itself an intent source (P4). It can be the stale side or the current side of a disagreement. Decide which by its history and other sources: the commit that wrote the text, product docs and decision records, instruction files about copy (read under INSTRUCTIONS-AND-MEMORY.md), and the history of the behaviour. When text and behaviour disagree and no source shows which one states the intent, record `needs_owner_intent`.
 
 **Person and goal.** Name the reader precisely: an anonymous visitor deciding to sign up, a buyer comparing plans, a member who received an email, a person reading an error, an invited person reading the invitation. The same text can be true for one reader and false for another (a feature listed for every plan and gated for some).
 
@@ -105,7 +105,7 @@ What to look for:
 - The recipient's likely state when they click: not signed in, signed in as another account, invitation expired, workspace archived, plan lapsed, on another device.
 - The gate on the destination and what it does for each of those states.
 - Email text describing an action ("click to accept", "review your draft") compared with what the destination offers.
-- Links that carry a token or return-to parameter and what happens when it is missing or expired.
+- Links that contain a token or return-to parameter and what happens when it is missing or expired.
 
 What establishes a gap: the email, the recipient, their state on click, the destination's behaviour for that state, and the absence of a working next action.
 
@@ -188,7 +188,7 @@ Not a gap:
 
 1. Confirm the text exists at the cited location and is shown to the named reader in the deployed configuration.
 2. Trace the described behaviour independently for that reader and confirm the difference.
-3. Check history for which side changed last and whether a source states which is the intent. If nothing settles it, the verdict is `needs_owner_intent`.
+3. Check history for which side changed last and whether a source states which is the intent. If nothing decides it, the verdict is `needs_owner_intent`.
 4. For link findings, look for a sign-in step that returns the person, an alternative destination, or a message naming who can help.
 5. For error findings, confirm the real cause from source and that the action shown does not work for it.
 6. Check that the remediation names whether the text or the behaviour should change, and that changing one does not break another surface that relies on it.

@@ -162,7 +162,7 @@ Principles: P6, P4
 
 Family: overfit
 
-A nullable column carries a hidden meaning. Null means "not yet set up", "legacy record", "personal account" or "invited but not joined", and code branches on it in many places without a named state.
+A nullable column has a hidden meaning. Null means "not yet set up", "legacy record", "personal account" or "invited but not joined", and code branches on it in many places without a named state.
 
 What to look for:
 
@@ -188,7 +188,7 @@ A status vocabulary is declared in more than one place: a code enum, a database 
 
 What to look for:
 
-- Every declaration of the same vocabulary. Compare values, spelling and order where order carries meaning.
+- Every declaration of the same vocabulary. Compare values, spelling and order where order changes behaviour.
 - Values present in code and missing from the database constraint, so a write fails at runtime for the person whose action produces it.
 - Values present in the database and missing from code, so a reader falls through to a default branch.
 - String unions re-declared by hand on a surface, which drift when the source vocabulary changes.
@@ -242,6 +242,6 @@ Not a gap:
 3. For a status with no exit, look for clean-up jobs, expiry timers, admin actions and support paths the intent names. Confirm any job is scheduled in the deployed configuration.
 4. For an impossible combination, confirm the source that rules it out and that a producer can create it. A database constraint that prevents it refutes the finding.
 5. For a constant flag, confirm the deployed configuration and every writer. A writer on another surface that sets the second value refutes the finding.
-6. For overfit elements, look for a stated need: audit history, compliance, recovery, a documented capability. If one exists, reject.
+6. For overfit elements, look for a stated need: audit history, compliance, recovery, a documented capability. If one exists, reject. The source must pass the provenance test in P4 (PRINCIPLES.md).
 7. For drift between mirrors, confirm which declaration is the source of truth according to the repository's own conventions, and that the drifting value is reachable.
 8. Check that the proposed remediation names any data migration it implies and that the smaller model leaves no existing record in a state with no exit.

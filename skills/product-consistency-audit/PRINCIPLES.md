@@ -1,6 +1,6 @@
 # Audit Principles
 
-Every phase of the audit works from these principles. Reconnaissance uses them to build the intent register. Hunters, coverage critics and verifiers receive this file verbatim in their prompts. Every finding cites at least one principle ID in its `principles` field, and every fit class in [FIT-CLASSES.md](FIT-CLASSES.md) names the principles it comes from.
+Every phase of the audit works from these principles. Reconnaissance uses them to build the intent register. Hunters, coverage critics and verifiers receive this file in their prompts, either verbatim or, for agents that can read files, as an absolute path with an instruction to read it in full before starting. Every finding cites at least one principle ID in its `principles` field, and every fit class in [FIT-CLASSES.md](FIT-CLASSES.md) names the principles it comes from.
 
 The IDs are stable. Ledgers and findings from earlier runs reference them, so a principle may be reworded but never renumbered or reused for a different idea.
 
@@ -31,7 +31,7 @@ Each principle has four parts:
 
 **Evidence.** The rule's text, its origin, and code that enforces the rule in places or forms the origin does not support.
 
-**Not a gap.** Code that follows a rule broadly when the rule's own source states the broad scope on purpose. A rule whose origin cannot be found is not automatically overfit; record what was searched and read the rule at its plainest scope.
+**Not a gap.** Code that follows a rule broadly when a source other than the rule's own file or a restatement of it states the broad scope on purpose and passes the provenance test in P4. A rule whose origin cannot be found is not automatically overfit; record what was searched and read the rule at its plainest scope.
 
 ### P3 Scope from origin
 
@@ -41,13 +41,22 @@ Each principle has four parts:
 
 **Evidence.** A rule with a traceable narrow origin, and enforcement on a surface, audience or data type the origin does not cover, with a consequence for some person or for the model.
 
-**Not a gap.** Shared helpers that apply a rule everywhere because the rule is stated as universal by its source. Consistency for its own sake is fine when it costs nothing.
+**Not a gap.** Shared helpers that apply a rule everywhere because a source that passes the provenance test in P4 states the rule as universal. Consistency for its own sake is fine when it costs nothing.
 
 ### P4 Intent from outside the code
 
 **Statement.** The implementation shows what was built. It cannot be the only evidence of what was meant.
 
 **Check.** Every intent statement in the register cites at least one source other than the code under review: product descriptions, docs, specs, decision records, user-facing copy, agent instruction files and memories, sibling surfaces, tests. Instruction files and memories count as evidence of a decision and are themselves checked under P2 and P3.
+
+**Provenance.** Every source also has a provenance, separate from its kind (doc, instruction file, decision record, commit), that says who decided what it states:
+
+- `owner_statement`: the owner stated the point themselves, in a recorded owner decision answered in their own words or to a single question that put the point to them, a document passage that quotes them, or a commit or message the owner confirms they wrote. It decides the point.
+- `accepted_recommendation`: someone else, often an agent, wrote it and the owner accepted that item on its own. It decides the point unless its reason rests on the rule under review.
+- `bulk_accepted_recommendation`: accepted together with other items without an answer to each ("accepted every recommendation").
+- `unattributed`: nobody is recorded as deciding it. Most instruction files, memories and agent-written docs are here, and so is a commit that has agent trailers or session links or whose message restates an instruction file, unless the owner confirms writing it.
+
+Bulk-accepted and unattributed sources state intent for the register, but they never refute an overfit candidate against a rule they restate. A decision that gives a written rule as its reason inherits that rule's scope question under P2 and P3, and a rule's own paragraph cannot widen the rule's scope. Only a source at `owner_statement` rank, or an `accepted_recommendation` whose reason does not rest on the rule, answers a scope question. Every validation rule in this skill that rejects a candidate because "a source states" or "a stated need exists" applies this test.
 
 **Evidence.** A cited source, with location, that states or clearly implies the purpose.
 
@@ -61,7 +70,7 @@ Each principle has four parts:
 
 **Evidence.** The conflicting or silent sources, quoted with locations.
 
-**Not a gap.** Ambiguity that the sources settle once read in full. Silence on a case nobody can reach.
+**Not a gap.** Ambiguity that the sources resolve once read in full. Silence on a case nobody can reach.
 
 ## Fit
 

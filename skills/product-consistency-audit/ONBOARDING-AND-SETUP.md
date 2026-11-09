@@ -168,6 +168,6 @@ Not a gap:
 1. Rebuild the setup map for the arrival path in the candidate and confirm the path is reachable in the deployed configuration.
 2. Confirm the gate's condition and every writer of it. A writer the candidate missed (an admin action, a job, an import) may supply the exit.
 3. Look for exits on the setup screen: skip, sign out, switch workspace, contact an admin, a link to the destination.
-4. For required fields, look for a stated need in docs, decision records, legal or billing requirements. If one exists, reject the overfit reading.
+4. For required fields, look for a stated need in docs, decision records, legal or billing requirements. If one exists, reject the overfit reading. The source must pass the provenance test in P4 (PRINCIPLES.md).
 5. For interrupted setup, confirm what the next attempt does from source or a walkthrough, and whether a clean-up or expiry frees the leftover state.
 6. If sources do not say whether setup is per person or per workspace, or who must complete it, the verdict is `needs_owner_intent`.

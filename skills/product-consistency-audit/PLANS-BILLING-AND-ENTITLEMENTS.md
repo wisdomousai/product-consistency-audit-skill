@@ -104,7 +104,7 @@ What to look for:
 
 - Every reader of plan state and which source it uses. Apps of the same product that read different sources.
 - Grants or overrides that some gates check and others ignore.
-- Session or token claims that carry the plan and are refreshed only at sign-in, so an upgrade or lapse shows on one surface and not another.
+- Session or token claims that hold the plan and are refreshed only at sign-in, so an upgrade or lapse shows on one surface and not another.
 - Admin views showing a plan or seat status that the person's surface does not honour.
 
 What establishes a gap: the sources, the readers that use each, a sequence that puts them apart (upgrade, lapse, grant, seat removal), and the person who gets different answers.
@@ -190,6 +190,6 @@ Not a gap:
 2. Confirm the plan state is reachable in the deployed configuration. A state that only a test-mode fixture can produce, with no production writer, is out of scope.
 3. Look for exits: an upgrade path the person can reach, a message naming the billing admin, a grace period, a support route the intent names.
 4. For plan-end findings, confirm the promised outcome in the cited source and its date. A later source that changed the promise refutes or narrows the finding.
-5. For overfit machinery, look for a stated operating need (support, partner, compliance) before reporting.
+5. For overfit machinery, look for a stated operating need (support, partner, compliance) before reporting. The source must pass the provenance test in P4 (PRINCIPLES.md).
 6. For provider-dependent states, keep `method: source` and confirm the source trace matches the provider behaviour the code relies on.
 7. Check that the remediation does not grant paid capability to a person the pricing excludes.

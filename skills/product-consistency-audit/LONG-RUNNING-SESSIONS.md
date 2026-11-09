@@ -192,6 +192,6 @@ Not a gap:
 2. Look for server-side expiry, heartbeat timeouts, scheduled clean-up and admin actions that free leftover state. Confirm any job is scheduled in the deployed configuration.
 3. Confirm the end reason is reachable in the deployed provider configuration. A reason that only a fake provider produces is out of scope.
 4. For close reason findings, confirm the message and action the client shows from source or a local walkthrough.
-5. For limit findings, look for a source that states the limit as product-wide. If one exists, reject the overfit reading.
+5. For limit findings, look for a source that states the limit as product-wide. If one exists, reject the overfit reading. The source must pass the provenance test in P4 (PRINCIPLES.md).
 6. Keep `method: source` for states that need a real provider or network condition the local setup cannot produce.
 7. Check that the remediation gives every end a defined fate without removing a limit the origin needs.

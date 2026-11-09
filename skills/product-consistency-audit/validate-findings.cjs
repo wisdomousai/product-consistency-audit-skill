@@ -866,17 +866,22 @@ function run(file) {
 }
 
 module.exports = {
+  JsonStructureError,
   LIMITS,
   PATH_FORBIDDEN_CHARACTER,
+  SafeInputError,
   UNSAFE_DIAGNOSTIC_CHARACTER,
   VISIBLE_CONTENT,
   WINDOWS_RESERVED_COMPONENT,
   collect,
   collectFindingSemanticErrors,
   collectSchemaErrors,
+  enforceJsonTextLimits,
+  escapeUnsafeDiagnosticCharacters,
   hasVisibleProse,
   isSafeRelativeSourcePath,
   loadPrincipleIds,
+  readFileWithinLimit,
   validateDocument,
 };
 

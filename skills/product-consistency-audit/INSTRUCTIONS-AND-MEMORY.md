@@ -5,7 +5,7 @@
 Select this file whenever reconnaissance finds any written rule that shapes the code. That includes:
 
 - Agent instruction files: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.cursorrules`, files under `.cursor/rules/`, `.github/copilot-instructions.md`, any other agent rule file reconnaissance lists, and nested copies of any of these in subdirectories.
-- Memory or notes directories committed with the code, including per-agent memory folders, scratch notes and running logs of corrections kept by agents. Read their index files and every entry.
+- Memory or notes directories committed with the code, including per-agent memory folders, scratch notes and running logs of corrections kept by agents, plus memories and session transcripts kept outside the repository when the owner names them. Read their index files and every entry.
 - Plan files, task lists, roadmaps and changelogs in the repository.
 - Conventions documents, contributing guides, style guides and design contracts.
 - Decision records (ADRs, RFCs, design notes) and any document that states how the domain works.
@@ -27,6 +27,9 @@ RECONNAISSANCE.md seeds one unit per material rule. A rule is material when it u
 5. Later edits to the same rule: widenings, narrowings, rewordings, removal.
 6. Other sources that state the same rule or its purpose: product docs, decision records, user-facing copy.
 7. Prior owner decisions in `decisions.json`, which rank above every written source.
+8. When history is squashed into a single commit, or the rule predates the repository: decision logs, QA and meeting notes, unmerged branches, and the outside memories and transcripts the owner named.
+
+Record each source's provenance under P4. A decision record that says the owner accepted a set of recommendations is `bulk_accepted_recommendation`, a decision that cites a rule as its reason inherits the rule's scope question, and a commit by the owner's account that has agent trailers or restates an instruction file is `unattributed` until the owner confirms writing it.
 
 **Person and goal.** Name the person the rule was meant to protect or serve and the person the enforcement reaches. They are often different. A rule written to stop a workspace admin from deleting shared documents by mistake may end up blocking a member from deleting their own drafts. Name both, with their goals.
 
@@ -53,7 +56,7 @@ Principles: P2, P3, P6
 
 Family: overfit
 
-A correction given once, often in conversation with an agent, becomes columns, enums, tables, statuses or constraints that encode the wording of the correction. The data model then carries the correction forever, and every later feature must handle it.
+A correction given once, often in conversation with an agent, becomes columns, enums, tables, statuses or constraints that encode the wording of the correction. The data model then keeps the correction forever, and every later feature must handle it.
 
 What to look for:
 
@@ -92,7 +95,7 @@ What establishes a gap: the absolute rule, an origin narrower than its words (fr
 
 Not a gap:
 
-- An absolute whose source states the broad scope on purpose and explains why. Read the whole paragraph and the commit before deciding the scope is narrow.
+- An absolute whose broad scope a separate source states on purpose and explains, when that source passes the provenance test in P4. The rule's own paragraph cannot widen the rule. Read the whole paragraph and the commit before deciding the scope is narrow.
 - Broad enforcement that costs nobody anything and adds no state.
 - An absolute with no findable origin, read at its plainest scope, when the code follows that plainest reading. Record what was searched.
 
@@ -181,7 +184,7 @@ What to look for:
 - Paths that follow each reading. Search for the code each rule produced and note which commit and which instruction version it followed.
 - Conventions that decide precedence: a nested file narrows the root for its directory, a dated decision record supersedes an earlier one, an owner decision outranks both. Check whether any source states such a convention for this repository.
 
-What establishes a gap: both rules quoted with locations, the surface where they collide, and code paths that follow different rules for the same person situation (inconsistency, P12). When the sources and their origins settle which rule governs, the path following the other is the finding. When nothing settles it, record `needs_owner_intent` with both readings and what each would require of the code (P5).
+What establishes a gap: both rules quoted with locations, the surface where they collide, and code paths that follow different rules for the same person situation (inconsistency, P12). When the sources and their origins show which rule governs, the path following the other is the finding. When nothing decides it, record `needs_owner_intent` with both readings and what each would require of the code (P5).
 
 Not a gap:
 
@@ -249,11 +252,11 @@ Not a gap:
 
 ## Validation rules
 
-1. Re-derive the origin independently. Run the history searches yourself and confirm the cited commit introduced the rule. Look for other commits that restated or widened it with a broader purpose. A narrow first origin does not settle scope when a later commit restated the rule with a wider reason.
+1. Re-derive the origin independently. Run the history searches yourself and confirm the cited commit introduced the rule. Look for other commits that restated or widened it with a broader purpose. A narrow first origin does not decide scope when a later commit restated the rule with a wider reason, provided that commit passes the provenance test in P4. A commit written in an agent session usually does not.
 2. Read the rule's full paragraph and file. Surrounding text often states the broad scope on purpose, or limits it.
 3. Confirm every listed enforcement point exists at the cited path and line and is reached in the deployed configuration.
-4. Look for a stated need that refutes an overfit reading: a product doc, decision record, compliance or audit note, recovery requirement, or owner decision in `decisions.json` that asks for the broad enforcement. If one exists, reject.
+4. Look for a stated need that refutes an overfit reading: a product doc, decision record, compliance or audit note, recovery requirement, or owner decision in `decisions.json` that asks for the broad enforcement. If one exists, reject. A decision record counts here only when the owner stated the broad scope themselves. An accepted recommendation that cites the rule under review restates the rule and inherits its scope question; the verdict is then `needs_owner_intent`.
 5. Look for an exit that refutes an underfit reading: a support path the intent names, an admin action, a background clean-up, a later commit that built the stated capability on another path.
-6. For contradictions and drift, confirm both sources were live at the same time and that code follows each. If history settles which source is current, the finding is the stale path. If nothing settles it, the verdict is `needs_owner_intent`.
+6. For contradictions and drift, confirm both sources were live at the same time and that code follows each. If history shows which source is current, the finding is the stale path. If nothing decides it, the verdict is `needs_owner_intent`.
 7. For a `not_traceable` origin, confirm the searches listed were run and were adequate. Read the rule at its plainest scope. Overfit cannot rest on an untraceable origin unless the excess is clear from the plainest reading.
 8. Check that the remediation names the instruction change and that applying it would not reopen the problem the origin describes.

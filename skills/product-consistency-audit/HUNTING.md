@@ -12,19 +12,21 @@ Before launch, the parent changes assigned units to `in_progress`, sets a lowerc
 
 Every hunter prompt contains these parts in this order:
 
-1. A two-sentence role preamble: the hunter's goal is to find source-grounded gaps between product intent and implementation in its assigned units, and it must return exactly one JSON object matching the structured-result contract at the end of the prompt.
-2. [PRINCIPLES.md](PRINCIPLES.md) verbatim.
-3. `architecture.md` verbatim.
+1. A two-sentence role preamble: the hunter's goal is to find source-grounded gaps between product intent and implementation in its assigned units, and it must write exactly one JSON object matching the structured-result contract at the end of the prompt.
+2. [PRINCIPLES.md](PRINCIPLES.md), verbatim or by absolute path with an instruction to read it in full.
+3. `architecture.md`, verbatim or by absolute path with the same instruction.
 4. The intent register entries for the assigned capabilities, verbatim.
 5. Assigned coverage IDs, capability, gate, starting paths, and each unit's block map from `coverage-ledger.json`.
 6. The selected blocks copied verbatim: each ordinary fit-class block from [FIT-CLASSES.md](FIT-CLASSES.md), and from each selected companion its `Core discipline`, each chosen class subsection, `Universal moves` and `Validation rules`. Never send block names alone.
 7. Excluded blocks, each with its reason.
 8. The core hunting method below.
 9. The candidate gate below.
-10. Carried same-source prior confirmations, limited to fingerprint, title and root cause, plus peer-owned coverage IDs this hunter must not duplicate.
-11. The agent's scratch path, agent ID, whether walkthroughs are enabled and with which fixture person, and the structured-result contract including the `confirmed` and `needs_owner_intent` branches of `report-schema.json` copied verbatim.
+10. Same-source prior confirmations brought into this run, limited to fingerprint, title and root cause, plus peer-owned coverage IDs this hunter must not duplicate.
+11. The agent's scratch path, agent ID, candidate cap (SKILL.md, Cost budget), whether walkthroughs are enabled and with which fixture person, and the structured-result contract including the `confirmed` and `needs_owner_intent` branches of `report-schema.json` copied verbatim.
 
-Scope is the hunter's coverage obligation, not permission to duplicate excluded work. If a different capability, gate or rule appears, return it under `uncovered` so the parent creates a unit for the next wave.
+The parent may write the parts every hunter shares (2, 3, 8, 9 and the contract from 11) once, to `<output-dir>/briefs/hunter-brief.md`, with the method, the gate and the contract copied verbatim and PRINCIPLES.md and `architecture.md` given by absolute path. The per-agent parts (4, 5, 6, 7, 10, and the ID, scratch path and cap) go to `agents/<agent-id>/scratch/assigned-units.json`. The prompt then gives both absolute paths and tells the hunter to read them in full before starting. For agents that can read files, part 6 may list each block by file and heading with the skill directory's absolute path and an instruction to read every listed block in full. A block name without that instruction does not count as sending the block.
+
+Scope sets what the hunter must cover. Units owned by peers or excluded stay with their owners. If a different capability, gate or rule appears, return it under `uncovered` so the parent creates a unit for the next wave.
 
 #### Core hunting method: include in every hunter prompt
 
@@ -76,7 +78,7 @@ compare every path where its action can happen. Compare user-facing text with th
 behaviour it describes (P12, P13).
 
 DEPTH BOUND. Trace only paths that reach your assigned gate or that it depends on.
-Stop a line of investigation once the fit is settled either way, and record it as a
+Stop a line of investigation once the fit is clear either way, and record it as a
 covered, candidate or blocked disposition, or as an uncovered entry.
 
 When a candidate reveals a reusable root cause, such as a rule applied by a shared
@@ -84,7 +86,7 @@ helper or a state used by many features, search your assigned units for other pl
 the same cause produces a gap. Consolidate the cause; establish each effect's person
 and situation separately. Return variants outside your units as uncovered.
 
-USE THE NARROWEST EVIDENCE. A source trace settles most claims. Use history to show
+USE THE NARROWEST EVIDENCE. A source trace decides most claims. Use history to show
 where a rule or state came from. Use a walkthrough only when what the person sees
 decides the claim, stop at the first observed stuck state or contradiction, and save
 notes or screenshots in scratch. Record the exact steps and fixture person.
@@ -103,7 +105,8 @@ notes or screenshots in scratch. Record the exact steps and fixture person.
 3. An overfit candidate names what the code was built from (the rule, memory,
    commit, example or misreading, or "not traceable" with what was searched), the
    excess, and the proportionate shape. If a stated need justifies the excess, it is
-   not a candidate.
+   not a candidate. The need counts only under the provenance test in P4; a
+   bulk-accepted or unattributed decision that restates the rule does not.
 4. If the deciding intent is ambiguous or the sources conflict, propose
    needs_owner_intent with the question and what each answer would require. Do not
    give it severity.
@@ -114,11 +117,17 @@ notes or screenshots in scratch. Record the exact steps and fixture person.
    It matches ^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$ and contains no line, wave, agent,
    severity or verdict.
 7. Return an empty candidate array when nothing survives these gates.
+8. A person the register marks served: false has no missing-surface finding. A
+   difference that a decided_not_on_ref entry already removes is not a candidate;
+   cite the entry in notes.
+9. Return at most your candidate cap, strongest first by severity and by how many
+   people each reaches. Put the rest under uncovered, with its fingerprint in
+   fingerprint and a one-sentence claim in reason.
 ```
 
 ## Structured hunter result
 
-Return exactly one JSON object, with no surrounding prose:
+Write exactly one JSON object to `agents/<agent-id>/scratch/result.json` and nothing else in that file. Then reply with only the file path, the number of units by disposition, and one line per candidate (fingerprint, proposed verdict, fit, title). The parent reads and validates the file; a missing or malformed file is a failed result. The object has this shape:
 
 ```json
 {
@@ -150,6 +159,7 @@ Return exactly one JSON object, with no surrounding prose:
       "capability": "...",
       "fit_class": "...",
       "starting_paths": ["repo/relative/path"],
+      "fingerprint": "optional; set for a candidate held back by the cap",
       "reason": "why this needs its own coverage unit"
     }
   ]
@@ -161,17 +171,17 @@ Each `candidates` entry matches its `report-schema.json` branch except that it u
 - `proposed_verdict: "confirmed"`: every field the `confirmed` branch requires, plus `literal_source`, `excess` and `proportionate_shape` when `fit` is `overfit`. `reproduction` describes only what was already done.
 - `proposed_verdict: "needs_owner_intent"`: every field that branch requires, with at least two `intent_candidates` and a `consequence_if_each` entry per answer. No severity, reproduction or remediation.
 
-Every assigned coverage ID appears exactly once in `units`. A `covered` unit has an owner, nonempty paths and checks, no unresolved fact and no candidate. A `candidate` unit has the same evidence and is the only state that carries fingerprints. A `blocked` unit has nonempty paths, checks and unresolved facts but no fingerprint. Paths are repository-relative. A trace with several entries starts at `entrypoint`, ends at `outcome`, and labels the steps between as `transition`.
+Every assigned coverage ID appears exactly once in `units`. A `covered` unit has an owner, nonempty paths and checks, no unresolved fact and no candidate. A `candidate` unit has the same evidence and is the only state that has fingerprints. A `blocked` unit has nonempty paths, checks and unresolved facts but no fingerprint. Paths are repository-relative. A trace with several entries starts at `entrypoint`, ends at `outcome`, and labels the steps between as `transition`.
 
 ## Parent consolidation and ledger update
 
 The parent validates each unit result, maps it to exactly one assigned `coverage_id`, and updates only that unit. Reject duplicate or absent IDs, unsafe agent IDs, `source` or `history` checks with artifacts, and `local` checks whose file the parent has not copied into `agents/<agent_id>/artifacts/`. For `local` checks, the parent copies the cited scratch file as a regular file, rejecting links and directories, and rewrites the artifact path. Copy reviewed paths, checks, fingerprints and unresolved facts into the ledger. Keep each hunter's `notes` in a parent bookkeeping field; they inform recommendations during the owner session. A failed or malformed result leaves the unit `planned` for reassignment. Run `validate-coverage-ledger.cjs` after the update; an invalid ledger cannot drive another assignment.
 
-Consolidate candidates by fingerprint and then by root cause. One root cause with several effects is one candidate carrying the strongest complete trace. An overfit element and the stuck state it causes share a fingerprint when removing the element would remove the stuck state. Independent causes get separate fingerprints.
+Consolidate candidates by fingerprint and then by root cause. One root cause with several effects is one candidate with the strongest complete trace. An overfit element and the stuck state it causes share a fingerprint when removing the element would remove the stuck state. Independent causes get separate fingerprints. When hunters report the same root cause under different fingerprints, keep the fingerprint from the unit whose gate holds the fix; when both do, or neither does, keep the fingerprint that sorts first lexicographically. Record the dropped fingerprint in parent bookkeeping so later runs can match it.
 
 ## Coverage-critic waves
 
-Immediately after each hunter wave, spend the reserved invocation on a fresh `research` post-wave coverage critic. It receives [PRINCIPLES.md](PRINCIPLES.md), `architecture.md`, `intent-register.json`, the full ledger with block maps, current candidate fingerprints and states, and the prior-run gap summary. It reads source and history but does not run the target. Require exactly this JSON:
+Immediately after each hunter wave, spend the reserved invocation on a fresh `research` post-wave coverage critic, with its own agent directory. It receives [PRINCIPLES.md](PRINCIPLES.md), `architecture.md`, `intent-register.json`, the full ledger with block maps, current candidate fingerprints and states, and the prior-run gap summary. It reads source and history but does not run the target. It writes exactly this JSON to its `scratch/result.json`:
 
 ```json
 {
@@ -193,7 +203,7 @@ Immediately after each hunter wave, spend the reserved invocation on a fresh `re
 }
 ```
 
-The critic checks for: capabilities in the register with no unit; written rules in the register with no Instructions-and-memory unit; status enums and core entities with no Data-model unit; gates and multi-step flows with no unit for the lifecycle cases that apply; selected companion classes without a unit; unjustified exclusions; units closed without paths or checks; units closed with an intent that rests only on the code under review; and prior `needs_owner_intent` or changed-source gaps no unit addresses. It proposes coverage, not findings. `stop` is `true` only when it proposes nothing.
+The critic checks for: capabilities in the register with no unit, except those whose people are all `served: false`; written rules in the register with no Instructions-and-memory unit; status enums and core entities with no Data-model unit; gates and multi-step flows with no unit for the lifecycle cases that apply; selected companion classes without a unit; unjustified exclusions; units closed without paths or checks; units closed with an intent that rests only on the code under review; and prior `needs_owner_intent` or changed-source gaps no unit addresses. It proposes coverage units only and leaves candidate gaps to hunters. `stop` is `true` only when it proposes nothing.
 
 The parent rejects proposed units outside scope or the execution boundary, derives canonical IDs, deduplicates against current units, and fails rather than merging an ID collision. For each legitimate `reassign_id` with live evidence, append the unit's terminal record to `attempts` with the critic's reason, increment `wave`, and give the next attempt a fresh owner and empty live evidence. In `standard` and `deep`, when the post-wave critic proposes nothing and no `planned` units remain, spend the reserved invocation on a distinct final-clean critic. Coverage is complete only when that critic also proposes nothing. If it finds work, queue it and repeat.
 

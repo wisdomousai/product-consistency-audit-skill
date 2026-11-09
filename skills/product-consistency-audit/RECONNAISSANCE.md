@@ -4,7 +4,9 @@
 
 The parent initializes `run-metadata.json`, applies the budget gate in `SKILL.md`, then creates agent directories and the shared ledger before hunting. Reconnaissance reads source, documentation, instruction files and git history. It does not run the target, contact deployed services, or write files; agents return structured facts to the parent.
 
-Launch these `research` agents in parallel. Give each one [PRINCIPLES.md](PRINCIPLES.md) verbatim.
+Before launch, ask the owner whether agent memories or session transcripts for this repository are kept outside it (per-user project memory directories are common) and whether any may be read. Pass the paths the owner gives to agent 1b.
+
+Launch these `research` agents in parallel. Give each one [PRINCIPLES.md](PRINCIPLES.md) verbatim, or its absolute path with an instruction to read it in full when the agent can read files.
 
 **Agent 1a: Product, people and goals**
 
@@ -16,7 +18,8 @@ Read the target at <target>. Do not run it and do not use the network. Return:
 2. Every kind of person who uses it: end users, invited users, organisation admins,
    members without their own login, buyers, reviewers, anonymous visitors, operators,
    API clients. For each: how they arrive, what they are trying to get done, and what
-   the product lets them do by design. Cite sources.
+   the product lets them do by design. Cite sources. Mark people a source names
+   whom no shipped surface serves yet.
 3. The capabilities that serve those goals, as a list of named capabilities with the
    apps, routes, screens, APIs or jobs that implement each.
 4. Apps, packages and services, and which capabilities each one owns.
@@ -30,19 +33,32 @@ Find every written source of product intent in <target>:
 - Product docs, specs, ADRs, decision records, READMEs, design notes.
 - Agent instruction files: CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules,
   .cursor/rules, .github/copilot-instructions.md, .windsurfrules, nested copies in
-  subdirectories, and any memory or notes directories committed with the code.
+  subdirectories, any memory or notes directories committed with the code, and the
+  memory or transcript paths outside the repository listed below, read only.
 - Plan files, TODO lists and changelogs.
 For each material rule (a "must", "never", "always", "only", a stated limit or a
 stated model of the domain), return:
 1. The rule text and location.
 2. Its origin: use git log -S, git log --follow and git blame to find the commit that
    introduced it, quote the commit message, and note any incident, correction,
-   example or conversation the text or commit mentions. If no origin is findable,
-   say what you searched.
+   example or conversation the text or commit mentions. When history is squashed
+   or the rule predates the repository, look in decision logs, QA and meeting notes,
+   unmerged branches (git branch -a, git log --all) and the outside memories and
+   transcripts. If no origin is findable, say what you searched.
 3. The purpose the origin supports, stated as the problem it solves.
 4. The scope that purpose supports (which surfaces, people and data), and any later
    text that widened or narrowed it.
 5. Conflicts with other sources, quoted with locations.
+6. Provenance of each decision: the owner stated it (quote the owner), the owner
+   accepted a recommendation someone else wrote (say whether one by one or in
+   bulk), or nobody is recorded as deciding it. A commit by the owner's account
+   that has agent trailers or session links, or whose message restates an
+   instruction file, counts as nobody's decision until the owner confirms it. When
+   a decision gives a written rule as its reason, name that rule.
+7. Decided changes that are not on the reviewed ref: unmerged branches, plans or
+   decision records that rename, remove or change a rule or capability. Give the
+   branch or file and what it changes.
+Outside memory and transcript paths: <paths the owner gave, or none>.
 Use only read-only git commands. Do not assess the code yet.
 ```
 
@@ -79,7 +95,7 @@ For each status, enum value, mode and flag:
 5. The commit that introduced it (git log -S on the value), with its message.
 Mark values with no producer, no consumer or no exit, flags with a single reachable
 value, and combinations of fields the code allows but other code assumes cannot
-happen. Report these as facts, not findings.
+happen. Report these as facts for hunters to assess.
 ```
 
 **Agent 1e: Local walkthrough capability**
@@ -95,6 +111,9 @@ Return:
    Note any rule in the target's docs about which databases or branches may be used.
 4. The settings that keep model, email, payment, storage, identity and analytics
    providers on fakes, local outboxes or disabled, and their default values.
+   Name every tool (CLI, MCP server, desktop app, SDK, script) that falls back to
+   a production or hosted URL when an origin setting is unset, and the setting
+   that pins it to localhost.
 5. Commands that would contact production, preview or paid services, send email,
    take payments, create or delete cloud resources, or pull environment files; mark
    them prohibited.
@@ -103,6 +122,8 @@ Return:
 7. What cannot be built locally (for example third-party session expiry or a lapsed
    real subscription).
 ```
+
+Save each report verbatim as `<output-dir>/recon/<agent>.md` as soon as it returns. Hunters and verifiers can then be pointed at a report, and the parent's context is not its only copy.
 
 Add focused reconnaissance agents for apps or capabilities these five do not map. If the budget blocks one, seed the unmapped area as a `deferred` ledger unit with reason `budget_cannot_reserve_critics_and_validation` and disclose the gap.
 
@@ -117,29 +138,38 @@ The parent writes `<output-dir>/intent-register.json` from agents 1a and 1b, che
 ```json
 {
   "capability": "Invite a teammate to a workspace",
-  "people": [{"role": "workspace admin", "goal": "add a colleague"}, {"role": "invited colleague", "goal": "join and start working"}],
+  "people": [{"role": "workspace admin", "goal": "add a colleague", "served": true}, {"role": "invited colleague", "goal": "join and start working", "served": true}],
   "purpose": "Admins bring colleagues into the workspace; the colleague joins with the role the admin chose.",
-  "sources": [{"kind": "file", "ref": "docs/workspaces.md", "line": 12, "quote": "..."}],
+  "sources": [{"kind": "file", "ref": "docs/workspaces.md", "line": 12, "quote": "...", "provenance": "unattributed"}, {"kind": "file", "ref": "docs/decisions.md", "line": 40, "quote": "D7: invitations are single use (accepted recommendation)", "provenance": "accepted_recommendation", "cites_rule": {"kind": "file", "ref": "AGENTS.md", "line": 88}}],
   "rules": [
     {
       "text": "Never let an invitation be reused.",
       "location": {"kind": "file", "ref": "AGENTS.md", "line": 88},
-      "origin": {"kind": "commit", "ref": "3f2a9c1", "quote": "fix: second click on invite link created a duplicate member"},
+      "origin": {"kind": "commit", "ref": "3f2a9c1", "line": null, "quote": "fix: second click on invite link created a duplicate member"},
+      "provenance": "unattributed",
       "purpose": "Stop a double click from creating a duplicate membership.",
       "supported_scope": "The accept step of a single invitation."
     }
   ],
   "conflicts": [],
-  "open_questions": []
+  "open_questions": [],
+  "decided_not_on_ref": [{"ref": "branch invite-expiry", "change": "Invitations expire after 14 days and can be resent."}]
 }
 ```
 
 Rules:
 
 - Every `purpose` cites at least one source that is not the implementation of that capability (P4).
-- `origin.kind` is `commit`, `file` or `not_traceable`; for `not_traceable`, `quote` lists what was searched.
-- Conflicts between sources are recorded with both quotes. A conflict the sources do not settle becomes an `open_questions` entry and, if it decides a candidate, a `needs_owner_intent` record later.
+- `origin.kind` is `commit`, `file`, `branch`, `transcript` or `not_traceable`; for `not_traceable`, `ref` is null and `quote` lists what was searched.
+- Findings accept only `file` (repository-relative) and `commit` in `intent.sources`. Cite a branch, transcript or outside memory in `evidence`. An intent that rests only on such sources becomes a `needs_owner_intent` record asking the owner to confirm it.
+- `line` is a positive integer, or null when the source has no line (a commit, a branch, a transcript). Never write 0.
+- `provenance` on each source and rule is `owner_statement`, `accepted_recommendation`, `bulk_accepted_recommendation` or `unattributed`, as defined in P4. It is separate from `kind`. A decision whose reason is a written rule records that rule's location in `cites_rule`, so verifiers can see the scope question it inherits.
+- A person a source names but no shipped surface serves has `served: false`. The missing surface is not underfit (SKILL.md anti-pattern 3); the owner session may ask whether it is still planned.
+- `decided_not_on_ref` lists decided changes missing from the reviewed ref, such as an unmerged branch. Hunters do not report the reviewed ref for a difference a listed change already removes. When a finding depends on one, the owner session asks whether it is still the plan.
+- Each `conflicts` entry is `{"description": "...", "sources": [...]}` with at least two source entries, so both quotes are recorded. A conflict the sources do not resolve becomes an `open_questions` entry and, if it decides a candidate, a `needs_owner_intent` record later.
 - The register states intent. It does not list suspected gaps.
+
+Run `node <skill-dir>/validate-intent-register.cjs <output-dir>/intent-register.json` after writing the register and after every change to it. Fix every error before seeding the ledger.
 
 ## Architecture summary and companion selection
 
@@ -161,6 +191,8 @@ Select a companion because reconnaissance found the surface its `When to use thi
 ## Deterministic coverage ledger
 
 The parent writes `<output-dir>/coverage-ledger.json` as a top-level array. Derive one unit for every material combination of entry surface, gate, capability and applicable fit class at the granularity the profile sets (`quick` uses the fixed capability value `profile/quick/all-in-scope-capabilities`; `deep` adds lifecycle modes). For a scoped run, retain discovered excluded surfaces as `out_of_scope` units.
+
+Before seeding, check that every starting path and gate path reconnaissance gave exists in the target at the reviewed state. Correct or drop a path that does not, and note the correction in `architecture.md`.
 
 Seed these units in addition to flow units:
 
