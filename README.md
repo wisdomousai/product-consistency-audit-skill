@@ -72,7 +72,11 @@ check the invitation flow for places people get stuck
 which rules in AGENTS.md has the code taken too literally?
 ```
 
-Questions about a single flow, rule or data model run in guidance mode and write no files. A request for a full audit runs all six phases and writes run files to `~/product-consistency-audit/<repo-name>/run-<N>`, outside the target. Name a profile (`quick`, `standard`, `deep`), a scope, or a budget in agent invocations to bound the run.
+```
+audit this product as an invited colleague and as a buyer on the free plan
+```
+
+Questions about a single flow, rule or data model run in guidance mode and write no files. A request for a full audit runs all six phases and writes run files to `~/product-consistency-audit/<repo-name>/run-<N>`, outside the target. Name a profile (`quick`, `standard`, `deep`), a scope, an audience (one or more kinds of people to audit as), or a budget in agent invocations to bound the run. Reconnaissance also infers people the docs never name, such as a member of two organisations or someone who receives a shared link without an account.
 
 ## Execution boundary
 

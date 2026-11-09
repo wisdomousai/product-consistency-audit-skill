@@ -68,6 +68,12 @@ test("requires served on every person and two sources per conflict", () => {
   assert.match(errors, /conflicts\[0\]\.sources: a conflict quotes at least two sources/);
 });
 
+test("accepts inferred people and rejects an inferred person without code evidence", () => {
+  const inferred = { role: "member of two workspaces", goal: "switch between them", served: true, inferred: { basis: [{ kind: "file", ref: "src/db/schema.ts", line: 40 }], derived_from: "workspace admin" } };
+  assert.deepEqual(errorsFor((e) => { e.people.push(inferred); }), []);
+  assert.match(errorsFor((e) => { e.people.push({ ...inferred, inferred: { basis: [], derived_from: null } }); }).join("\n"), /inferred\.basis: must not be empty/);
+});
+
 test("rejects duplicate capabilities", () => {
   assert.match(validateRegister([entry(), entry()]).join("\n"), /\$\[1\]\.capability: duplicate capability/);
 });

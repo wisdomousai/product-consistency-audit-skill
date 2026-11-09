@@ -19,7 +19,7 @@ The audit hunts three families of gap:
 
 This skill is guidance by default. Loading it does not authorize the complete workflow or file creation.
 
-- **Guidance mode**: for questions about a single flow, rule, data model or finding, use only the relevant parts of this skill. Do not run all six phases, create an output directory, or write audit artifacts. Focused agents may be launched; they return results to the current task.
+- **Guidance mode**: for questions about a single flow, rule, data model, finding or kind of person, use only the relevant parts of this skill. Do not run all six phases, create an output directory, or write audit artifacts. Focused agents may be launched; they return results to the current task.
 - **Full audit mode**: use the complete workflow when the user explicitly asks to audit a codebase for product consistency or intent fit, asks for a full or end-to-end review, or requests report artifacts. Run all six phases and write the files defined below.
 
 If the request could mean either mode, ask a focused question before creating files or starting the complete workflow.
@@ -105,6 +105,15 @@ Pick a profile from the user's request or propose one from the target's size. Re
 - **`deep`**: split units per capability and lifecycle mode (first visit, returning, expired, role changed, downgraded, removed), run critic waves to a clean pass, keep candidate validation and record verification as separate fresh agents, and give prior covered same-source units a second pass.
 
 A **scoped run** audits named paths, named capabilities, a companion domain, or the diff between two refs. Seed units only for in-scope surfaces and record discovered excluded surfaces as `out_of_scope`. A scoped or `quick` run presents itself as partial coverage.
+
+An **audience-scoped run** audits the product as one or more kinds of people the owner names: a role, a user type or a target audience, such as invited colleagues, buyers or people on a free plan. Record them as `audience` in `run-metadata.json`.
+
+- Reconnaissance maps each audience term to people in the intent register, named or inferred. An audience that matches nobody, or only people with `served: false`, is noted in `architecture.md` and becomes the first owner question, because the product may not mean to serve it.
+- The ledger gets a unit per person, using the optional `person` dimension, for every surface that person reaches and every gate and state they pass through. It also covers actions by other people that change their state, such as an admin removing them, a plan lapsing on the owner's account, or a shared record being deleted. Surfaces only other people reach are `out_of_scope`.
+- With several audiences, a surface they share gets a unit for each person, because the same screen can let one person through and lock another out.
+- Hunters walk as the unit's person, verifiers confirm that person can reach the entrypoint, and the summary and decision tree group findings by person.
+
+An audience scope combines with any profile and with the other scopes.
 
 Profiles change breadth and redundancy. The evidence bar is the same in every profile.
 

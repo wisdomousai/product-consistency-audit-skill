@@ -5,7 +5,10 @@
  * Usage: node validate-coverage-ledger.cjs <path-to-coverage-ledger.json>
  *
  * coverage_id joins the encoded surface, gate, capability and fit_class
- * references with "::" and appends the encoded lifecycle when present.
+ * references with "::", then appends "p=" plus the encoded person and the
+ * encoded lifecycle when present. "=" is always percent-encoded inside a
+ * reference, so the "p=" prefix keeps a person segment apart from a lifecycle
+ * segment.
  *
  * Adapted from https://github.com/cloudflare/security-audit-skill (MIT,
  * Copyright (c) 2025-2026 Cloudflare, Inc.). See LICENSE.
@@ -51,6 +54,12 @@ const REQUIRED_FIELDS = [
   "unresolved",
 ];
 const REF_FIELDS = ["surface", "gate", "capability", "fit_class"];
+const OPTIONAL_REF_FIELDS = ["person", "lifecycle"];
+const OPTIONAL_REF_PREFIX = { person: "p=", lifecycle: "" };
+
+function refFieldsFor(value) {
+  return [...REF_FIELDS, ...OPTIONAL_REF_FIELDS.filter((field) => hasOwn(value, field))];
+}
 const STATUSES = new Set([
   "planned",
   "not_applicable",
@@ -374,11 +383,11 @@ function encodeCanonicalRef(value) {
 
 function canonicalCoverageId(refs) {
   if (!isObject(refs)) throw new TypeError("canonical_refs must be an object");
-  const fields = hasOwn(refs, "lifecycle") ? [...REF_FIELDS, "lifecycle"] : REF_FIELDS;
+  const fields = refFieldsFor(refs);
   if (Object.keys(refs).length !== fields.length || fields.some((field) => !hasOwn(refs, field))) {
     throw new TypeError("canonical_refs has missing or unexpected fields");
   }
-  return fields.map((field) => encodeCanonicalRef(refs[field])).join("::");
+  return fields.map((field) => (OPTIONAL_REF_PREFIX[field] || "") + encodeCanonicalRef(refs[field])).join("::");
 }
 
 function isSafeRelativePath(value) {
@@ -501,13 +510,14 @@ function semanticKey(unit) {
     unit.gate,
     unit.capability,
     unit.fit_class,
+    hasOwn(unit, "person") ? unit.person : null,
     hasOwn(unit, "lifecycle") ? unit.lifecycle : null,
   ]);
 }
 
 function hasValidSemanticFields(unit) {
   return REF_FIELDS.every((field) => isVisibleText(unit[field])) &&
-    (!hasOwn(unit, "lifecycle") || isVisibleText(unit.lifecycle));
+    OPTIONAL_REF_FIELDS.every((field) => !hasOwn(unit, field) || isVisibleText(unit[field]));
 }
 
 function requireEmptyArray(unit, field, base, errors) {
@@ -661,13 +671,15 @@ function collectUnitErrors(unit, index) {
   for (const field of REF_FIELDS) {
     if (!isVisibleText(unit[field])) errors.push(`${base}.${field}: invalid text`);
   }
-  if (hasOwn(unit, "lifecycle") && !isVisibleText(unit.lifecycle)) errors.push(`${base}.lifecycle: invalid text`);
+  for (const field of OPTIONAL_REF_FIELDS) {
+    if (hasOwn(unit, field) && !isVisibleText(unit[field])) errors.push(`${base}.${field}: invalid text`);
+  }
 
   let expectedId = null;
   if (!isObject(unit.canonical_refs)) {
     errors.push(`${base}.canonical_refs: expected object`);
   } else {
-    const expectedFields = hasOwn(unit.canonical_refs, "lifecycle") ? [...REF_FIELDS, "lifecycle"] : REF_FIELDS;
+    const expectedFields = refFieldsFor(unit.canonical_refs);
     for (const field of expectedFields) {
       if (!hasOwn(unit.canonical_refs, field)) {
         errors.push(`${base}.canonical_refs: missing required field ${safeQuote(field)}`);
@@ -678,8 +690,10 @@ function collectUnitErrors(unit, index) {
     if (Object.keys(unit.canonical_refs).some((field) => !expectedFields.includes(field))) {
       errors.push(`${base}.canonical_refs: contains unexpected fields`);
     }
-    if (hasOwn(unit, "lifecycle") !== hasOwn(unit.canonical_refs, "lifecycle")) {
-      errors.push(`${base}: lifecycle and canonical_refs.lifecycle must appear together`);
+    for (const field of OPTIONAL_REF_FIELDS) {
+      if (hasOwn(unit, field) !== hasOwn(unit.canonical_refs, field)) {
+        errors.push(`${base}: ${field} and canonical_refs.${field} must appear together`);
+      }
     }
     try {
       expectedId = canonicalCoverageId(unit.canonical_refs);

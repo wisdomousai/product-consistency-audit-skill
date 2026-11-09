@@ -41,7 +41,10 @@ never in a way that sends email, takes payment, spends paid quota or touches a
 deployed environment. Never edit the target. Write only in your scratch directory.
 
 START FROM THE PERSON AND THE PURPOSE.
-1. Name the person, their role and their goal (P1).
+1. Name the person, their role and their goal (P1). When the unit names a person,
+   walk only as that person. Include the inferred people in the register, and
+   for an inferred person with no derived_from, propose needs_owner_intent for
+   any gap.
 2. State the purpose of the capability from the intent register, with its sources.
    If the register entry rests only on the code under review, stop and report the
    unit as blocked with that reason (P4).
@@ -203,7 +206,7 @@ Immediately after each hunter wave, spend the reserved invocation on a fresh `re
 }
 ```
 
-The critic checks for: capabilities in the register with no unit, except those whose people are all `served: false`; written rules in the register with no Instructions-and-memory unit; status enums and core entities with no Data-model unit; gates and multi-step flows with no unit for the lifecycle cases that apply; selected companion classes without a unit; unjustified exclusions; units closed without paths or checks; units closed with an intent that rests only on the code under review; and prior `needs_owner_intent` or changed-source gaps no unit addresses. It proposes coverage units only and leaves candidate gaps to hunters. `stop` is `true` only when it proposes nothing.
+The critic checks for: capabilities in the register with no unit, except those whose people are all `served: false`; people the schema, roles or account states imply that the register neither names nor infers; in an audience-scoped run, surfaces an audience person reaches with no unit for that person, and actions by other people that change an audience person's state with no unit; written rules in the register with no Instructions-and-memory unit; status enums and core entities with no Data-model unit; gates and multi-step flows with no unit for the lifecycle cases that apply; selected companion classes without a unit; unjustified exclusions; units closed without paths or checks; units closed with an intent that rests only on the code under review; and prior `needs_owner_intent` or changed-source gaps no unit addresses. It proposes coverage units only and leaves candidate gaps to hunters. `stop` is `true` only when it proposes nothing.
 
 The parent rejects proposed units outside scope or the execution boundary, derives canonical IDs, deduplicates against current units, and fails rather than merging an ID collision. For each legitimate `reassign_id` with live evidence, append the unit's terminal record to `attempts` with the critic's reason, increment `wave`, and give the next attempt a fresh owner and empty live evidence. In `standard` and `deep`, when the post-wave critic proposes nothing and no `planned` units remain, spend the reserved invocation on a distinct final-clean critic. Coverage is complete only when that critic also proposes nothing. If it finds work, queue it and repeat.
 

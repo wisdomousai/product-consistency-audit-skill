@@ -4,7 +4,7 @@
  * Validates intent-register.json against the shape in RECONNAISSANCE.md.
  * Usage: node validate-intent-register.cjs <path-to-intent-register.json>
  *
- * Checks entry and field shapes, source kinds, line numbers (positive integer
+ * Checks entry and field shapes, inferred people, line numbers (positive integer
  * or null), provenance values, origin rules for not_traceable, and duplicate
  * capabilities. Whether a purpose is drawn from outside the code is left to
  * reconnaissance and the coverage critic.
@@ -106,10 +106,17 @@ function validateRegister(register) {
     if (!isText(entry.purpose)) errors.push(`${base}.purpose: invalid text`);
     checkArray(entry.people, `${base}.people`, errors, { nonempty: true }).forEach((person, i) => {
       const at = `${base}.people[${i}]`;
-      if (!checkKeys(person, ["role", "goal", "served"], ["role", "goal", "served"], at, errors)) return;
+      if (!checkKeys(person, ["role", "goal", "served", "inferred"], ["role", "goal", "served"], at, errors)) return;
       if (!isText(person.role)) errors.push(`${at}.role: invalid text`);
       if (!isText(person.goal)) errors.push(`${at}.goal: invalid text`);
       if (typeof person.served !== "boolean") errors.push(`${at}.served: must be true or false`);
+      if ("inferred" in person && checkKeys(person.inferred, ["basis", "derived_from"], ["basis", "derived_from"], `${at}.inferred`, errors)) {
+        checkArray(person.inferred.basis, `${at}.inferred.basis`, errors, { nonempty: true })
+          .forEach((location, j) => checkLocation(location, `${at}.inferred.basis[${j}]`, errors));
+        if (person.inferred.derived_from !== null && !isText(person.inferred.derived_from)) {
+          errors.push(`${at}.inferred.derived_from: must be a role or null`);
+        }
+      }
     });
     checkArray(entry.sources, `${base}.sources`, errors, { nonempty: true }).forEach((source, i) => checkSource(source, `${base}.sources[${i}]`, errors));
     checkArray(entry.rules, `${base}.rules`, errors).forEach((rule, i) => {

@@ -205,6 +205,14 @@ test("derives collision-free canonical IDs from exact UTF-8 references", () => {
     canonicalCoverageId({ surface: "a", gate: "b", capability: "c", fit_class: "d", lifecycle: "retry" }),
     "a::b::c::d::retry",
   );
+  assert.equal(
+    canonicalCoverageId({ surface: "a", gate: "b", capability: "c", fit_class: "d", person: "retry" }),
+    "a::b::c::d::p=retry",
+  );
+  assert.equal(
+    canonicalCoverageId({ surface: "a", gate: "b", capability: "c", fit_class: "d", person: "invited colleague", lifecycle: "expired" }),
+    "a::b::c::d::p=invited%20colleague::expired",
+  );
   assert.throws(() => encodeCanonicalRef("e\u0301"), /invalid canonical reference/);
   assert.throws(() => encodeCanonicalRef("bad\u0000ref"), /invalid canonical reference/);
   assert.throws(() => encodeCanonicalRef("hidden\u200bref"), /invalid canonical reference/);

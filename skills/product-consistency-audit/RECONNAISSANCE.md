@@ -23,6 +23,17 @@ Read the target at <target>. Do not run it and do not use the network. Return:
 3. The capabilities that serve those goals, as a list of named capabilities with the
    apps, routes, screens, APIs or jobs that implement each.
 4. Apps, packages and services, and which capabilities each one owns.
+5. People no source names but the product implies. Infer them from roles,
+   permissions and account states in the schema and auth code; plan, seat and
+   trial tiers; invitation, membership and verification states; people who
+   receive an email, link, export or shared view without an account; people who
+   hold several roles or belong to several organisations, or none; and a named
+   person in a later situation (removed, lapsed, expired, demoted, on a second
+   device). For each, give the code evidence and the named person they derive
+   from, if any.
+6. When the run names an audience: which named or inferred people each audience
+   term covers, with the source or code that ties them, and every surface those
+   people reach.
 Return only facts with repository-relative file:line references.
 ```
 
@@ -164,6 +175,7 @@ Rules:
 - Findings accept only `file` (repository-relative) and `commit` in `intent.sources`. Cite a branch, transcript or outside memory in `evidence`. An intent that rests only on such sources becomes a `needs_owner_intent` record asking the owner to confirm it.
 - `line` is a positive integer, or null when the source has no line (a commit, a branch, a transcript). Never write 0.
 - `provenance` on each source and rule is `owner_statement`, `accepted_recommendation`, `bulk_accepted_recommendation` or `unattributed`, as defined in P4. It is separate from `kind`. A decision whose reason is a written rule records that rule's location in `cites_rule`, so verifiers can see the scope question it inherits.
+- A person no source names but reconnaissance inferred has `inferred: {"basis": [<location>, ...], "derived_from": "<role of a named person>" | null}`, where each location is `{kind, ref, line}`. When `derived_from` names a person, that person's sourced goal applies in the derived situation, so a gap for the inferred person can be confirmed. When it is null, the goal rests on the code alone (P4): write the goal the code implies, and a gap for that person becomes `needs_owner_intent`, asking whether the product means to serve them.
 - A person a source names but no shipped surface serves has `served: false`. The missing surface is not underfit (SKILL.md anti-pattern 3); the owner session may ask whether it is still planned.
 - `decided_not_on_ref` lists decided changes missing from the reviewed ref, such as an unmerged branch. Hunters do not report the reviewed ref for a difference a listed change already removes. When a finding depends on one, the owner session asks whether it is still the plan.
 - Each `conflicts` entry is `{"description": "...", "sources": [...]}` with at least two source entries, so both quotes are recorded. A conflict the sources do not resolve becomes an `open_questions` entry and, if it decides a candidate, a `needs_owner_intent` record later.
@@ -190,7 +202,7 @@ Select a companion because reconnaissance found the surface its `When to use thi
 
 ## Deterministic coverage ledger
 
-The parent writes `<output-dir>/coverage-ledger.json` as a top-level array. Derive one unit for every material combination of entry surface, gate, capability and applicable fit class at the granularity the profile sets (`quick` uses the fixed capability value `profile/quick/all-in-scope-capabilities`; `deep` adds lifecycle modes). For a scoped run, retain discovered excluded surfaces as `out_of_scope` units.
+The parent writes `<output-dir>/coverage-ledger.json` as a top-level array. Derive one unit for every material combination of entry surface, gate, capability and applicable fit class at the granularity the profile sets (`quick` uses the fixed capability value `profile/quick/all-in-scope-capabilities`; `deep` adds lifecycle modes; an audience-scoped run adds the person). For a scoped run, retain discovered excluded surfaces as `out_of_scope` units.
 
 Before seeding, check that every starting path and gate path reconnaissance gave exists in the target at the reviewed state. Correct or drop a path that does not, and note the correction in `architecture.md`.
 
@@ -205,7 +217,7 @@ Derive `coverage_id` without lossy slugs:
 
 1. Require every reference to be Unicode NFC with visible content, no control, format, line or paragraph separator or default-ignorable code point, and no surrounding whitespace.
 2. Encode its UTF-8 bytes with RFC 3986 percent encoding: leave only `A-Z a-z 0-9 - . _ ~` unescaped and use uppercase `%HH` for every other byte.
-3. Join encoded `surface`, `gate`, `capability` and `fit_class` references with `::`; append encoded `lifecycle` when present.
+3. Join encoded `surface`, `gate`, `capability` and `fit_class` references with `::`. When present, append `p=` followed by the encoded `person`, then the encoded `lifecycle`, each after another `::`. A reference always encodes `=`, so the prefix keeps a person segment apart from a lifecycle segment.
 
 Do not include wave, agent, verdict, severity or line number in a reference or ID. Sort units by `coverage_id` before each assignment. Fail on duplicate IDs; treat duplicate IDs with different semantic fields as an identity collision and never merge them.
 
@@ -240,7 +252,7 @@ Each unit records:
 }
 ```
 
-`prior_needs_owner_intent` marks a unit linked to a prior `needs_owner_intent` record. When `lifecycle` is material, add both `canonical_refs.lifecycle` and a human `lifecycle` field. `ordinary_fit_class_block` is null only when no ordinary block applies. The selected companion list includes each applicable class plus its companion `Core discipline`, `Universal moves` and `Validation rules`; `excluded_blocks` records every considered but unselected block and the source fact that excludes it.
+`prior_needs_owner_intent` marks a unit linked to a prior `needs_owner_intent` record. When `lifecycle` is material, add both `canonical_refs.lifecycle` and a human `lifecycle` field. In an audience-scoped run, add both `canonical_refs.person`, the register role exactly as written, and a human `person` field. `ordinary_fit_class_block` is null only when no ordinary block applies. The selected companion list includes each applicable class plus its companion `Core discipline`, `Universal moves` and `Validation rules`; `excluded_blocks` records every considered but unselected block and the source fact that excludes it.
 
 `attempts` is an append-only archive for evidence-bearing assignments that a coverage critic reopens. Before reassignment, append the unit's exact `wave`, `status`, `agent_id`, `reviewed_paths`, `local_checks`, `result_fingerprints` and `unresolved`, plus the critic's `reassignment_reason`. Only `blocked`, `covered` and `candidate` states are archived. The next assignment increments `wave`, uses a fresh owner, and starts with empty live evidence.
 

@@ -143,7 +143,7 @@ The audit ends in a conversation with the owner. The verified records hold the d
 Write `<output-dir>/SUMMARY.md`, short enough to read in a couple of minutes:
 
 1. Profile, scope, source ref, whether walkthroughs ran, and prior-run use. A `quick`, scoped, budget-limited or incomplete run says plainly that it is partial and lists unvalidated fingerprints.
-2. Counts by family (underfit, overfit, inconsistency) and by severity, plus the number of open intent questions.
+2. Counts by family (underfit, overfit, inconsistency) and by severity, plus the number of open intent questions. An audience-scoped run gives these counts per person.
 3. Coverage from the ledger: covered, candidate, blocked and deferred counts, the main exclusions, and the final critic result.
 
 The summary does not restate findings. Their detail stays in `findings.json` and is read out during the session when a question needs it.
@@ -152,7 +152,7 @@ The summary does not restate findings. Their detail stays in `findings.json` and
 
 Write `<output-dir>/decision-tree.json` from the final `confirmed` and `needs_owner_intent` records. Each node is a decision for the owner, with the fingerprints it covers, the decisions it depends on, and a recommended answer drawn from the verified records. Build it in this order of dependency:
 
-1. **Intent questions.** Each `needs_owner_intent` record becomes a decision. Findings whose verdict or fix depends on that intent hang below it. When several findings rest on recommendations the owner accepted in bulk, ask first which of those count as the owner's decisions. When a fix depends on an entry in `decided_not_on_ref` or on edits in a dirty worktree, ask whether that change is still the plan.
+1. **Intent questions.** Each `needs_owner_intent` record becomes a decision. Findings whose verdict or fix depends on that intent hang below it. When several findings rest on recommendations the owner accepted in bulk, ask first which of those count as the owner's decisions. When a fix depends on an entry in `decided_not_on_ref` or on edits in a dirty worktree, ask whether that change is still the plan. In an audience-scoped run, an audience the product does not serve, and each inferred person with no named person behind them, come first: whether the product means to serve them decides every finding below.
 2. **Rules behind overfit.** Group overfit records by their `literal_source`. Each rule, memory or example becomes one decision: keep it as written, narrow it to the scope its origin supports, or remove it. The findings it produced hang below it, so a single answer decides many of them.
 3. **Fixes.** Each remaining confirmed record, or cluster sharing a root cause, becomes a decision about its remediation: the proposed change, a different change the owner prefers, or accepting the current behaviour as intended.
 4. **Order.** Once fixes are decided, what to do first. Recommend by severity and by how many people each fix reaches.
