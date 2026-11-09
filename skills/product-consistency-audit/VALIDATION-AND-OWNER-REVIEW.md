@@ -7,7 +7,7 @@ After the clean coverage-critic pass or a recorded early stop, consolidate Phase
 Assign each verifier a unique lowercase ID with its own `scratch/` and `artifacts/`. It receives, in this order:
 
 1. [PRINCIPLES.md](PRINCIPLES.md), verbatim or by absolute path with an instruction to read it in full.
-2. The intent register entry for the capability, its cited sources, and `architecture.md`.
+2. The intent register entry for the capability, its cited sources, `architecture.md`, and the `state-machines.json` entry when the candidate concerns a machine.
 3. The candidate's trace, evidence and person, **without** the hunter's intent statement, `literal_source`, `excess` or `proportionate_shape`.
 4. The exact selected companion `Validation rules` blocks.
 5. Whether walkthroughs are enabled, with a fixture person distinct from the hunter's.
@@ -117,7 +117,7 @@ For `confirmed`, check:
 4. That no exit, case or rule the intent names was missed.
 5. For overfit: that `literal_source` is accurate, the `excess` items exist and have no stated need behind them, and `proportionate_shape` serves the purpose.
 6. Severity: likelihood, demonstrated impact, overall no greater than impact.
-7. That the remediation restores the fit, names any instruction change, and creates no new stuck state.
+7. That the remediation restores the fit, names any instruction change, and creates no new stuck state. When it changes a lifecycle, a stored state or a status vocabulary: that `remediation.experience` names an improvement for people using the product, developers and agents, and that `remediation.change_safety` maps every value writers produce and lists every writer, reader and contract the verifier can find.
 8. That every decision record the verdict relies on passes the provenance test in Phase 3, step 2.
 
 For a `rejected` record that rests on a decision record, check the provenance test. If the decision is not the owner's own statement on the deciding point, replace the record with `needs_owner_intent`.
@@ -145,6 +145,7 @@ Write `<output-dir>/SUMMARY.md`, short enough to read in a couple of minutes:
 1. Profile, scope, source ref, whether walkthroughs ran, and prior-run use. A `quick`, scoped, budget-limited or incomplete run says plainly that it is partial and lists unvalidated fingerprints.
 2. Counts by family (underfit, overfit, inconsistency) and by severity, plus the number of open intent questions. An audience-scoped run gives these counts per person.
 3. Coverage from the ledger: covered, candidate, blocked and deferred counts, the main exclusions, and the final critic result.
+4. In a state machine run, a table of every machine in `state-machines.json`: name, explicit or implicit, where its state is stored, how many writers and runtimes it has, and the fingerprints found for it.
 
 The summary does not restate findings. Their detail stays in `findings.json` and is read out during the session when a question needs it.
 
@@ -154,7 +155,7 @@ Write `<output-dir>/decision-tree.json` from the final `confirmed` and `needs_ow
 
 1. **Intent questions.** Each `needs_owner_intent` record becomes a decision. Findings whose verdict or fix depends on that intent hang below it. When several findings rest on recommendations the owner accepted in bulk, ask first which of those count as the owner's decisions. When a fix depends on an entry in `decided_not_on_ref` or on edits in a dirty worktree, ask whether that change is still the plan. In an audience-scoped run, an audience the product does not serve, and each inferred person with no named person behind them, come first: whether the product means to serve them decides every finding below.
 2. **Rules behind overfit.** Group overfit records by their `literal_source`. Each rule, memory or example becomes one decision: keep it as written, narrow it to the scope its origin supports, or remove it. The findings it produced hang below it, so a single answer decides many of them.
-3. **Fixes.** Each remaining confirmed record, or cluster sharing a root cause, becomes a decision about its remediation: the proposed change, a different change the owner prefers, or accepting the current behaviour as intended.
+3. **Fixes.** Each remaining confirmed record, or cluster sharing a root cause, becomes a decision about its remediation: the proposed change, a different change the owner prefers, or accepting the current behaviour as intended. Findings about the same state machine form one decision about the machine's shape, and its recommended answer gives the effect on people, developers and agents from `remediation.experience` and the main points of `remediation.change_safety`, including any `owner_checks` to run first.
 4. **Order.** Once fixes are decided, what to do first. Recommend by severity and by how many people each fix reaches.
 
 #### Run the session

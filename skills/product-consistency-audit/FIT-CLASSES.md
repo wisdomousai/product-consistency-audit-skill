@@ -12,6 +12,8 @@ Use `confirmed` only when the person, the cited intent, the trace and the reacha
 >
 > **Persisted state** (schemas, migrations, enums, status machines, flags, settings, modes): use [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md).
 >
+> **Lifecycles** (states spread across fields, rows, runtimes or client variables; transitions written by many writers; state that APIs, tools and instruction files describe): use [STATE-MACHINES.md](STATE-MACHINES.md).
+>
 > **Sign-in and access** (sign-up, sign-in across apps, sign-out, sessions, invitations, account linking, credential reset, role routing, return-to parameters): use [ACCESS-AND-IDENTITY-FLOWS.md](ACCESS-AND-IDENTITY-FLOWS.md).
 >
 > **First run** (onboarding steps, required profile, workspace or organisation creation, forced redirects): use [ONBOARDING-AND-SETUP.md](ONBOARDING-AND-SETUP.md).

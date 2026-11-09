@@ -397,6 +397,198 @@
                   ],
                   "additionalProperties": false
                 }
+              },
+              "experience": {
+                "type": "object",
+                "description": "Effect of the change on people using the product, developers and agents (STATE-MACHINES.md).",
+                "properties": {
+                  "people": {
+                    "type": "string",
+                    "minLength": 1,
+                    "visibleContent": true
+                  },
+                  "developers": {
+                    "type": "string",
+                    "minLength": 1,
+                    "visibleContent": true
+                  },
+                  "agents": {
+                    "type": "string",
+                    "minLength": 1,
+                    "visibleContent": true
+                  }
+                },
+                "required": [
+                  "people",
+                  "developers",
+                  "agents"
+                ],
+                "additionalProperties": false
+              },
+              "change_safety": {
+                "type": "object",
+                "description": "What keeps existing records, callers and stored values working (STATE-MACHINES.md#Change safety).",
+                "properties": {
+                  "value_mapping": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "current": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        },
+                        "new_state": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        }
+                      },
+                      "required": [
+                        "current",
+                        "new_state"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "writers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "file": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "line": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "change": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        }
+                      },
+                      "required": [
+                        "file",
+                        "change"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "readers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "file": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "line": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "change": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        }
+                      },
+                      "required": [
+                        "file",
+                        "change"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "surface": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        },
+                        "compatibility": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        }
+                      },
+                      "required": [
+                        "surface",
+                        "compatibility"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "steps": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "visibleContent": true
+                    }
+                  },
+                  "coverage": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "move": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "missing_check": {
+                          "type": "string",
+                          "minLength": 1,
+                          "visibleContent": true
+                        }
+                      },
+                      "required": [
+                        "move",
+                        "checks"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "owner_checks": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "visibleContent": true
+                    }
+                  }
+                },
+                "required": [
+                  "value_mapping",
+                  "writers",
+                  "readers",
+                  "contracts",
+                  "steps",
+                  "coverage",
+                  "owner_checks"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [

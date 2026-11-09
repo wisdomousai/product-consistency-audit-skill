@@ -1,6 +1,6 @@
 ---
 name: product-consistency-audit
-description: Audits a codebase for gaps between what the product is for and what was built. Infers each capability's intent from sources outside the code, then finds underfit (people locked out, stuck, looping or left without a next step), overfit (instructions, memories or examples taken literally and built into states, tables, flags and guards the purpose never needed) and inconsistency (surfaces that disagree, rules enforced on some paths and skipped on others, copy that describes behaviour the product lacks). Ends with a short grilling session that puts the resulting decisions to the owner in rounds, each with a recommended answer. Use for product consistency questions, intent reviews of a flow or data model, or a full audit. Run the complete workflow only for explicit full-audit requests or requested report artifacts.
+description: Audits a codebase for gaps between what the product is for and what was built. Infers each capability's intent from sources outside the code, then finds underfit (people locked out, stuck, looping or left without a next step), overfit (instructions, memories or examples taken literally and built into states, tables, flags and guards the purpose never needed) and inconsistency (surfaces that disagree, rules enforced on some paths and skipped on others, copy that describes behaviour the product lacks). Ends with a short grilling session that puts the resulting decisions to the owner in rounds, each with a recommended answer. Use for product consistency questions, intent reviews of a flow or data model, an inventory of the implicit state machines in a codebase with a recommended shape for each, or a full audit. Run the complete workflow only for explicit full-audit requests or requested report artifacts.
 ---
 
 # Product Consistency Audit
@@ -19,7 +19,7 @@ The audit hunts three families of gap:
 
 This skill is guidance by default. Loading it does not authorize the complete workflow or file creation.
 
-- **Guidance mode**: for questions about a single flow, rule, data model, finding or kind of person, use only the relevant parts of this skill. Do not run all six phases, create an output directory, or write audit artifacts. Focused agents may be launched; they return results to the current task.
+- **Guidance mode**: for questions about a single flow, rule, data model, state machine, finding or kind of person, use only the relevant parts of this skill. Do not run all six phases, create an output directory, or write audit artifacts. Focused agents may be launched; they return results to the current task.
 - **Full audit mode**: use the complete workflow when the user explicitly asks to audit a codebase for product consistency or intent fit, asks for a full or end-to-end review, or requests report artifacts. Run all six phases and write the files defined below.
 
 If the request could mean either mode, ask a focused question before creating files or starting the complete workflow.
@@ -66,6 +66,7 @@ The parent creates and is the only writer of shared run files:
 - `run-metadata.json`
 - `architecture.md`
 - `intent-register.json`
+- `state-machines.json`
 - `coverage-ledger.json`
 - `findings.json`
 - `SUMMARY.md`
@@ -115,6 +116,15 @@ An **audience-scoped run** audits the product as one or more kinds of people the
 
 An audience scope combines with any profile and with the other scopes.
 
+A **state machine run** finds every lifecycle in the target, explicit or implicit, and recommends a shape for each one that has a gap. It is a scoped run over [STATE-MACHINES.md](STATE-MACHINES.md) and [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md), started by requests such as "find the implicit state machines in this codebase".
+
+- Reconnaissance runs as usual; agent 1d's machine inventory is the run's main input, and the parent may split it across several agents for a target with many runtimes or apps. The parent writes `state-machines.json` and validates it.
+- The ledger gets a unit per machine for each STATE-MACHINES.md class that its record makes plausible, plus the DATA-MODEL-AND-STATE.md classes the record shows. Flows that touch no machine are `out_of_scope`.
+- Every confirmed record recommends a shape for the whole machine with `remediation.experience` and `remediation.change_safety` (STATE-MACHINES.md). A machine with no gap still appears in the summary's machine list, with no recommendation.
+- The decision tree puts each machine's recommended shape to the owner as one decision, with the findings for that machine below it.
+
+A state machine run combines with any profile and with an audience scope.
+
 Profiles change breadth and redundancy. The evidence bar is the same in every profile.
 
 #### Cost budget
@@ -161,20 +171,20 @@ The high/medium test: does the demonstrated result fully deny the capability's i
 
 ### Recommend the smallest change that restores the fit
 
-For underfit and inconsistency, name the decision point where the missing exit, case or rule belongs. For overfit, name the proportionate shape: the smaller model or narrower rule that serves the purpose, the states or branches to remove, any data migration that implies, and the change to the instruction or memory that produced the excess. The audit describes changes; it does not modify the target.
+For underfit and inconsistency, name the decision point where the missing exit, case or rule belongs. For overfit, name the proportionate shape: the smaller model or narrower rule that serves the purpose, the states or branches to remove, any data migration that implies, and the change to the instruction or memory that produced the excess. A change to a lifecycle, a stored state or a status vocabulary also states its effect on people using the product, developers and agents in `remediation.experience`, and what keeps existing records, callers and stored values working in `remediation.change_safety` (STATE-MACHINES.md). The audit describes changes; it does not modify the target.
 
 ## Full audit workflow
 
 In full audit mode, follow all six phases in order:
 
-1. **Reconnaissance**: map people, goals, intent sources and their origins, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md), and validate the register with `validate-intent-register.cjs`.
+1. **Reconnaissance**: map people, goals, intent sources and their origins, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json`, `state-machines.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md), and validate the register with `validate-intent-register.cjs` and the machine inventory with `validate-state-machines.cjs`.
 2. **Coverage-led hunting waves**: assign isolated hunters from the ledger and collect structured results with [HUNTING.md](HUNTING.md), [FIT-CLASSES.md](FIT-CLASSES.md) and the selected companions.
 3. **Candidate validation**: give every candidate to a fresh verifier that re-derives the intent before reading the hunter's wording, as defined in [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md).
 4. **Structured output**: write final `confirmed`, `needs_owner_intent` and `rejected` records to `findings.json`; validate with `report-schema.json` and `validate-findings.cjs`, and validate the ledger with `validate-coverage-ledger.cjs`.
 5. **Independent record verification**: fresh agents verify final records and reconcile corrections.
 6. **Owner review**: write a short `SUMMARY.md`, turn the verified records into a decision tree, and work through it with the owner in rounds of questions, each with a recommended answer, until every decision is made. Record the answers in `decisions.json` and `DECISIONS.md`.
 
-The run ends in one of three states: the owner session is finished and its decisions are recorded; the summary and decision tree are written and the session is pending because the owner is not available; or `run_status: "incomplete"` is recorded with its reason and the gap is disclosed in the summary. Both validators pass in the first two. Never stop mid-phase.
+The run ends in one of three states: the owner session is finished and its decisions are recorded; the summary and decision tree are written and the session is pending because the owner is not available; or `run_status: "incomplete"` is recorded with its reason and the gap is disclosed in the summary. Every validator passes in the first two. Never stop mid-phase.
 
 ## Anti-patterns
 

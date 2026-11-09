@@ -388,10 +388,56 @@ test("rejects severity above demonstrated impact", () => {
   });
 });
 
+function stateMachine() {
+  const finding = confirmed();
+  finding.fingerprint = "src-invitations-transitions-written-in-place";
+  finding.title = "Admin tool reopens accepted invitations";
+  finding.fit = "inconsistency";
+  finding.fit_class = "STATE-MACHINES.md#Transitions written in place";
+  finding.principles = ["P12", "P14"];
+  finding.remediation = {
+    strategy: "Route every invitation status write through a single transition function.",
+    experience: {
+      people: "An accepted invitation stays accepted, and a refused move says what can be done instead.",
+      developers: "Invitation moves are defined in one module that types and constraints check.",
+      agents: "Tool responses return the status and allowed next actions, and AGENTS.md points to the definition.",
+    },
+    change_safety: {
+      value_mapping: [{ current: "accepted_at set, revoked_at null", new_state: "accepted" }],
+      writers: [{ file: "src/admin/invitations.ts", line: 40, change: "Call transitionInvitation." }],
+      readers: [{ file: "src/invitations/list.ts", change: "Read the status field." }],
+      contracts: [{ surface: "GET /api/invitations", compatibility: "Keep accepted_at in responses while clients move." }],
+      steps: ["Add the status field and backfill it.", "Move writers.", "Move readers.", "Drop the old reads."],
+      coverage: [{ move: "pending -> accepted", checks: ["tests/invitations.workflow.ts"] }],
+      owner_checks: ["Count production invitations with both accepted_at and revoked_at set."],
+    },
+  };
+  return finding;
+}
+
+test("accepts a state machine finding with experience and change safety", () => {
+  assert.deepEqual(errorsFor([stateMachine()]), []);
+});
+
+test("requires experience and change safety on STATE-MACHINES.md findings", () => {
+  for (const field of ["experience", "change_safety"]) {
+    assert(errorsAfter(stateMachine, (finding) => { delete finding.remediation[field]; })
+      .some((error) => error.includes(`a STATE-MACHINES.md finding requires "${field}"`)));
+  }
+  assert(errorsAfter(stateMachine, (finding) => { delete finding.remediation.experience.agents; })
+    .some((error) => error.includes("agents")));
+});
+
+test("requires repository-relative writer and reader files in change safety", () => {
+  assert(errorsAfter(stateMachine, (finding) => { finding.remediation.change_safety.writers[0].file = "/abs/admin.ts"; })
+    .some((error) => error.includes("change_safety.writers[0].file: must be a repository-relative path")));
+});
+
 test("checks principle IDs against PRINCIPLES.md headings", () => {
   const ids = loadPrincipleIds();
   assert(ids.has("P1"));
   assert(ids.has("P13"));
+  assert(ids.has("P14"));
 
   const known = confirmed();
   known.principles = ["P13"];

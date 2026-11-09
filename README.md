@@ -32,6 +32,7 @@ Every finding cites the principles in [`PRINCIPLES.md`](skills/product-consisten
 | `FIT-CLASSES.md` | Underfit, overfit and inconsistency classes, plus wildcard and checklist hunters |
 | `INSTRUCTIONS-AND-MEMORY.md` | Companion for instruction files, memories, plans and rule origins |
 | `DATA-MODEL-AND-STATE.md` | Companion for schemas, enums, status machines and flags |
+| `STATE-MACHINES.md` | Companion for explicit and implicit state machines, with the recommended shape and change safety |
 | `ACCESS-AND-IDENTITY-FLOWS.md` | Companion for sign-up, sign-in, sessions, invitations and roles |
 | `ONBOARDING-AND-SETUP.md` | Companion for first-run flows and required setup |
 | `PLANS-BILLING-AND-ENTITLEMENTS.md` | Companion for plans, trials, seats, credits and checkout |
@@ -43,6 +44,7 @@ Every finding cites the principles in [`PRINCIPLES.md`](skills/product-consisten
 | `validate-findings.cjs` | Validator for `findings.json` |
 | `validate-coverage-ledger.cjs` | Validator for `coverage-ledger.json` |
 | `validate-intent-register.cjs` | Validator for `intent-register.json` |
+| `validate-state-machines.cjs` | Validator for `state-machines.json` |
 | `*.test.cjs` | Validator tests (`node <file>`) |
 
 ## Installation
@@ -76,7 +78,13 @@ which rules in AGENTS.md has the code taken too literally?
 audit this product as an invited colleague and as a buyer on the free plan
 ```
 
+```
+find the implicit state machines in this codebase
+```
+
 Questions about a single flow, rule or data model run in guidance mode and write no files. A request for a full audit runs all six phases and writes run files to `~/product-consistency-audit/<repo-name>/run-<N>`, outside the target. Name a profile (`quick`, `standard`, `deep`), a scope, an audience (one or more kinds of people to audit as), or a budget in agent invocations to bound the run. Reconnaissance also infers people the docs never name, such as a member of two organisations or someone who receives a shared link without an account.
+
+Every run lists the product's state machines in `state-machines.json`, including implicit ones: lifecycles spread across booleans and timestamps, held in two runtimes at once, kept in client variables, or described only in instruction files. A state machine run focuses on them. For each machine with a gap it recommends a shape that improves the product for the people using it, for developers and for agents, and lists every stored value, writer, reader, outside contract and check that the change has to keep working.
 
 ## Execution boundary
 

@@ -107,6 +107,25 @@ For each status, enum value, mode and flag:
 Mark values with no producer, no consumer or no exit, flags with a single reachable
 value, and combinations of fields the code allows but other code assumes cannot
 happen. Report these as facts for hunters to assess.
+Then list every state machine, explicit or implicit: any record, person or screen
+that moves through states which change what someone can do. Look for status
+columns, booleans and nullable timestamps read together, time-derived states,
+rows whose existence stands for a stage, attempt counters, the same lifecycle held
+in several runtimes (database, realtime server, queue, cache, third-party service),
+client state that forms a machine (loading, error and step variables, wizard steps
+in URLs, local storage or cookies), and instruction-file prose that describes a
+lifecycle. Use the signals in STATE-MACHINES.md, "When to use this file". For each:
+1. What moves, the people and agents affected, and where the states are defined
+   once, if anywhere.
+2. Storage: every field, row, runtime or client variable that holds part of the state.
+3. States: each with the person situation it stands for and every expression that
+   readers use to tell it, with file:line.
+4. Transitions: from, to, trigger, and every writer with the guard it applies.
+5. Readers, and contracts that expose the state (API, SDK, CLI, tool server,
+   webhooks, exports, analytics, cookies, local storage, other apps).
+6. Instruction, memory and doc text that describes the lifecycle.
+7. The checks (tests, workflow scripts, end-to-end specs) that exercise each
+   transition, with paths.
 ```
 
 **Agent 1e: Local walkthrough capability**
@@ -183,6 +202,39 @@ Rules:
 
 Run `node <skill-dir>/validate-intent-register.cjs <output-dir>/intent-register.json` after writing the register and after every change to it. Fix every error before seeding the ledger.
 
+## State machine inventory
+
+The parent writes `<output-dir>/state-machines.json` from agent 1d, checked against 1c. It is a top-level array with one entry per machine, explicit or implicit:
+
+```json
+{
+  "id": "invitation-lifecycle",
+  "name": "Invitation lifecycle",
+  "subject": "invitations row",
+  "kind": "implicit",
+  "people": ["workspace admin", "invited colleague"],
+  "definition": null,
+  "storage": [{"kind": "timestamp", "ref": "src/db/schema.ts", "line": 40, "description": "accepted_at"}],
+  "states": [{"name": "pending", "situation": "The colleague has not answered yet.", "identified_by": [{"ref": "src/invitations/list.ts", "line": 12, "expression": "!accepted_at && !revoked_at"}]}],
+  "transitions": [{"from": null, "to": "pending", "trigger": "Admin sends an invitation.", "writers": [{"ref": "src/invitations/create.ts", "line": 8, "guard": null}]}],
+  "readers": [{"ref": "src/invitations/list.ts", "line": 12, "reads": "accepted_at and revoked_at"}],
+  "contracts": [{"ref": "src/api/invitations.ts", "line": 30, "surface": "GET /api/invitations returns accepted_at"}],
+  "instruction_refs": [{"ref": "AGENTS.md", "line": 88, "text": "Never let an invitation be reused."}],
+  "coverage": [{"from": null, "to": "pending", "checks": [{"ref": "tests/invitations.workflow.ts", "line": 15}]}]
+}
+```
+
+Rules:
+
+- `kind` is `explicit` when a single place defines the states and the moves, and `definition` cites it; otherwise `implicit` with `definition: null`. An explicit machine whose writers bypass the definition stays explicit; the bypass is hunter work.
+- `storage.kind` is `column`, `boolean`, `timestamp`, `nullable_field`, `row`, `derived`, `runtime`, `client` or `external`.
+- State names describe what the record means to the people in `people`. For an implicit machine, take them from copy or docs where possible and say in `situation` where the name came from.
+- `from: null` marks creation. Every transition has at least one writer, and every `coverage` entry names a listed transition. A transition with no check has no `coverage` entry.
+- Every `ref` is repository-relative and every `line` is a positive integer or null.
+- The inventory lists machines. It does not list suspected gaps.
+
+Run `node <skill-dir>/validate-state-machines.cjs <output-dir>/state-machines.json` after writing it and after every change. Fix every error before seeding the ledger.
+
 ## Architecture summary and companion selection
 
 The parent writes `<output-dir>/architecture.md`, capped at about 1,000 words:
@@ -198,7 +250,7 @@ The parent writes `<output-dir>/architecture.md`, capped at about 1,000 words:
 9. Prior coverage gaps and revalidation targets.
 10. Selected companions from [FIT-CLASSES.md](FIT-CLASSES.md), each with the surface that requires it.
 
-Select a companion because reconnaissance found the surface its `When to use this file` section describes, never because a library or a word appears. [INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md) is selected whenever the target has any written rules, and [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md) whenever it has persisted state.
+Select a companion because reconnaissance found the surface its `When to use this file` section describes, never because a library or a word appears. [INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md) is selected whenever the target has any written rules, [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md) whenever it has persisted state, and [STATE-MACHINES.md](STATE-MACHINES.md) whenever `state-machines.json` holds an implicit machine or a machine with more than a single writer, runtime or surface.
 
 ## Deterministic coverage ledger
 
@@ -209,7 +261,8 @@ Before seeding, check that every starting path and gate path reconnaissance gave
 Seed these units in addition to flow units:
 
 - An Instructions-and-memory unit for every material rule in the intent register, with the rule's location as the surface and its enforcement points as starting paths.
-- A Data-model unit for every status enum, state machine and core entity, with the definition as the surface.
+- A Data-model unit for every status enum and core entity, with the definition as the surface.
+- A State-machines unit for every machine in `state-machines.json` and each STATE-MACHINES.md class its record makes plausible, with the definition, or the main storage location of an implicit machine, as the surface and its writers as starting paths.
 
 Each dimension has a human label and a stable source-derived value in `canonical_refs`. Suitable references are a repository-relative path plus a route, export or heading; a rule location; an enum or table name; and the exact fit-class block reference. A block reference is `FILE.md#` plus the exact class name as written in that file: the `##` heading text in a companion, or the bold class name in [FIT-CLASSES.md](FIT-CLASSES.md) without the principle list that follows it (`FIT-CLASSES.md#Lockout`). Section blocks use their heading text (`INSTRUCTIONS-AND-MEMORY.md#Core discipline`). Do not lowercase or slug display labels.
 

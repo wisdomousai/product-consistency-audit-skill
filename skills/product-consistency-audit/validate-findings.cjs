@@ -62,6 +62,7 @@ const PRINCIPLES_PATH = path.join(__dirname, "PRINCIPLES.md");
 const PRINCIPLE_HEADING = /^### (P[1-9][0-9]*) /gmu;
 const COMMIT_REF = /^[0-9a-f]{7,40}$/;
 const OVERFIT_FIELDS = ["literal_source", "excess", "proportionate_shape"];
+const STATE_MACHINE_REMEDIATION_FIELDS = ["experience", "change_safety"];
 
 class JsonStructureError extends Error {}
 class SafeInputError extends Error {}
@@ -640,6 +641,22 @@ function collectFindingSemanticErrors(findings, principleIds) {
       }
       if (!finding.remediation || typeof finding.remediation !== "object" || typeof finding.remediation.strategy !== "string" || !hasVisibleProse(finding.remediation.strategy)) {
         errors.push(`${base}: confirmed finding requires visible remediation`);
+      }
+      if (typeof finding.fit_class === "string" && finding.fit_class.startsWith("STATE-MACHINES.md#") && isObjectValue(finding.remediation)) {
+        for (const field of STATE_MACHINE_REMEDIATION_FIELDS) {
+          if (!hasOwn(finding.remediation, field)) errors.push(`${base}.remediation: a STATE-MACHINES.md finding requires ${safeQuote(field)}`);
+        }
+      }
+      if (isObjectValue(finding.remediation) && isObjectValue(finding.remediation.change_safety)) {
+        for (const list of ["writers", "readers"]) {
+          const entries = finding.remediation.change_safety[list];
+          if (!Array.isArray(entries)) continue;
+          entries.forEach((entry, entryIndex) => {
+            if (isObjectValue(entry) && hasOwn(entry, "file") && !isSafeRelativeSourcePath(entry.file)) {
+              errors.push(`${base}.remediation.change_safety.${list}[${entryIndex}].file: must be a repository-relative path`);
+            }
+          });
+        }
       }
       if (finding.fit === "overfit") {
         for (const field of OVERFIT_FIELDS) {

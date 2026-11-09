@@ -155,3 +155,13 @@ Bulk-accepted and unattributed sources state intent for the register, but they n
 **Evidence.** The text, its location, and the behaviour that contradicts it for the person who reads it.
 
 **Not a gap.** Wording preferences with no difference in meaning.
+
+### P14 One definition per lifecycle
+
+**Statement.** When a record, a person or a screen moves through states, the states and the allowed moves between them are defined in one place. Every writer changes the state through that definition, and every reader gets the state from it: the product's screens, its API, its CLI and the tools agents use.
+
+**Check.** For each lifecycle, find where its state is stored and where it is derived. List every writer with the guard and side effects it applies, every reader with the expression it uses to tell the state, and what API, CLI and tool responses and refusals say about the state and the allowed next actions. Compare instruction-file prose about the lifecycle with the code.
+
+**Evidence.** The lifecycle, the places that encode or derive its state, and a cost: readers that tell the same record's state differently, a move the sources forbid that a writer can still make, a person or agent left in a state with no named next action, or a lifecycle change that has to be made in several places that have already drifted.
+
+**Not a gap.** A fact with two values, a single writer and no moves that a boolean already names. A lifecycle defined in a library or framework the target uses, when every writer goes through it. A definition mirrored in a database constraint and a code type that a check keeps in step.
