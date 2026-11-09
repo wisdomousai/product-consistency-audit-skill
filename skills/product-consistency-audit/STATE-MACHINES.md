@@ -2,7 +2,7 @@
 
 ## When to use this file
 
-Select this file whenever a record, a person or a screen moves through states that change what someone can do. Most products have such lifecycles; few write them down. Use it for every unit seeded from `state-machines.json` and for a state machine run (SKILL.md).
+Select this file whenever a record, a person or a screen moves through states that change what someone can do. Use it for every unit seeded from `state-machines.json` and for a state machine run (SKILL.md).
 
 A state machine is implicit when no single place names its states and the moves between them. Its state is spread across fields, rows, runtimes or client variables, and each writer and reader works the state out for itself. Reconnaissance agent 1d finds them from these signals:
 
@@ -22,7 +22,7 @@ DATA-MODEL-AND-STATE.md covers single states and fields: a status without an exi
 
 ## Core discipline
 
-**Bar for a finding.** P14 (PRINCIPLES.md) asks that each lifecycle is defined once and that every writer and reader goes through that definition. A lifecycle being implicit is not a finding by itself. A finding shows a cost to someone:
+**Bar for a finding.** P14 (PRINCIPLES.md) asks that each lifecycle is defined once and that every writer and reader goes through that definition. An implicit lifecycle becomes a finding when it costs someone something:
 
 - A person sees conflicting answers about the same record, is moved to a state the product means to forbid, or is left in a state with no next action.
 - An agent that operates the product through its API, CLI or tools cannot tell the state or the allowed next actions, attempts a move the product rejects, and gets an error that names neither.
@@ -34,9 +34,9 @@ DATA-MODEL-AND-STATE.md covers single states and fields: a status without an exi
 - **Developers** (DX): how many places define the states, where a new state or move gets added, whether types and constraints reject an invalid state, and whether checks exercise the moves.
 - **Agents** (AX): coding agents editing the repository, and agents that use the product through an API, SDK, CLI or tool server. An agent should find the machine from a file the instruction files point to, read the state and the allowed next actions from tool and API responses, and get a refusal that names the current state and what is allowed from it.
 
-**Where intent is written.** The lifecycle's intent comes from the product's description of the thing that moves (what a draft, an invitation, a session or an order is), copy that names states and their actions, decision records, instruction files read under INSTRUCTIONS-AND-MEMORY.md, and the commits that introduced each field and each transition. The code shows which moves exist; the sources say which moves the product means to have.
+**Where intent is written.** The lifecycle's intent comes from the product's description of the thing that moves (what a draft, an invitation, a session or an order is), copy that names states and their actions, decision records, instruction files read under INSTRUCTIONS-AND-MEMORY.md, and the commits that introduced each field and each transition. Measure the moves the code makes against the moves these sources describe.
 
-**Machine record.** `state-machines.json` holds a record per machine, explicit or implicit (RECONNAISSANCE.md). The hunter checks its machine's record against source before using it, and adds to its scratch notes any storage, writer, reader, contract or transition the record missed. A machine record is evidence for hunters; the parent alone edits the file.
+**Machine record.** `state-machines.json` holds a record per machine, explicit or implicit (RECONNAISSANCE.md). The hunter checks its machine's record against source before using it, and adds to its scratch notes any storage, writer, reader, contract or transition the record missed. Only the parent edits the file.
 
 **Evidence methods.**
 
@@ -94,7 +94,7 @@ Principles: P14, P12, P10
 
 Family: inconsistency
 
-The same lifecycle is stored in separate places that each move on their own: a database row and a realtime server, a job queue, a cache, a third-party service or a worker's memory. Each has its own status, timers and clean-up. Some moves update both; others update only the place they started in.
+The same lifecycle is stored in separate places that each move on their own: a database row and a realtime server, a job queue, a cache, a third-party service or a worker's memory. Each has its own status, timers and clean-up. A move that updates only one of them leaves the others stale.
 
 What to look for:
 
@@ -139,7 +139,7 @@ Principles: P14, P11, P13
 
 Family: inconsistency
 
-Agents work from the repository's instruction files and from the product's API, SDK, CLI and tool responses. When those describe the lifecycle differently from the code, or expose raw fields with no state and no allowed next actions, agents make moves the product refuses, retry blindly, or edit a single writer and miss the others.
+Agents work from the repository's instruction files and from the product's API, SDK, CLI and tool responses. When those describe the lifecycle differently from the code, or expose raw fields with no state and no allowed next actions, agents attempt moves the product refuses, and coding agents change a single writer and miss the others.
 
 What to look for:
 
@@ -162,14 +162,14 @@ A finding from this file recommends a shape for the whole machine, and that shap
 
 Start from this shape and remove whatever the machine does not need (P6):
 
-- **States are the person situations.** Name each state for what it means to the person or agent who sees it. A step that only the system cares about stays out of a state that people see. Remove states that every reader treats alike, and add none that no situation needs.
-- **A single definition.** The states and the allowed moves live in one module, written in the target's existing idiom: an enum with a transition map, a reducer, a typed union, a database type with a constraint mirroring it. Do not recommend a new state machine library unless the target already uses one.
-- **A single field for exclusive states.** When the states exclude each other, a single field holds the state. Timestamps stay as history beside it and stop being read as state. A state that time alone produces (expired) is computed by a function next to the definition.
-- **A single way to move.** Every writer calls the same transition function. It checks the move against the definition, applies the move's side effects in one place, and refuses a disallowed move with an error that names the current state and the moves allowed from it.
-- **An owner across runtimes.** When the lifecycle is held in more than a single runtime, the recommendation picks the runtime that owns the state, and the others report events to it or read it.
-- **Client state follows the server.** A screen keeps a single state value, such as a typed union, instead of independent flags, rebuilds it from the server on load, and gives every failure state a retry or a way back.
-- **State and next actions in every response.** API, SDK, CLI and tool responses return the state and the allowed next actions from the definition. Refusals include the same information.
-- **Instruction files point to the definition.** Instruction text names the file that defines the machine and keeps only the purpose behind each rule. Transition rules restated in prose are removed or replaced by that pointer, so the next change happens in one place.
+- **State names.** Name each state for what it means to the person or agent who sees it. A step that only the system cares about stays out of a state that people see. Remove states that every reader treats alike. A new state needs a person situation behind it.
+- **Definition.** The states and the allowed moves live in one module, written in the target's existing idiom: an enum with a transition map, a reducer, a typed union, a database type with a constraint mirroring it. Do not recommend a new state machine library unless the target already uses one.
+- **Storage.** When the states exclude each other, a single field holds the state. Timestamps stay as history beside it and stop being read as state. A state that time alone produces (expired) is computed by a function next to the definition.
+- **Transition function.** Every writer calls the same transition function. It checks the move against the definition, applies the move's side effects in one place, and refuses a disallowed move with an error that names the current state and the moves allowed from it.
+- **Runtimes.** When the lifecycle is held in more than a single runtime, the recommendation picks the runtime that owns the state, and the others report events to it or read it.
+- **Client state.** A screen keeps a single state value, such as a typed union, instead of independent flags, rebuilds it from the server on load, and gives every failure state a retry or a way back.
+- **Responses and refusals.** API, SDK, CLI and tool responses return the state and the allowed next actions from the definition. Refusals include the same information.
+- **Instruction files.** Instruction text names the file that defines the machine and keeps only the purpose behind each rule. Transition rules restated in prose are removed or replaced by that pointer, so the next change happens in one place.
 
 ## Change safety
 

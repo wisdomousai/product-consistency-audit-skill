@@ -198,7 +198,7 @@ Rules:
 - A person a source names but no shipped surface serves has `served: false`. The missing surface is not underfit (SKILL.md anti-pattern 3); the owner session may ask whether it is still planned.
 - `decided_not_on_ref` lists decided changes missing from the reviewed ref, such as an unmerged branch. Hunters do not report the reviewed ref for a difference a listed change already removes. When a finding depends on one, the owner session asks whether it is still the plan.
 - Each `conflicts` entry is `{"description": "...", "sources": [...]}` with at least two source entries, so both quotes are recorded. A conflict the sources do not resolve becomes an `open_questions` entry and, if it decides a candidate, a `needs_owner_intent` record later.
-- The register states intent. It does not list suspected gaps.
+- Leave suspected gaps out of the register; hunters assess them.
 
 Run `node <skill-dir>/validate-intent-register.cjs <output-dir>/intent-register.json` after writing the register and after every change to it. Fix every error before seeding the ledger.
 
@@ -231,7 +231,7 @@ Rules:
 - State names describe what the record means to the people in `people`. For an implicit machine, take them from copy or docs where possible and say in `situation` where the name came from.
 - `from: null` marks creation. Every transition has at least one writer, and every `coverage` entry names a listed transition. A transition with no check has no `coverage` entry.
 - Every `ref` is repository-relative and every `line` is a positive integer or null.
-- The inventory lists machines. It does not list suspected gaps.
+- Leave suspected gaps out of the inventory; hunters assess them.
 
 Run `node <skill-dir>/validate-state-machines.cjs <output-dir>/state-machines.json` after writing it and after every change. Fix every error before seeding the ledger.
 
