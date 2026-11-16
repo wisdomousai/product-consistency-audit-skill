@@ -6,6 +6,8 @@ The parent initializes `run-metadata.json`, applies the budget gate in `SKILL.md
 
 Before launch, ask the owner whether agent memories or session transcripts for this repository are kept outside it (per-user project memory directories are common) and whether any may be read. Pass the paths the owner gives to agent 1b.
 
+When the host already loads a memory index for this repository into the parent's session, the owner has made it part of the working context. Treat those memory paths as named: tell the owner which paths agent 1b will read, and do not ask again. They stay read only, and their rules are read for purpose and origin like any other written rule ([INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md)).
+
 Launch these `research` agents in parallel. Give each one [PRINCIPLES.md](PRINCIPLES.md) verbatim, or its absolute path with an instruction to read it in full when the agent can read files.
 
 **Agent 1a: Product, people and goals**
@@ -234,6 +236,18 @@ Rules:
 - Leave suspected gaps out of the inventory; hunters assess them.
 
 Run `node <skill-dir>/validate-state-machines.cjs <output-dir>/state-machines.json` after writing it and after every change. Fix every error before seeding the ledger.
+
+## People and organisation check
+
+Every finding depends on who the people are and how they relate. Reconnaissance builds that map from sources, code and memories, which can disagree or be out of date. A role the owner sees as a position inside an organisation can be modelled as a separate party, for example. Hunting on a wrong map produces findings that all have to be redone.
+
+After the intent register is written and validated, and before the first hunter wave, the parent puts the map to the owner in one round, in the format of Phase 6 ([VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md), Run the session):
+
+- Each kind of person, with the organisation or group they belong to, the role they hold there and their goal.
+- Each relation between kinds of organisation and person that the gates depend on: who belongs to whom, who acts for whom, who leads a case or account, and who may read what another person writes.
+- Where sources disagree with each other or with the code about one of these, the options, with a recommended answer.
+
+Ask only about the map, not about findings. Record the answers in `decisions.json` with the provenance rules of Phase 6, and update `intent-register.json` and `architecture.md` before hunting. A correction to the map is an `owner_statement` source for every capability it touches. If the owner is not available, record the map as unconfirmed in `architecture.md`. Each finding that depends on an unconfirmed relation then becomes `needs_owner_intent` on that relation.
 
 ## Architecture summary and companion selection
 

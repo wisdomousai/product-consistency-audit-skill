@@ -36,6 +36,16 @@ This skill is agent-neutral:
 
 Use equivalent platform capabilities while preserving the role, write-isolation, prompt and independence boundaries.
 
+### Role assignment
+
+Agents differ in what they can do and what the owner allows them to do. Before delegation, the parent records `agent_roles` in `run-metadata.json`, with the model or agent type for each role:
+
+- **source readers**: reconnaissance, hunters without walkthroughs, critics and verifiers. They read source and history and never run the target.
+- **walkers**: hunters and verifiers that run walkthroughs. Only an agent with a browser or terminal automation tool fills this role.
+- **outside reviewers**: other models or tools the owner asked to review the target (see Outside reviews in [HUNTING.md](HUNTING.md)).
+
+Follow the owner's instructions and memories about which models do which work, such as a model that may read code but must not drive a browser. Never send target content to an outside model or service the owner has not named.
+
 ## Execution boundary
 
 These rules apply in both modes. The target is the owner's product, so the boundary protects real people, money and data rather than the host.
@@ -47,6 +57,9 @@ These rules apply in both modes. The target is the owner's product, so the bound
 - Never contact production or preview deployments, use real accounts or credentials, send email, take payments, spend paid model or API quota, create or delete cloud database branches or projects, or pull environment files from a hosting provider.
 - Never edit target source, configuration or environment files, and never add test files to the target. Walkthrough scripts, notes and screenshots live in the agent's `scratch/` directory.
 - The parent serializes walkthroughs that share a data store and gives each walkthrough its own fixture person.
+- Walkthroughs also share the host machine, often the owner's own computer. A local server plus a headless browser per agent can saturate it. The parent runs at most one walker at a time unless the owner allows more. It never runs a walker while type checks, builds or test suites run. Before each launch it checks the host load (for example with `uptime`) and waits while the one-minute load is above the number of CPU cores. Walkers close their browser session when they finish.
+- Walkers drive the product with a browser or terminal automation tool that writes nothing into the target, such as a headless browser CLI. They do not write spec files, even into a scratch folder inside the target, and use the tool the owner names for agent browser checks.
+- An agent deletes nothing outside its own `scratch/`. This includes files another agent created and folders that look like leftovers.
 - A state that cannot be built locally, such as an expired third-party session or a lapsed paid subscription, keeps the finding at `method: source`. It is not upgraded by assumption.
 
 ## Full audit setup
@@ -125,6 +138,15 @@ A **state machine run** finds every lifecycle in the target, explicit or implici
 
 A state machine run combines with any profile and with an audience scope.
 
+A **fix verification run** checks fixes made after an earlier run. It starts from the prior `findings.json`, `decisions.json` and the diff between the prior source ref and the current one, and is recorded as `scope: "fix_verification"` with `prior_run` in `run-metadata.json`.
+
+- The ledger gets one unit per prior `confirmed` record the owner decided to fix, with the record's entrypoint as the surface. Each unit also cites the changed paths that touch the record's trace.
+- A fresh verifier re-runs the record's own reproduction at the record's method: source trace, history or walkthrough. It returns `fixed`, `not_fixed` or `changed`. A `changed` result means the trace now ends somewhere new, and that outcome becomes a new candidate.
+- One coverage critic reads the diff for surfaces it touches that no unit covers, such as a new state, a new writer or a new gate. Each one becomes a `planned` unit for a normal hunter.
+- The summary lists each prior fingerprint with its result. The owner session asks only about `not_fixed` records and new confirmed records.
+
+A fix verification run is partial coverage and says so. It costs about one verifier per fixed record plus the critic.
+
 Profiles change breadth and redundancy. The evidence bar is the same in every profile.
 
 #### Cost budget
@@ -177,7 +199,7 @@ For underfit and inconsistency, name the decision point where the missing exit, 
 
 In full audit mode, follow all six phases in order:
 
-1. **Reconnaissance**: map people, goals, intent sources and their origins, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json`, `state-machines.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md), and validate the register with `validate-intent-register.cjs` and the machine inventory with `validate-state-machines.cjs`.
+1. **Reconnaissance**: map people, goals, intent sources and their origins, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json`, `state-machines.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md), and validate the register with `validate-intent-register.cjs` and the machine inventory with `validate-state-machines.cjs`. Before hunting, put the people and organisation map to the owner in one round (RECONNAISSANCE.md, People and organisation check).
 2. **Coverage-led hunting waves**: assign isolated hunters from the ledger and collect structured results with [HUNTING.md](HUNTING.md), [FIT-CLASSES.md](FIT-CLASSES.md) and the selected companions.
 3. **Candidate validation**: give every candidate to a fresh verifier that re-derives the intent before reading the hunter's wording, as defined in [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md).
 4. **Structured output**: write final `confirmed`, `needs_owner_intent` and `rejected` records to `findings.json`; validate with `report-schema.json` and `validate-findings.cjs`, and validate the ledger with `validate-coverage-ledger.cjs`.
@@ -199,3 +221,6 @@ The run ends in one of three states: the owner session is finished and its decis
 9. Assigning severity to `needs_owner_intent` records.
 10. Starting the owner session before independent verification, or letting the summary and JSON disagree.
 11. Handing the owner a long report to read instead of the decisions they need to make, or answering a decision on the owner's behalf.
+12. Hunting before the owner has confirmed who the people and organisations are and how they relate. One wrong relation, such as treating a role inside an organisation as a separate party, invalidates every finding built on it.
+13. Reporting an outside reviewer's claim without a fresh verifier checking it against the source.
+14. Launching several walkers at once, or a walker beside builds and test suites, on the owner's machine.

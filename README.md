@@ -21,6 +21,10 @@ Agent instruction files (`CLAUDE.md`, `AGENTS.md`, `.cursorrules` and similar) a
 
 Every finding cites the principles in [`PRINCIPLES.md`](skills/product-consistency-audit/PRINCIPLES.md) it breaks. Runs are additive: later runs read earlier ledgers, findings and decisions, revalidate changed source, and do not re-report what you accepted as intended.
 
+Before hunting starts, you confirm the map of people and organisations in one round of questions, so that no finding rests on a wrong relation. Reports from other reviewers (other models or tools) enter as candidates and go through the same verification. After you fix findings, a fix verification run re-runs each fixed finding's reproduction against the diff instead of a full hunt.
+
+Walkthroughs run on your machine, so the skill runs one browser agent at a time, never beside builds or test suites, and waits while the host load is high.
+
 ## Files
 
 | File | Purpose |

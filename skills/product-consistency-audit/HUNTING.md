@@ -182,6 +182,16 @@ The parent validates each unit result, maps it to exactly one assigned `coverage
 
 Consolidate candidates by fingerprint and then by root cause. One root cause with several effects is one candidate with the strongest complete trace. An overfit element and the stuck state it causes share a fingerprint when removing the element would remove the stuck state. Independent causes get separate fingerprints. When hunters report the same root cause under different fingerprints, keep the fingerprint from the unit whose gate holds the fix; when both do, or neither does, keep the fingerprint that sorts first lexicographically. Record the dropped fingerprint in parent bookkeeping so later runs can match it.
 
+## Outside reviews
+
+The owner may ask other models or tools to review the target during a run, or bring their reports to it. An outside review is input to hunting, not a finding.
+
+- Save each report verbatim as `<output-dir>/recon/outside-<reviewer>.md`.
+- The parent splits the report into claims. Each claim that names a path or behaviour becomes a candidate with the reviewer as its source, in the structured hunter result shape, with `method: source` until a verifier checks it. A claim without a path or a reachable situation goes to an existing or new ledger unit as a starting path for a hunter, not a candidate.
+- Consolidate these candidates with the hunters' by fingerprint and root cause. When a reviewer and a hunter report the same root cause, keep the hunter's trace and note the reviewer in parent bookkeeping.
+- Each candidate goes through Phase 3 like any other. The verifier receives the claim's trace and evidence without the reviewer's reading of the intent.
+- A reviewer that only reads code never walks the target. A claim about what a person sees stays at `method: source` until a walker checks it.
+
 ## Coverage-critic waves
 
 Immediately after each hunter wave, spend the reserved invocation on a fresh `research` post-wave coverage critic, with its own agent directory. It receives [PRINCIPLES.md](PRINCIPLES.md), `architecture.md`, `intent-register.json`, the full ledger with block maps, current candidate fingerprints and states, and the prior-run gap summary. It reads source and history but does not run the target. It writes exactly this JSON to its `scratch/result.json`:
