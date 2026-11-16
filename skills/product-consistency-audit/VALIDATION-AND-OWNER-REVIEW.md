@@ -1,5 +1,21 @@
 # Validation, Structured Output, Verification and Owner Review
 
+### Plan the adversarial reviews
+
+Verifiers, critics and outside reviewers are all asked to attack something. An attacker does what its brief rewards. Given a conclusion, it tends to confirm it or argue about its wording. Rewarded for refuting, it rejects real findings on thin grounds. Several attackers given the same open brief repeat each other and leave the same gaps. Plan every adversarial review before launch, and write the plan to `<output-dir>/briefs/review-plan.json` with one entry per reviewer:
+
+- **Target**: the exact claims, records or units under attack, given as trace and evidence. Never the parent's or the hunter's conclusion, unless the mechanism in Phase 3 releases it after the blind reading.
+- **Angle**: what this reviewer tries to show. Examples are a missed exit, a stated need behind an overfit element, an intent source that says otherwise, a person who cannot reach the entrypoint, a fix that creates a new stuck state, or a part of a plan that is not built. When several reviewers attack the same target, give each a different angle, and record which angles no one covers.
+- **Evidence bar**: a refutation needs the same evidence as a confirmation, with a path, a line or a reproduction. A refutation without evidence leaves the claim standing, and the claim goes to a fresh verifier. A claim that rests on an open intent becomes `needs_owner_intent`, whichever side the reviewer takes.
+- **Known decisions**: the owner's recorded decisions and the people and organisation map. The reviewer may show that the code breaks a decision, but does not argue the decision itself. A reviewer who thinks a decision is wrong returns that as a note for the owner session.
+- **Role and tools**: source reader or walker (SKILL.md, Role assignment), the fixture person for a walker, and what the reviewer may not do.
+- **Stopping rule and budget**: when the reviewer stops, for example at the first refutation with evidence, after each angle is checked once, or at a fixed number of claims.
+- **Output**: the result shape the parent can merge, never prose only.
+
+For outside reviewers, show the plan to the owner before launch: which model or tool, which content leaves the machine, the brief and the expected cost. A brief such as "review this critically and say if it is complete" needs the plan or spec that defines complete, the intent sources, the known decisions and the scope. Without them the reviewer measures the code against its own idea of the product.
+
+When reviewers disagree on a deciding point, do not pick the more confident one. Send the point with both traces to a fresh verifier. If it is a question of intent, it becomes `needs_owner_intent`.
+
 ### Phase 3: Independently validate every candidate
 
 After the clean coverage-critic pass or a recorded early stop, consolidate Phase 2 candidates and prior records brought into this run by fingerprint and root cause. Give every unique candidate to a fresh `general` verifier that did not hunt it. A prior confirmation brought into this run follows the same path even though hunters excluded its unchanged root cause. In `quick`, a verifier may take up to three candidates whose root causes are independent of each other. It reads the intent for each one separately and returns one decision per candidate.

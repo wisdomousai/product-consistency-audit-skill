@@ -184,7 +184,7 @@ Consolidate candidates by fingerprint and then by root cause. One root cause wit
 
 ## Outside reviews
 
-The owner may ask other models or tools to review the target during a run, or bring their reports to it. An outside review is input to hunting, not a finding.
+The owner may ask other models or tools to review the target during a run, or bring their reports to it. An outside review is input to hunting, not a finding. Plan an outside review launched during the run as an adversarial review ([VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md), Plan the adversarial reviews).
 
 - Save each report verbatim as `<output-dir>/recon/outside-<reviewer>.md`.
 - The parent splits the report into claims. Each claim that names a path or behaviour becomes a candidate with the reviewer as its source, in the structured hunter result shape, with `method: source` until a verifier checks it. A claim without a path or a reachable situation goes to an existing or new ledger unit as a starting path for a hunter, not a candidate.

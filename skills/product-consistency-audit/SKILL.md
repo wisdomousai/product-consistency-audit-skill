@@ -224,3 +224,4 @@ The run ends in one of three states: the owner session is finished and its decis
 12. Hunting before the owner has confirmed who the people and organisations are and how they relate. One wrong relation, such as treating a role inside an organisation as a separate party, invalidates every finding built on it.
 13. Reporting an outside reviewer's claim without a fresh verifier checking it against the source.
 14. Launching several walkers at once, or a walker beside builds and test suites, on the owner's machine.
+15. Launching a verifier, critic or outside reviewer without a planned target, angle, evidence bar and stopping rule, or giving several reviewers the same open brief.
