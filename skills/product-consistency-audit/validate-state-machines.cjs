@@ -25,7 +25,7 @@ const {
 const MACHINE_ID = /^[a-z0-9][a-z0-9-]{0,127}$/;
 const KINDS = new Set(["explicit", "implicit"]);
 const STORAGE_KINDS = new Set(["column", "boolean", "timestamp", "nullable_field", "row", "derived", "runtime", "client", "external"]);
-const ENTRY_KEYS = ["id", "name", "subject", "kind", "people", "definition", "storage", "states", "transitions", "readers", "contracts", "instruction_refs", "coverage"];
+const ENTRY_KEYS = ["id", "name", "subject", "kind", "actors", "definition", "storage", "states", "transitions", "readers", "contracts", "instruction_refs", "coverage"];
 
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const isText = (value) => typeof value === "string" && hasVisibleProse(value) && value.trim() === value;
@@ -79,8 +79,8 @@ function validateInventory(inventory) {
     else ids.add(machine.id);
     for (const field of ["name", "subject"]) if (!isText(machine[field])) errors.push(`${base}.${field}: invalid text`);
     if (!KINDS.has(machine.kind)) errors.push(`${base}.kind: must be explicit or implicit`);
-    checkArray(machine.people, `${base}.people`, errors, { nonempty: true }).forEach((role, i) => {
-      if (!isText(role)) errors.push(`${base}.people[${i}]: invalid text`);
+    checkArray(machine.actors, `${base}.actors`, errors, { nonempty: true }).forEach((role, i) => {
+      if (!isText(role)) errors.push(`${base}.actors[${i}]: invalid text`);
     });
 
     if (machine.kind === "explicit") {

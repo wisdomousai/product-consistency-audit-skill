@@ -206,12 +206,12 @@ test("derives collision-free canonical IDs from exact UTF-8 references", () => {
     "a::b::c::d::retry",
   );
   assert.equal(
-    canonicalCoverageId({ surface: "a", gate: "b", capability: "c", fit_class: "d", person: "retry" }),
-    "a::b::c::d::p=retry",
+    canonicalCoverageId({ surface: "a", gate: "b", capability: "c", fit_class: "d", actor: "retry" }),
+    "a::b::c::d::a=retry",
   );
   assert.equal(
-    canonicalCoverageId({ surface: "a", gate: "b", capability: "c", fit_class: "d", person: "invited colleague", lifecycle: "expired" }),
-    "a::b::c::d::p=invited%20colleague::expired",
+    canonicalCoverageId({ surface: "a", gate: "b", capability: "c", fit_class: "d", actor: "invited colleague", lifecycle: "expired" }),
+    "a::b::c::d::a=invited%20colleague::expired",
   );
   assert.throws(() => encodeCanonicalRef("e\u0301"), /invalid canonical reference/);
   assert.throws(() => encodeCanonicalRef("bad\u0000ref"), /invalid canonical reference/);
@@ -779,4 +779,26 @@ test("accepts a canonical ID derived from near-maximum multibyte references", ()
     const result = runCli(JSON.stringify([value]));
     assert.equal(result.status, 0, cliOutput(result));
   }
+});
+
+test("migrates actor coverage IDs and rejects old keys and mismatched identities", () => {
+  const { migrateRecords } = require("./migrate-actor-records.cjs");
+  const refs = { ...unit().canonical_refs, actor: "tool agent", lifecycle: "retry" };
+  const current = unit({ canonical_refs: refs, actor: "Tool agent", lifecycle: "Retry" });
+  const previous = structuredClone(current);
+  previous.person = previous.actor;
+  delete previous.actor;
+  previous.canonical_refs.person = previous.canonical_refs.actor;
+  delete previous.canonical_refs.actor;
+  previous.coverage_id = previous.coverage_id.replace("::a=", "::p=");
+  assert.notEqual(errorsFor([previous]).length, 0);
+  const original = JSON.stringify(previous);
+  assert.deepEqual(migrateRecords("coverage-ledger", [previous]), [current]);
+  assert.equal(JSON.stringify(previous), original);
+  assert.deepEqual(migrateRecords("coverage-ledger", [current]), [current]);
+  assert.deepEqual(migrateRecords("coverage-ledger", [unit()]), [unit()]);
+  assert.throws(() => migrateRecords("coverage-ledger", [{ ...previous, actor: current.actor }]), /Both person and actor/);
+  assert.throws(() => migrateRecords("coverage-ledger", [{ ...previous, coverage_id: "wrong-id" }]), /does not match/);
+  const other = unit({ canonical_refs: { ...refs, actor: "another agent" }, actor: "Another agent", lifecycle: "Retry" });
+  assert.deepEqual(migrateRecords("coverage-ledger", [current, other]), [other, current]);
 });

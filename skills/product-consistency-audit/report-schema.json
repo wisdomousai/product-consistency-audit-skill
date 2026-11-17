@@ -32,9 +32,9 @@
             "minLength": 1,
             "visibleContent": true
           },
-          "person": {
+          "actor": {
             "type": "object",
-            "description": "The person the capability serves and the goal affected.",
+            "description": "The actor served: a human, developer, operator, agent or automated service, with its task and success condition.",
             "properties": {
               "role": {
                 "type": "string",
@@ -95,13 +95,15 @@
                       "type": "string",
                       "enum": [
                         "file",
-                        "commit"
+                        "commit",
+                        "transcript"
                       ]
                     },
                     "ref": {
                       "type": "string",
                       "minLength": 1,
-                      "description": "Repository-relative path for kind file; commit hash for kind commit."
+                      "description": "Repository-relative path for file; hash for commit; conversation and message or prior run decision identifier for transcript. Verifiers must receive the cited excerpt.",
+                      "visibleContent": true
                     },
                     "line": {
                       "type": "integer",
@@ -224,7 +226,10 @@
                     "device_or_browser",
                     "timing",
                     "provider_dependency",
-                    "deployment_config"
+                    "deployment_config",
+                    "available_context",
+                    "execution_environment",
+                    "resource_limit"
                   ]
                 },
                 "description": {
@@ -402,7 +407,7 @@
                 "type": "object",
                 "description": "Effect of the change on people using the product, developers and agents (STATE-MACHINES.md).",
                 "properties": {
-                  "people": {
+                  "human_users": {
                     "type": "string",
                     "minLength": 1,
                     "visibleContent": true
@@ -419,7 +424,7 @@
                   }
                 },
                 "required": [
-                  "people",
+                  "human_users",
                   "developers",
                   "agents"
                 ],
@@ -697,7 +702,7 @@
           "title",
           "description",
           "capability",
-          "person",
+          "actor",
           "fit",
           "fit_class",
           "principles",
@@ -742,9 +747,9 @@
             "minLength": 1,
             "visibleContent": true
           },
-          "person": {
+          "actor": {
             "type": "object",
-            "description": "The person the capability serves and the goal affected.",
+            "description": "The actor served: a human, developer, operator, agent or automated service, with its task and success condition.",
             "properties": {
               "role": {
                 "type": "string",
@@ -885,13 +890,15 @@
                         "type": "string",
                         "enum": [
                           "file",
-                          "commit"
+                          "commit",
+                          "transcript"
                         ]
                       },
                       "ref": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Repository-relative path for kind file; commit hash for kind commit."
+                        "description": "Repository-relative path for file; hash for commit; conversation and message or prior run decision identifier for transcript. Verifiers must receive the cited excerpt.",
+                        "visibleContent": true
                       },
                       "line": {
                         "type": "integer",
@@ -960,7 +967,7 @@
           "title",
           "description",
           "capability",
-          "person",
+          "actor",
           "fit",
           "fit_class",
           "principles",
@@ -1002,9 +1009,9 @@
             "minLength": 1,
             "visibleContent": true
           },
-          "person": {
+          "actor": {
             "type": "object",
-            "description": "The person the capability serves and the goal affected.",
+            "description": "The actor served: a human, developer, operator, agent or automated service, with its task and success condition.",
             "properties": {
               "role": {
                 "type": "string",
@@ -1138,7 +1145,7 @@
           "title",
           "description",
           "capability",
-          "person",
+          "actor",
           "fit",
           "fit_class",
           "principles",

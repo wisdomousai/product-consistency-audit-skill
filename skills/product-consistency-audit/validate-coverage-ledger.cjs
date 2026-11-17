@@ -5,9 +5,9 @@
  * Usage: node validate-coverage-ledger.cjs <path-to-coverage-ledger.json>
  *
  * coverage_id joins the encoded surface, gate, capability and fit_class
- * references with "::", then appends "p=" plus the encoded person and the
+ * references with "::", then appends "a=" plus the encoded actor and the
  * encoded lifecycle when present. "=" is always percent-encoded inside a
- * reference, so the "p=" prefix keeps a person segment apart from a lifecycle
+ * reference, so the "a=" prefix keeps an actor segment apart from a lifecycle
  * segment.
  *
  * Adapted from https://github.com/cloudflare/security-audit-skill (MIT,
@@ -54,8 +54,8 @@ const REQUIRED_FIELDS = [
   "unresolved",
 ];
 const REF_FIELDS = ["surface", "gate", "capability", "fit_class"];
-const OPTIONAL_REF_FIELDS = ["person", "lifecycle"];
-const OPTIONAL_REF_PREFIX = { person: "p=", lifecycle: "" };
+const OPTIONAL_REF_FIELDS = ["actor", "lifecycle"];
+const OPTIONAL_REF_PREFIX = { actor: "a=", lifecycle: "" };
 
 function refFieldsFor(value) {
   return [...REF_FIELDS, ...OPTIONAL_REF_FIELDS.filter((field) => hasOwn(value, field))];
@@ -510,7 +510,7 @@ function semanticKey(unit) {
     unit.gate,
     unit.capability,
     unit.fit_class,
-    hasOwn(unit, "person") ? unit.person : null,
+    hasOwn(unit, "actor") ? unit.actor : null,
     hasOwn(unit, "lifecycle") ? unit.lifecycle : null,
   ]);
 }

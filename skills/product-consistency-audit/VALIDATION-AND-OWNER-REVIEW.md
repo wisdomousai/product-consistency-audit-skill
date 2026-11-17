@@ -5,10 +5,10 @@
 Verifiers, critics and outside reviewers are all asked to attack something. An attacker does what its brief rewards. Given a conclusion, it tends to confirm it or argue about its wording. Rewarded for refuting, it rejects real findings on thin grounds. Several attackers given the same open brief repeat each other and leave the same gaps. Plan every adversarial review before launch, and write the plan to `<output-dir>/briefs/review-plan.json` with one entry per reviewer:
 
 - **Target**: the exact claims, records or units under attack, given as trace and evidence. Never the parent's or the hunter's conclusion, unless the mechanism in Phase 3 releases it after the blind reading.
-- **Angle**: what this reviewer tries to show. Examples are a missed exit, a stated need behind an overfit element, an intent source that says otherwise, a person who cannot reach the entrypoint, a fix that creates a new stuck state, or a part of a plan that is not built. When several reviewers attack the same target, give each a different angle, and record which angles no one covers.
+- **Angle**: what this reviewer tries to show. Examples are a missed exit, a stated need behind an overfit element, an intent source that says otherwise, an actor who cannot reach the entrypoint, a fix that creates a new stuck state, or a part of a plan that is not built. When several reviewers attack the same target, give each a different angle, and record which angles no one covers.
 - **Evidence bar**: a refutation needs the same evidence as a confirmation, with a path, a line or a reproduction. A refutation without evidence leaves the claim standing, and the claim goes to a fresh verifier. A claim that rests on an open intent becomes `needs_owner_intent`, whichever side the reviewer takes.
-- **Known decisions**: the owner's recorded decisions and the people and organisation map. The reviewer may show that the code breaks a decision, but does not argue the decision itself. A reviewer who thinks a decision is wrong returns that as a note for the owner session.
-- **Role and tools**: source reader or walker (SKILL.md, Role assignment), the fixture person for a walker, and what the reviewer may not do.
+- **Known decisions**: the owner's recorded decisions and the actors and organisation map. The reviewer may show that the code breaks a decision, but does not argue the decision itself. A reviewer who thinks a decision is wrong returns that as a note for the owner session.
+- **Role and tools**: source reader or walker (FULL-AUDIT.md, Role assignment), the fixture actor for a walker, and what the reviewer may not do.
 - **Stopping rule and budget**: when the reviewer stops, for example at the first refutation with evidence, after each angle is checked once, or at a fixed number of claims.
 - **Output**: the result shape the parent can merge, never prose only.
 
@@ -24,15 +24,15 @@ Assign each verifier a unique lowercase ID with its own `scratch/` and `artifact
 
 1. [PRINCIPLES.md](PRINCIPLES.md), verbatim or by absolute path with an instruction to read it in full.
 2. The intent register entry for the capability, its cited sources, `architecture.md`, and the `state-machines.json` entry when the candidate concerns a machine.
-3. The candidate's trace, evidence and person, **without** the hunter's intent statement, `literal_source`, `excess` or `proportionate_shape`.
+3. The candidate's trace, evidence and actor, **without** the hunter's intent statement, `literal_source`, `excess` or `proportionate_shape`.
 4. The exact selected companion `Validation rules` blocks.
-5. Whether walkthroughs are enabled, with a fixture person distinct from the hunter's.
-6. The `confirmed`, `needs_owner_intent` and `rejected` branches of `report-schema.json`, verbatim.
+5. Whether walkthroughs are enabled, with a fixture actor distinct from the hunter's.
+6. The `confirmed`, `needs_owner_intent` and `rejected` branches of `report-schema.json`, verbatim, and the severity guide below.
 7. Prior records with the same fingerprint.
 
 The verifier states its own reading of the intent and of any rule origin (step 1 of the prompt below) before it sees the hunter's. Use one of these mechanisms:
 
-- **Continuation**: the verifier returns `{"intent_reading": {...}}`, and the parent continues the same agent (SKILL.md, Platform terminology) with the hunter's full candidate.
+- **Continuation**: the verifier returns `{"intent_reading": {...}}`, and the parent continues the same agent (FULL-AUDIT.md, Platform terminology) with the hunter's full candidate.
 - **File order**: the parent writes items 1 to 7 to `agents/<verifier-id>/scratch/candidate-blind-<n>.json` and the full candidate to `agents/<verifier-id>/sealed/candidate-full-<n>.json`. The prompt tells the verifier to write `scratch/intent-reading-<n>.json` before opening the sealed file. After the verifier finishes, the parent checks that every intent reading exists. File order relies on the verifier keeping to the order, so prefer continuation where the platform supports it.
 
 The prompt below ends step 1 with the continuation sentence. For file order, the parent replaces that sentence with: "Write this reading to scratch/intent-reading-<n>.json, then open sealed/candidate-full-<n>.json."
@@ -45,26 +45,25 @@ Companion validation rules that check the hunter's cited origin, commit or searc
 
 ```text
 You did not write this candidate. Try to refute it from source, git history and, if
-enabled for you, a bounded local walkthrough as your assigned fixture person. Never
+enabled for you, a bounded local walkthrough as your assigned fixture actor. Never
 contact a deployed environment, send email, take payment or spend paid quota. Never
 edit the target. Write only in your scratch directory.
 
 1. Before reading the hunter's wording, state the capability's purpose and the
-   person's goal from the intent sources you were given. Cite them. Read every
+   actor's goal from the intent sources you were given. Cite them. Read every
    written rule for its purpose and the scope its origin supports. If the sources
    do not establish the purpose for the situation in the trace, say so.
    Return this reading as {"intent_reading": {...}} and wait for the candidate.
 2. Compare your reading with the hunter's. If they differ on the deciding point and
    the sources cannot decide it, the verdict is needs_owner_intent. A decision
-   record, commit or accepted recommendation that chose the current behaviour
-   decides the point only when the owner stated that choice themselves (P4). When
-   it gives a written rule as its reason, it inherits that rule's scope question:
-   an overfit candidate tracing the behaviour to that rule is not refuted by it.
-   Without the owner's own statement on the deciding point, the verdict is
-   needs_owner_intent, asking whether the choice was the owner's or a reading of
-   the rule.
+   record or recommendation is evaluated under P4: an owner_statement or an
+   individually accepted_recommendation with an independent reason can decide
+   a scope question. Bulk acceptance or an unattributed restatement of the rule
+   cannot. If a decision's reason relies on the rule being challenged, check that
+   scope question rather than using the decision as circular justification.
+   Use needs_owner_intent only when the deciding point remains unresolved.
 3. Verify every trace and evidence entry: file, positive line number, scope and
-   description. Confirm the entrypoint is a place the named person arrives
+   description. Confirm the entrypoint is a place the named actor arrives
    and the outcome is the claimed situation.
 4. Look for the strongest exit, case or rule the candidate may have missed: other
    routes, support paths the intent names, admin actions, background clean-up,
@@ -92,7 +91,7 @@ replaces the hunter's wording. List any other gap you noticed outside these
 candidates under uncovered, in the hunter result's uncovered shape.
 ```
 
-A verifier promotes `needs_owner_intent` to `confirmed` only after citing a source that answers the question. It demotes a proposed confirmation to `needs_owner_intent` when the deciding intent is open. It uses `rejected` when source, history or a walkthrough refutes the claim, when an exit exists, or when a stated need justifies an overfit element. `needs_owner_intent` is never a parking place for a speculative idea.
+A verifier promotes `needs_owner_intent` to `confirmed` only after citing a source that answers the question. It demotes a proposed confirmation to `needs_owner_intent` when the deciding intent is open. It uses `rejected` when source, history or a walkthrough refutes the claim, when a supported exit resolves the claimed block, or when a stated need justifies an overfit element. `needs_owner_intent` is never a parking place for a speculative idea.
 
 The parent checks that each verifier kept the fingerprint unless it identified a different root cause, merges corrections, records the decision in every linked ledger unit, and keeps one record per fingerprint. Discard a missing or malformed result file without repairing it and re-run with a fresh verifier when the budget permits; otherwise the candidate stays an unvalidated ledger candidate under the incomplete-run rule.
 
@@ -100,15 +99,29 @@ The parent seeds every verifier `uncovered` entry as a ledger unit, `deferred` w
 
 When verifier evidence updates a ledger check, set the check's `agent_id` to the verifier and list its `reviewed_paths`. The unit keeps its original owner.
 
+### Separate priority from certainty
+
+Only `confirmed` records receive severity. Overall severity cannot exceed demonstrated impact.
+
+- **critical**: an actor permanently loses access to an account, a purchase or their own data with no recovery path; or every actor in an organisation is blocked from a core capability.
+- **high**: a common path (sign-up, sign-in, invitation, first run, checkout, the product's core task, an intended agent task or a required operational procedure) blocks the actor with no in-product exit; or the data model encodes a misunderstanding that produces states actors get stuck in, or that block an intended capability, and fixing it needs a migration.
+- **medium**: a block that needs uncommon preconditions, or an exit that needs support contact or clearing browser data; overfit machinery that forces other features to handle states with no product meaning; a rule spread onto surfaces where it blocks real actors.
+- **low**: a detour with a working exit; machinery with no reachable effect beyond maintenance cost; wording drift with no difference in behaviour.
+- **informational**: an observation used as a prerequisite inside a larger finding.
+
+Apply these levels to agent and technical tasks using demonstrated task failure, data loss or operational impact; lack of a graphical interface does not reduce severity.
+
+The high/medium test: does the demonstrated result fully deny the capability's intent to the actor, or only make it harder?
+
 ### Phase 4: Write and validate `findings.json`
 
 The parent writes all decided records to `<output-dir>/findings.json`, sorted by fingerprint:
 
-- `confirmed`: a gap with a cited intent, a named person, a complete trace, a reproduction, a remediation, severity and confidence. Overfit records also include `literal_source`, `excess` and `proportionate_shape`.
+- `confirmed`: a gap with a cited intent, a named actor, a complete trace, a reproduction, a remediation, severity and confidence. Overfit records also include `literal_source`, `excess` and `proportionate_shape`.
 - `needs_owner_intent`: a source-grounded gap whose verdict depends on an intent the sources leave open, with the competing readings, the question and the consequence of each answer. No severity.
 - `rejected`: a candidate disproved during validation, kept so later runs do not repeat it without changed evidence.
 
-Read `report-schema.json` immediately before writing. It uses `additionalProperties: false`; do not copy hunter wrapper fields such as `proposed_verdict` into a record. When copying register sources into `intent.sources`, omit a null `line`.
+Read `report-schema.json` immediately before writing. It uses `additionalProperties: false`; do not copy hunter wrapper fields such as `proposed_verdict` into a record. When copying register sources into `intent.sources`, copy only `kind`, `ref`, `quote` and a positive `line` when present; keep provenance and `cites_rule` in the register. File sources require a line. For transcript sources, give the verifier the cited excerpt and its conversation/message or prior decision identifier. A transcript may establish intent, not execution or reproduction.
 
 Run:
 
@@ -129,14 +142,14 @@ For `confirmed`, check:
 
 1. Every trace and evidence path, line, scope and description.
 2. That the intent sources say what `intent.purpose` claims, and at least one of them lies outside the code under review.
-3. That the person can reach the entrypoint and that the outcome is as stated.
+3. That the actor can reach the entrypoint under its actual authority and available context, and that the outcome meets or fails the sourced task success condition as stated. Technical and agent tasks need no human UI symptom.
 4. That no exit, case or rule the intent names was missed.
 5. For overfit: that `literal_source` is accurate, the `excess` items exist and have no stated need behind them, and `proportionate_shape` serves the purpose.
 6. Severity: likelihood, demonstrated impact, overall no greater than impact.
-7. That the remediation restores the fit, names any instruction change, and creates no new stuck state. When it changes a lifecycle, a stored state or a status vocabulary: that `remediation.experience` names an improvement for people using the product, developers and agents, and that `remediation.change_safety` maps every value writers produce and lists every writer, reader and contract the verifier can find.
+7. That the remediation restores the fit, names any instruction change, and creates no new stuck state. When it changes a lifecycle, a stored state or a status vocabulary: that `remediation.experience` describes the effect on people using the product, developers and agents, marking unaffected groups explicitly, and that `remediation.change_safety` maps every value writers produce and lists every writer, reader and contract the verifier can find.
 8. That every decision record the verdict relies on passes the provenance test in Phase 3, step 2.
 
-For a `rejected` record that rests on a decision record, check the provenance test. If the decision is not the owner's own statement on the deciding point, replace the record with `needs_owner_intent`.
+For a `rejected` record that rests on a decision record, apply P4, including independently justified, individually accepted recommendations. Replace it with `needs_owner_intent` only if no admissible source resolves the deciding point.
 
 For `needs_owner_intent`, check:
 
@@ -152,14 +165,14 @@ After every applied replacement, rerun both validators and update linked ledger 
 
 ### Phase 6: Owner review
 
-The audit ends in a conversation with the owner. The verified records hold the detail; the owner's time goes to the decisions only they can make. This phase follows the grilling method from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, MIT): the parent turns the findings into a tree of decisions and asks them in rounds until nothing is left assumed.
+The audit ends in a conversation with the owner, one decision at a time. The verified records hold the detail; the owner's time goes to the decisions only they can make. This phase follows the grilling method from [mattpocock/skills](https://github.com/mattpocock/skills) (`grilling`, MIT): the parent turns the findings into a tree of decisions and asks them individually until nothing is left assumed.
 
 #### Write the short summary
 
 Write `<output-dir>/SUMMARY.md`, short enough to read in a couple of minutes:
 
 1. Profile, scope, source ref, whether walkthroughs ran, and prior-run use. A `quick`, scoped, budget-limited or incomplete run says plainly that it is partial and lists unvalidated fingerprints.
-2. Counts by family (underfit, overfit, inconsistency) and by severity, plus the number of open intent questions. An audience-scoped run gives these counts per person.
+2. Counts by family (underfit, overfit, inconsistency) and by severity, plus the number of open intent questions. An audience-scoped run gives these counts per actor.
 3. Coverage from the ledger: covered, candidate, blocked and deferred counts, the main exclusions, and the final critic result.
 4. In a state machine run, a table of every machine in `state-machines.json`: name, explicit or implicit, where its state is stored, how many writers and runtimes it has, and the fingerprints found for it.
 
@@ -169,31 +182,31 @@ The summary does not restate findings. Their detail stays in `findings.json` and
 
 Write `<output-dir>/decision-tree.json` from the final `confirmed` and `needs_owner_intent` records. Each node is a decision for the owner, with the fingerprints it covers, the decisions it depends on, and a recommended answer drawn from the verified records. Build it in this order of dependency:
 
-1. **Intent questions.** Each `needs_owner_intent` record becomes a decision. Findings whose verdict or fix depends on that intent hang below it. When several findings rest on recommendations the owner accepted in bulk, ask first which of those count as the owner's decisions. When a fix depends on an entry in `decided_not_on_ref` or on edits in a dirty worktree, ask whether that change is still the plan. In an audience-scoped run, an audience the product does not serve, and each inferred person with no named person behind them, come first: whether the product means to serve them decides every finding below.
+1. **Intent questions.** Each `needs_owner_intent` record becomes a decision. Findings whose verdict or fix depends on that intent hang below it. When several findings rest on recommendations the owner accepted in bulk, ask first which of those count as the owner's decisions. When a fix depends on an entry in `decided_not_on_ref` or on edits in a dirty worktree, ask whether that change is still the plan. In an audience-scoped run, an audience whose support requirement is unresolved, and each inferred actor whose task has no independent source, come first: whether the product means to serve them decides every finding below.
 2. **Rules behind overfit.** Group overfit records by their `literal_source`. Each rule, memory or example becomes one decision: keep it as written, narrow it to the scope its origin supports, or remove it. The findings it produced hang below it, so a single answer decides many of them.
-3. **Fixes.** Each remaining confirmed record, or cluster sharing a root cause, becomes a decision about its remediation: the proposed change, a different change the owner prefers, or accepting the current behaviour as intended. Findings about the same state machine form one decision about the machine's shape, and its recommended answer gives the effect on people, developers and agents from `remediation.experience` and the main points of `remediation.change_safety`, including any `owner_checks` to run first.
-4. **Order.** Once fixes are decided, what to do first. Recommend by severity and by how many people each fix reaches.
+3. **Fixes.** Each remaining confirmed record, or cluster sharing a root cause, becomes a decision about its remediation: the proposed change, a different change the owner prefers, or accepting the current behaviour as intended. Findings about the same state machine form one decision about the machine's shape, and its recommended answer gives the effect on the applicable users, developers and agents from `remediation.experience` and the main points of `remediation.change_safety`, including any `owner_checks` to run first.
+4. **Order.** Once fixes are decided, what to do first. Recommend by severity and by how many actors each fix reaches.
 
 #### Run the session
 
-Work the tree in rounds. The frontier is every decision whose prerequisites are decided. Ask the whole frontier in one round, numbered, each with a recommended answer, and wait for the owner's answers before the next round. A question that depends on another question in the same round belongs to a later round.
+Choose one unresolved decision whose prerequisites are decided. Ask that question with a recommended answer and wait for the owner's response before selecting the next. Prioritize intent questions that unblock other decisions; do not bundle independent questions into a round.
 
 ```
-❓ **Q1** - **<decision title>**: <what the product does now, for which person, and why it does not fit the intent; the options>
+❓ **Q1** - **<decision title>**: <what the product does now, for which actor, and why it does not fit the intent; the options>
 
 ➡️ <recommended answer, with the fingerprint(s) it resolves>
 ```
 
-Word each question so that "yes" accepts the recommendation. Keep the body to what the owner needs to decide: the person, the situation, the intent source, and the options. Offer the full trace when asked.
+Word each question so that "yes" accepts the recommendation. Keep the body to what the owner needs to decide: the actor, the situation, the intent source, and the options. Offer the full trace when asked.
 
 Facts are the parent's job. When a question needs a fact (a file, a commit, what a screen shows), look it up or dispatch a `research` agent; do not ask the owner. Only the questions that depend on that fact wait. Decisions are the owner's; never answer one on their behalf.
 
-Each answer reshapes the tree. An answer to an intent question may turn findings below it into accepted behaviour or confirm them. A decision to narrow a rule may change the fix for every finding below it. Recompute the frontier after every round.
+Each answer reshapes the tree. An answer to an intent question may turn findings below it into accepted behaviour or confirm them. A decision to narrow a rule may change the fix for every finding below it. Recompute which decisions are ready after every answer.
 
-The session ends when the frontier is empty and the owner confirms the understanding is shared. If the owner is not available, stop after writing the summary and the tree, and say that the session is pending. Recommendations in an unanswered tree are the audit's opinions and are never recorded as decisions.
+The session ends when no decisions remain and the owner confirms the understanding is shared. If the owner is not available, stop after writing the summary and the tree, and say that the session is pending. Recommendations in an unanswered tree are the audit's opinions and are never recorded as decisions.
 
 #### Record the decisions
 
-Write `<output-dir>/decisions.json` and a short `<output-dir>/DECISIONS.md`. For every decision: the question, the owner's answer in their words, the fingerprints it resolves, and the resulting action (fix now, fix later, accepted as intended, rule kept, rule narrowed, rule removed). Record how each answer was given in `answered_as`: `own_words`, `accepted_recommendation` ("yes" to that single question) or `bulk_accepted` (one reply accepting several questions without answering each). An `own_words` answer, or a "yes" to a single question that put the deciding point to the owner, has `owner_statement` provenance under P4. When a reply accepts a whole round at once, record it as `bulk_accepted` and ask every intent and rule question from that round again, one at a time, before recording it as decided. For accepted-as-intended and rule decisions, record the owner's statement of intent with the date; later runs use it as an intent source at the provenance its `answered_as` gives.
+Write `<output-dir>/decisions.json` and a short `<output-dir>/DECISIONS.md`. For every decision: the question, the owner's answer in their words, the fingerprints it resolves, and the resulting action (fix now, fix later, accepted as intended, rule kept, rule narrowed, rule removed). Record how each answer was given in `answered_as`: `own_words`, `accepted_recommendation` ("yes" to that single question) or `bulk_accepted` (one reply accepting several questions without answering each). An `own_words` answer, or a "yes" to a single question that put the deciding point to the owner, has `owner_statement` provenance under P4. For imported decisions or an unsolicited reply accepting several recommendations at once, preserve `bulk_accepted` provenance. Ask about an individual deciding point only if its authority remains material under P4. For accepted-as-intended and rule decisions, record the owner's statement of intent with the date; later runs use it as an intent source at the provenance its `answered_as` gives.
 
 The audit does not modify the target. After the session, offer to make the agreed code and instruction changes, and start only when the owner says so.

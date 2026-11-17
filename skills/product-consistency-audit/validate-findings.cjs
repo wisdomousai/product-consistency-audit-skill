@@ -541,7 +541,7 @@ function hasSourceOutsideTrace(sources, trace) {
       .map((entry) => entry.file),
   );
   return sources.some((source) => isObjectValue(source) && (
-    source.kind === "commit" ||
+    source.kind === "commit" || source.kind === "transcript" ||
     (source.kind === "file" && typeof source.ref === "string" && !traceFiles.has(source.ref))
   ));
 }
@@ -669,7 +669,7 @@ function collectFindingSemanticErrors(findings, principleIds) {
       }
       if (isObjectValue(finding.intent) && Array.isArray(finding.intent.sources) && finding.intent.sources.length > 0 &&
           !hasSourceOutsideTrace(finding.intent.sources, finding.trace)) {
-        errors.push(`${base}.intent.sources: intent cannot rest only on the implementation under review; cite a commit or a file outside the trace`);
+        errors.push(`${base}.intent.sources: intent cannot rest only on the implementation under review; cite a commit, a transcript, or a file outside the trace`);
       }
       const overall = finding.severity && finding.severity.overall_severity;
       const impact = finding.severity && finding.severity.impact && finding.severity.impact.score;

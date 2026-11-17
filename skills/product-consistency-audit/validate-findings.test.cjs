@@ -38,7 +38,7 @@ function evidence(file = "src/invitations/accept.ts", line = 20) {
   return { file, line, description: "The expiry branch returns a page with no next action." };
 }
 
-function person() {
+function actor() {
   return { role: "Invited user", goal: "Join the workspace they were invited to." };
 }
 
@@ -49,7 +49,7 @@ function confirmed() {
     title: "Expired invitation offers no next step",
     description: "An invited user who opens an expired link sees an error with no way to ask for a new invitation.",
     capability: "Accept an invitation",
-    person: person(),
+    actor: actor(),
     fit: "underfit",
     fit_class: "FIT-CLASSES.md#Dead-end state",
     principles: ["P1", "P8"],
@@ -105,7 +105,7 @@ function needsOwnerIntent() {
     title: "Sign-out drops an unsaved draft",
     description: "Signing out ends the session without saving or mentioning an unsaved draft.",
     capability: "Edit a draft",
-    person: { role: "Author", goal: "Finish a draft over several sessions." },
+    actor: { role: "Author", goal: "Finish a draft over several sessions." },
     fit: "underfit",
     fit_class: "FIT-CLASSES.md#Interrupted work",
     principles: ["P10"],
@@ -137,7 +137,7 @@ function rejected() {
     title: "Last admin can remove their own role",
     description: "The candidate claimed a workspace could lose its last admin.",
     capability: "Change admin roles",
-    person: { role: "Workspace admin", goal: "Hand administration to a colleague." },
+    actor: { role: "Workspace admin", goal: "Hand administration to a colleague." },
     fit: "inconsistency",
     fit_class: "FIT-CLASSES.md#Surfaces disagree",
     principles: ["P12"],
@@ -398,7 +398,7 @@ function stateMachine() {
   finding.remediation = {
     strategy: "Route every invitation status write through a single transition function.",
     experience: {
-      people: "An accepted invitation stays accepted, and a refused move says what can be done instead.",
+      human_users: "An accepted invitation stays accepted, and a refused move says what can be done instead.",
       developers: "Invitation moves are defined in one module that types and constraints check.",
       agents: "Tool responses return the status and allowed next actions, and AGENTS.md points to the definition.",
     },
@@ -500,6 +500,90 @@ test("checks file and commit source objects", () => {
   }
   assert(errorsAfter(needsOwnerIntent, (finding) => { delete finding.intent_candidates[0].sources[0].line; })
     .some((error) => error.includes('file source requires "line"')));
+});
+
+test("accepts an agent task sourced from a conversation through both validators", () => {
+  const { validateRegister } = require("./validate-intent-register.cjs");
+  const finding = confirmed();
+  finding.fingerprint = "src-tools-export-result-unavailable";
+  finding.title = "Export tool cannot retrieve the completed result";
+  finding.description = "The export tool returns a browser link that its supported caller cannot open.";
+  finding.capability = "Export records through tools";
+  finding.actor = { role: "tool-using agent", goal: "Retrieve the completed export using the available tools." };
+  finding.fit_class = "TECHNICAL-AND-AGENT-TASKS.md#Task path unavailable";
+  const source = {
+    kind: "transcript", ref: "session-export-task/message-3",
+    quote: "The agent must retrieve the export using only the documented tools.",
+  };
+  finding.intent = { purpose: finding.actor.goal, sources: [source] };
+  finding.root_cause = "The only result retrieval path requires a browser session.";
+  finding.trace = [{ kind: "entrypoint", file: "src/tools/export.ts", line: 8, scope: "exportRecords", description: "The tool returns a browser-only result URL." }];
+  finding.evidence = [{ file: "src/tools/export.ts", line: 8, description: finding.root_cause }];
+  finding.conditions = [{ kind: "available_context", description: "The caller has the documented tools and no browser session." }];
+  finding.reproduction = {
+    method: "source", setup: finding.conditions[0].description,
+    steps: ["Trace exportRecords and all documented result retrieval tools."],
+    observed_result: "No tool retrieves the export; the only result link requires a browser session.",
+  };
+  finding.remediation = { strategy: "Expose result retrieval through the supported tool interface." };
+  finding.severity = {
+    likelihood: { score: "high", reason: "Every tool export returns this link." },
+    impact: { score: "high", reason: "The supported agent cannot complete its core export task." },
+    overall_severity: "high",
+  };
+  finding.confidence = { score: "high", reason: "The tool and retrieval paths establish the missing step." };
+  const register = [{
+    capability: finding.capability, actors: [{ ...finding.actor, served: true }],
+    purpose: finding.intent.purpose,
+    sources: [{ ...source, line: null, provenance: "owner_statement" }],
+    rules: [], conflicts: [], open_questions: [], decided_not_on_ref: [],
+  }];
+  assert.deepEqual(validateRegister(register), []);
+  assert.deepEqual(errorsFor([finding]), []);
+  const result = runCli(JSON.stringify([finding]));
+  assert.equal(result.status, 0, cliOutput(result));
+});
+
+test("accepts technical constraints without requiring a human-facing feature", () => {
+  const finding = confirmed();
+  finding.actor = { role: "import worker", goal: "Resume the import within its documented resource bound." };
+  finding.capability = "Resume interrupted imports";
+  finding.fit_class = "TECHNICAL-AND-AGENT-TASKS.md#Technical requirement unmet";
+  finding.intent.sources = [{ kind: "file", ref: "docs/import-contract.md", line: 5, quote: "Resume imports in the worker runtime within the configured memory limit." }];
+  finding.conditions = [
+    { kind: "execution_environment", description: "The supported worker runtime after a restart." },
+    { kind: "resource_limit", description: "The documented worker memory limit applies." },
+  ];
+  assert.deepEqual(errorsFor([finding]), []);
+});
+
+test("accepts transcript evidence for open intent without granting severity", () => {
+  const finding = needsOwnerIntent();
+  finding.intent_candidates[0].sources = [{ kind: "transcript", ref: "session/task-message", quote: "Preserve drafts when work resumes." }];
+  assert.deepEqual(errorsFor([finding]), []);
+  finding.severity = confirmed().severity;
+  assert(errorsFor([finding]).some((error) => error.includes('needs_owner_intent finding must not contain "severity"')));
+});
+
+test("requires identifiable transcript references and actual quoted content", () => {
+  for (const factory of [confirmed, needsOwnerIntent]) {
+    const sourcesFor = (finding) => finding.intent ? finding.intent.sources : finding.intent_candidates[0].sources;
+    for (const field of ["ref", "quote"]) {
+      for (const value of ["", " ", "\u2066", "\ud800"]) {
+        rejectMutation(factory, (finding) => {
+          sourcesFor(finding)[0] = { kind: "transcript", ref: "session/message-2", quote: "The stated task.", [field]: value };
+        });
+      }
+      rejectMutation(factory, (finding) => {
+        const source = { kind: "transcript", ref: "session/message-2", quote: "The stated task." };
+        delete source[field];
+        sourcesFor(finding)[0] = source;
+      });
+    }
+    rejectMutation(factory, (finding) => {
+      sourcesFor(finding)[0] = { kind: "branch", ref: "unmerged-fix", quote: "A planned fix." };
+    });
+  }
 });
 
 test("keeps verdict-specific fields out of other verdicts", () => {
@@ -879,5 +963,60 @@ test("keeps shared helpers aligned with the coverage-ledger validator", () => {
       ledgerModule.hasVisibleProse(value),
       `prose verdict diverges for ${JSON.stringify(value)}`,
     );
+  }
+});
+
+test("explicitly migrates all finding verdicts without changing evidence or fingerprints", () => {
+  const { migrateRecords } = require("./migrate-actor-records.cjs");
+  for (const factory of [confirmed, overfit, stateMachine, needsOwnerIntent, rejected]) {
+    const current = factory();
+    const previous = structuredClone(current);
+    previous.person = previous.actor;
+    delete previous.actor;
+    if (previous.remediation?.experience) {
+      previous.remediation.experience.people = previous.remediation.experience.human_users;
+      delete previous.remediation.experience.human_users;
+    }
+    const snapshot = JSON.stringify(previous);
+    assert.notEqual(errorsFor([previous]).length, 0);
+    assert.deepEqual(migrateRecords("findings", [previous]), [current]);
+    assert.equal(JSON.stringify(previous), snapshot);
+    assert.deepEqual(migrateRecords("findings", [current]), [current]);
+    previous.actor = current.actor;
+    assert.throws(() => migrateRecords("findings", [previous]), /Both person and actor/);
+  }
+});
+
+test("migration CLI validates before writing and never overwrites input or output", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "migrate-actors-"));
+  const input = path.join(dir, "old.json");
+  const output = path.join(dir, "new.json");
+  const migratePath = path.join(__dirname, "migrate-actor-records.cjs");
+  const run = (destination = output) => spawnSync(process.execPath, [migratePath, "findings", input, destination], { encoding: "utf8", timeout: 5000 });
+  try {
+    const current = confirmed();
+    const old = { ...current, person: current.actor };
+    delete old.actor;
+    const original = JSON.stringify([old]);
+    fs.writeFileSync(input, original);
+    let result = run();
+    assert.equal(result.status, 0, cliOutput(result));
+    assert.deepEqual(JSON.parse(fs.readFileSync(output, "utf8")), [current]);
+    assert.equal(fs.readFileSync(input, "utf8"), original);
+    const written = fs.readFileSync(output, "utf8");
+    assert.equal(run().status, 1);
+    assert.equal(run(input).status, 1);
+    assert.equal(fs.readFileSync(output, "utf8"), written);
+    assert.equal(fs.readFileSync(input, "utf8"), original);
+    fs.writeFileSync(input, JSON.stringify([{ ...old, severity: {} }]));
+    const invalidOutput = path.join(dir, "invalid.json");
+    assert.equal(run(invalidOutput).status, 1);
+    assert.equal(fs.existsSync(invalidOutput), false);
+    fs.writeFileSync(input, '{"unterminated":');
+    result = run(invalidOutput);
+    assert.equal(result.status, 1);
+    assert.equal(fs.existsSync(invalidOutput), false);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
   }
 });

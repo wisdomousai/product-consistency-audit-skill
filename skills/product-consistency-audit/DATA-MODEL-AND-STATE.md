@@ -15,7 +15,7 @@ RECONNAISSANCE.md seeds one unit per status enum, state machine and core entity.
 
 ## Core discipline
 
-**Bar for a finding.** Every state, status, flag, mode and nullable field stands for a situation the product must tell apart for some person (P6). A finding names the model element, the person situation it represents or the absence of one, its producers, its consumers and its exits, and a cost: a state a person can enter and not leave, a combination other code must handle with no product meaning, a capability blocked, or a migration needed to change course. Odd modelling with no such cost is out of scope.
+**Bar for a finding.** Every state, status, flag, mode and nullable field stands for a task situation or technical requirement the product must distinguish (P6). The beneficiary may be a person, agent or service. A finding names the model element, the task situation or technical invariant it represents or the absence of one, its producers, its consumers and its exits, and a cost: a state a person can enter and not leave, a combination other code must handle with no product meaning, a capability blocked, or a migration needed to change course. Odd modelling with no such cost is out of scope.
 
 **Where intent is written.** The schema shows what was built. Intent for the model comes from:
 
@@ -25,12 +25,12 @@ RECONNAISSANCE.md seeds one unit per status enum, state machine and core entity.
 - The commit and message that introduced each element: `git log -S '<value>'`, `git log -p -- <schema file>`, and the migration that added it.
 - Sibling entities that already model the same kind of situation.
 
-**Person and goal.** For each state, name the person who is in it or whose record is in it, what they are trying to do, and what the state lets them do. A status on an invitation concerns the admin who sent it and the person who received it. A status on a subscription concerns the buyer and every member whose access depends on it.
+**Actor and task.** For each state, name the human, agent or service affected, its task, and the distinction the state preserves. Include internal coordination and recovery needs even when no person sees the state. A status on an invitation concerns the admin who sent it and the person who received it. A status on a subscription concerns the buyer and every member whose access depends on it.
 
 **State record.** For each element in scope, write down in scratch:
 
 - Definition and every mirror (database constraint, lookup table, API type, client type, copy).
-- The person situation it represents, in a sentence, with a source.
+- The task situation or technical invariant it represents, in a sentence, with a source.
 - Producers: every path that writes or sets it, including admin tools, jobs, imports, migrations and backfills.
 - Consumers: every path that reads it or branches on it.
 - Exits: every transition out, who can trigger each, and from which surface.
@@ -43,6 +43,8 @@ RECONNAISSANCE.md seeds one unit per status enum, state machine and core entity.
 - `local`: a walkthrough under the execution boundary in SKILL.md, used to show that a person reaches a state and what they can do there. Use a disposable local data store and a fixture person. Never write to a shared or hosted database to build a state.
 
 ## State without a person situation
+
+This class name stays stable for earlier ledgers. Apply it only when neither an actor task nor a technical requirement justifies the state; absence of a human-facing distinction alone is insufficient.
 
 Principles: P6, P2
 
@@ -58,7 +60,7 @@ What to look for:
 - Intermediate states written and overwritten within a single request or transaction, persisted anyway, and then found in production data by readers that do not expect them.
 - Status names that describe the system's process ("sync_started", "webhook_received") stored on a record that people see, when no person action depends on the step.
 
-What establishes a gap: the element, the absence of a distinct person situation (consumers treat it identically, or no consumer exists), its origin where traceable, and the cost: extra branches in other features, a person who can be left in it, or copy that shows a meaningless state.
+What establishes a gap: the element, the absence of a distinct task situation or technical need (including recovery, coordination and audit consumers), its origin where traceable, and the cost: extra branches in other features, a person who can be left in it, or copy that shows a meaningless state.
 
 Not a gap:
 
@@ -237,7 +239,7 @@ Not a gap:
 
 ## Validation rules
 
-1. Re-derive the person situation for each state from the intent sources before reading the candidate's wording.
+1. Re-derive the task situation or technical requirement for each state from the intent sources before reading the candidate's wording.
 2. Confirm every producer, consumer and exit cited, and search for ones the candidate missed: admin tools, background jobs, imports, scheduled clean-up, database triggers, cascading deletes.
 3. For a status with no exit, look for clean-up jobs, expiry timers, admin actions and support paths the intent names. Confirm any job is scheduled in the deployed configuration.
 4. For an impossible combination, confirm the source that rules it out and that a producer can create it. A database constraint that prevents it refutes the finding.

@@ -64,7 +64,7 @@ What to look for:
 - Data created under the higher plan that becomes unreachable, including the person's own documents.
 - The route back: resubscribe, update payment, upgrade. Whether a lapsed person can reach it from the screens they see.
 
-What establishes a gap: the plan-end event, the promised outcome with its source, the implemented outcome traced through each gate, and the person affected. Loss of a person's own data with no recovery meets the critical severity in SKILL.md.
+What establishes a gap: the plan-end event, the promised outcome with its source, the implemented outcome traced through each gate, and the person affected. Loss of a person's own data with no recovery meets the critical level in [the severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty).
 
 Not a gap:
 

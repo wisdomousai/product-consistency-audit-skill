@@ -1,6 +1,6 @@
 # Audit Principles
 
-Every phase of the audit works from these principles. Reconnaissance uses them to build the intent register. Hunters, coverage critics and verifiers receive this file in their prompts, either verbatim or, for agents that can read files, as an absolute path with an instruction to read it in full before starting. Every finding cites at least one principle ID in its `principles` field, and every fit class in [FIT-CLASSES.md](FIT-CLASSES.md) names the principles it comes from.
+These principles are the authoritative evidence and judgment rules. In guidance mode read P1–P5 and the fit principles relevant to the question, including their “Not a gap” distinctions. Full-audit parents, hunters, critics and verifiers read this file in full. Every structured finding cites at least one principle ID; every fit class names its principles.
 
 The IDs are stable. Ledgers and findings from earlier runs reference them, so a principle may be reworded but never renumbered or reused for a different idea.
 
@@ -13,15 +13,15 @@ Each principle has four parts:
 
 ## Intent
 
-### P1 Person and goal
+### P1 Actor and goal
 
-**Statement.** Every capability serves a person who has a role and a goal. A gap exists only in relation to that person.
+**Statement.** Every capability serves an actor with a task or goal: a human user, developer, operator, agent or automated service. A technical requirement also has a beneficiary and a success condition. A gap exists in relation to that task or requirement, even without a human-facing feature.
 
-**Check.** Before reading implementation, name who uses the capability, what they are trying to get done, and what they can see and do at that point. Include people who reach the capability indirectly: an invited user, someone whose account an admin changed, a buyer whose plan lapsed, a person on a second device.
+**Check.** Before reading implementation, name who uses the capability, what they are trying to get done, and what they can see and do at that point. Include actors who reach the capability indirectly: an invited user, someone whose account an admin changed, a buyer whose plan lapsed, an actor on a second device.
 
-**Evidence.** A named person, a goal that the product's own sources attribute to them, and a reachable situation where the goal is affected.
+**Evidence.** A named actor, a goal that the product's own sources attribute to them, and a reachable situation where the goal is affected.
 
-**Not a gap.** Code that looks odd but affects no person and makes no future change harder. Developer convenience paths that the deployed product cannot reach.
+**Not a gap.** Code that looks odd but affects no supported task or technical requirement. A developer workflow is in scope when sources establish it as supported; production reachability is not required for build, maintenance or agent tasks.
 
 ### P2 Purpose of a rule
 
@@ -35,11 +35,11 @@ Each principle has four parts:
 
 ### P3 Scope from origin
 
-**Statement.** A rule that came from one incident or one example covers that kind of incident. Applying it to unrelated surfaces, data or people is overfit unless a source widens it.
+**Statement.** A rule that came from one incident or one example covers that kind of incident. Applying it to unrelated surfaces, data or actors is overfit unless a source widens it.
 
 **Check.** For each rule, list every place it is enforced. For each place, ask whether the incident behind the rule could happen there.
 
-**Evidence.** A rule with a traceable narrow origin, and enforcement on a surface, audience or data type the origin does not cover, with a consequence for some person or for the model.
+**Evidence.** A rule with a traceable narrow origin, and enforcement on a surface, audience or data type the origin does not cover, with a consequence for some actor or for the model.
 
 **Not a gap.** Shared helpers that apply a rule everywhere because a source that passes the provenance test in P4 states the rule as universal. Consistency for its own sake is fine when it costs nothing.
 
@@ -47,7 +47,7 @@ Each principle has four parts:
 
 **Statement.** The implementation shows what was built. It cannot be the only evidence of what was meant.
 
-**Check.** Every intent statement in the register cites at least one source other than the code under review: product descriptions, docs, specs, decision records, user-facing copy, agent instruction files and memories, sibling surfaces, tests. Instruction files and memories count as evidence of a decision and are themselves checked under P2 and P3.
+**Check.** Every intent statement in the register cites at least one source other than the code under review: product descriptions, assigned tasks, interface contracts, operational requirements, docs, specs, decision records, user-facing copy, agent instruction files and memories, sibling surfaces, tests. A current user request is a source of intent and can be cited as a transcript. An implementation test is not independent evidence merely because it lives in another file; check that it expresses a requirement rather than restating the implementation. Instruction files and memories count as evidence of a decision and are themselves checked under P2 and P3.
 
 **Provenance.** Every source also has a provenance, separate from its kind (doc, instruction file, decision record, commit), that says who decided what it states:
 
@@ -76,13 +76,13 @@ Bulk-accepted and unattributed sources state intent for the register, but they n
 
 ### P6 Proportionate model
 
-**Statement.** Every state, status, table, mode, flag and branch stands for a situation the product must tell apart for some person. Ones that exist only because a rule was read literally, or that model a misunderstanding of the domain, are overfit.
+**Statement.** Every state, status, table, mode, flag and branch stands for a distinction needed by an actor task or a technical requirement, including internal correctness, recovery and coordination. Ones that exist only because a rule was read literally, or that model a misunderstanding of the domain, are overfit.
 
-**Check.** For each state and each flag, name the person situation it represents, what produces it, what reads it, and how a person leaves it. Look for states that differ only in wording, combinations the domain makes impossible but the model allows, flags with one reachable value, and branches that handle situations no producer creates.
+**Check.** For each state and each flag, name the task situation or technical invariant it represents, what produces it, what reads it, and how it resolves. Check retry, coordination and recovery contracts before calling an internal state unnecessary. Look for states that differ only in wording, combinations the domain makes impossible but the model allows, flags with one reachable value, and branches that handle situations no producer creates.
 
-**Evidence.** The model element, the absence of a distinct person situation behind it, the source it was built from where traceable, and the cost it imposes: extra cases other features must handle, states a person can enter and not leave, or migrations needed to change it.
+**Evidence.** The model element, the absence of a task situation or technical need behind it, the source it was built from where traceable, and the cost it imposes: extra cases other features must handle, states an actor can enter and not leave, or migrations needed to change it.
 
-**Not a gap.** States that exist for audit history, compliance or recovery when a source names that need. Internal states that never reach a person and keep a process correct.
+**Not a gap.** States that exist for audit history, compliance or recovery when a source names that need. Internal states that keep a process correct without appearing in a user interface.
 
 ### P7 General case
 
@@ -90,49 +90,49 @@ Bulk-accepted and unattributed sources state intent for the register, but they n
 
 **Check.** Look for literal identifiers, names, counts, locales, plan names and fixture values in conditions; branches that only the seed data reaches; and assumptions that hold for one record but not for many.
 
-**Evidence.** The special case, the general case the intent covers, and a real person or record that the special case mishandles.
+**Evidence.** The special case, the general case the intent covers, and a real actor or record that the special case mishandles.
 
-**Not a gap.** Fixtures and demo paths that the deployed configuration cannot reach.
+**Not a gap.** Fixtures intentionally limited to a documented example. For supported development, automation and agent tasks, check reachability in their documented operating environment.
 
 ### P8 A way forward or back
 
-**Statement.** From every state the product can put a person in, there is a working action toward the goal or back to a state that has one.
+**Statement.** From every state the product can put an actor in, there is a working action toward the goal or back to a state that has one.
 
-**Check.** For each gate, redirect, error page and terminal status, follow where the person goes next. Confirm that the destination accepts them and that it is not the place they came from.
+**Check.** For each gate, redirect, error page, tool result and terminal status, follow where the actor goes next. Confirm that the destination accepts them and that it is not the place they came from.
 
 **Evidence.** A reachable state, the actions available in it, and a trace showing that none leads toward the goal or back to a working state.
 
-**Not a gap.** Terminal states the intent defines as final, when the person is told so and has nothing further to do.
+**Not a gap.** Terminal states the intent defines as final, when the actor is told so and has nothing further to do.
 
 ### P9 Prerequisites before demands
 
-**Statement.** When a step requires something, such as a plan, a role, a verified email, an invitation or a profile field, the person can obtain it from where they are or is told who can.
+**Statement.** When a step requires something, such as a plan, a role, a verified email, an invitation or a profile field, the actor can obtain it from where they are or is told who can.
 
-**Check.** For each requirement a gate enforces, find the path that satisfies it and whether the person blocked by the gate can start that path.
+**Check.** For each requirement a gate enforces, find the path that satisfies it and whether the actor blocked by the gate can start that path.
 
 **Evidence.** The gate, the requirement, and the absence of a reachable way to meet it or of any message naming who can.
 
-**Not a gap.** Requirements met by another person, when the blocked person is told who that is.
+**Not a gap.** Requirements met by another actor, when the blocked actor is told who that is.
 
 ### P10 Defined fate for interrupted work
 
-**Statement.** A step abandoned midway, through a closed tab, a lost connection, back, refresh or a second tab, leaves state that the next attempt can use or clear without help.
+**Statement.** A step abandoned midway, through a closed tab, a lost connection, back, refresh, a process restart or task cancellation, leaves state that the next attempt can use or clear without help.
 
-**Check.** For each multi-step flow, list the state written at each step. Ask what happens when the person stops after that step and later starts again, from the same device or another.
+**Check.** For each multi-step flow, list the state written at each step. Ask what happens when the actor stops after that step and later starts again, from the same device or another.
 
 **Evidence.** Leftover state, the next attempt, and a trace showing that the leftover blocks or corrupts it.
 
-**Not a gap.** Leftover state that expires quickly enough that the person does not notice, when a source accepts that delay.
+**Not a gap.** Leftover state that expires quickly enough that the actor does not notice, when a source accepts that delay.
 
-### P11 Failures the person can act on
+### P11 Failures the actor can act on
 
-**Statement.** Every error, expiry, revocation, lapse and rejection ends in a message and an action that fit the person who sees it. Ordinary mistakes are recoverable without support or a database edit.
+**Statement.** Every error, expiry, revocation, lapse and rejection ends in an outcome the actor can interpret and act on through its supported interface. For an agent this may require structured state, a stable error code, or a supported handoff, depending on the task contract. Ordinary mistakes are recoverable without support or a database edit.
 
-**Check.** For each failure branch, read what the person sees and what they can do next. For each ordinary mistake (wrong input, wrong choice, abandoned step, forgotten credential), find the recovery path.
+**Check.** For each failure branch, read what the actor sees and what they can do next. For each ordinary mistake (wrong input, wrong choice, abandoned step, forgotten credential), find the recovery path.
 
-**Evidence.** A failure outcome with no message, a message aimed at a different person, or an action that does not work for this person; or a mistake whose only recovery is operator work.
+**Evidence.** A failure outcome with no message, a message aimed at a different actor, or an action that does not work for this actor; or a mistake whose only recovery is operator work.
 
-**Not a gap.** Recovery that the intent deliberately reserves for an operator, when the person is told how to reach them.
+**Not a gap.** Recovery that the intent deliberately reserves for an operator, when the actor is told how to reach them.
 
 ## Consistency
 
@@ -142,26 +142,26 @@ Bulk-accepted and unattributed sources state intent for the register, but they n
 
 **Check.** For each piece of shared state, list every writer and reader. For each rule, list every path that performs the guarded action.
 
-**Evidence.** Two surfaces giving different answers about the same state for the same person, or a path that performs the action without the rule.
+**Evidence.** Two surfaces giving different answers about the same state for the same actor, or a path that performs the action without the rule.
 
 **Not a gap.** Deliberate differences between audiences that a source states.
 
 ### P13 Words match behaviour
 
-**Statement.** Copy, labels, docs and emails describe what the product does at that moment for that person.
+**Statement.** Copy, labels, docs and emails describe what the product does at that moment for that actor.
 
-**Check.** Compare promises in user-facing text, marketing pages, help content and notifications with the behaviour on the path they describe.
+**Check.** Compare promises in user-facing text, marketing pages, help content, notifications, tool descriptions and operational instructions with the behaviour on the path they describe.
 
-**Evidence.** The text, its location, and the behaviour that contradicts it for the person who reads it.
+**Evidence.** The text, its location, and the behaviour that contradicts it for the actor who reads it.
 
 **Not a gap.** Wording preferences with no difference in meaning.
 
 ### P14 One definition per lifecycle
 
-**Statement.** When a record, a person or a screen moves through states, the states and the allowed moves between them are defined in one place. Every writer changes the state through that definition, and every reader gets the state from it: the product's screens, its API, its CLI and the tools agents use.
+**Statement.** When a record, an actor or a screen moves through states, the states and the allowed moves between them are defined in one place. Every writer changes the state through that definition, and every reader gets the state from it: the product's screens, its API, its CLI and the tools agents use.
 
 **Check.** For each lifecycle, find where its state is stored and where it is derived. List every writer with the guard and side effects it applies, every reader with the expression it uses to tell the state, and what API, CLI and tool responses and refusals say about the state and the allowed next actions. Compare instruction-file prose about the lifecycle with the code.
 
-**Evidence.** The lifecycle, the places that encode or derive its state, and a cost: readers that tell the same record's state differently, a move the sources forbid that a writer can still make, a person or agent left in a state with no named next action, or a lifecycle change that has to be made in several places that have already drifted.
+**Evidence.** The lifecycle, the places that encode or derive its state, and a cost: readers that tell the same record's state differently, a move the sources forbid that a writer can still make, an actor left in a state with no named next action, or a lifecycle change that has to be made in several places that have already drifted.
 
 **Not a gap.** A fact with two values, a single writer and no moves that a boolean already names. A lifecycle defined in a library or framework the target uses, when every writer goes through it. A definition mirrored in a database constraint and a code type that a check keeps in step.

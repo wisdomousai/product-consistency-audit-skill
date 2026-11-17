@@ -1,8 +1,8 @@
 # Reconnaissance
 
-### Phase 1: Map intent, people, gates and the data model, then plan coverage
+### Phase 1: Map intent, actors, gates and the data model, then plan coverage
 
-The parent initializes `run-metadata.json`, applies the budget gate in `SKILL.md`, then creates agent directories and the shared ledger before hunting. Reconnaissance reads source, documentation, instruction files and git history. It does not run the target, contact deployed services, or write files; agents return structured facts to the parent.
+The parent initializes `run-metadata.json`, applies the budget reservations in [FULL-AUDIT.md](FULL-AUDIT.md), then creates agent directories and the shared ledger before hunting. Reconnaissance reads source, documentation, instruction files and git history. It does not run the target, contact deployed services, or write files; agents return structured facts to the parent.
 
 Before launch, ask the owner whether agent memories or session transcripts for this repository are kept outside it (per-user project memory directories are common) and whether any may be read. Pass the paths the owner gives to agent 1b.
 
@@ -10,33 +10,38 @@ When the host already loads a memory index for this repository into the parent's
 
 Launch these `research` agents in parallel. Give each one [PRINCIPLES.md](PRINCIPLES.md) verbatim, or its absolute path with an instruction to read it in full when the agent can read files.
 
-**Agent 1a: Product, people and goals**
+**Agent 1a: Product, actors and goals**
 
 ```text
-Read the target at <target>. Do not run it and do not use the network. Return:
+Read the target at <target> and the supplied task or owner statements. Do not run
+it and do not use the network. Return:
 1. What the product does and for whom, in the product's own words, citing README,
    docs, landing or marketing copy, onboarding text and help content with
    repository-relative file:line.
-2. Every kind of person who uses it: end users, invited users, organisation admins,
+2. Every kind of actor who uses it: end users, invited users, organisation admins,
    members without their own login, buyers, reviewers, anonymous visitors, operators,
-   API clients. For each: how they arrive, what they are trying to get done, and what
-   the product lets them do by design. Cite sources. Mark people a source names
-   whom no shipped surface serves yet.
+   developers, coding agents, tool-using agents, API clients and automated services.
+   For each: how they arrive, what they are trying to get done, and what
+   the product lets them do by design. Cite sources. Mark actors a source names
+   whom no supported path serves yet; distinguish current requirements from plans.
 3. The capabilities that serve those goals, as a list of named capabilities with the
-   apps, routes, screens, APIs or jobs that implement each.
+   apps, routes, screens, APIs, tools, commands or jobs that implement each. Include
+   supported development and operational tasks and their success conditions. For
+   agents, record available context, permitted tools and delegated authority.
 4. Apps, packages and services, and which capabilities each one owns.
-5. People no source names but the product implies. Infer them from roles,
+5. Actors no source names but the product implies. Infer them from roles,
    permissions and account states in the schema and auth code; plan, seat and
-   trial tiers; invitation, membership and verification states; people who
-   receive an email, link, export or shared view without an account; people who
+   trial tiers; invitation, membership and verification states; actors who
+   receive an email, link, export or shared view without an account; actors who
    hold several roles or belong to several organisations, or none; and a named
-   person in a later situation (removed, lapsed, expired, demoted, on a second
-   device). For each, give the code evidence and the named person they derive
+   actor in a later situation (removed, lapsed, expired, demoted, on a second
+   device). For each, give the code evidence and the named actor they derive
    from, if any.
-6. When the run names an audience: which named or inferred people each audience
+6. When the run names an audience: which named or inferred actors each audience
    term covers, with the source or code that ties them, and every surface those
-   people reach.
-Return only facts with repository-relative file:line references.
+   actors reach.
+Return only facts with repository-relative file:line references or precise
+conversation/message references for supplied task and owner statements.
 ```
 
 **Agent 1b: Intent sources and rule origins**
@@ -44,6 +49,9 @@ Return only facts with repository-relative file:line references.
 ```text
 Find every written source of product intent in <target>:
 - Product docs, specs, ADRs, decision records, READMEs, design notes.
+- Assigned tasks, interface contracts, runbooks, reliability and resource limits,
+  supported development workflows and agent tool descriptions. Cite actual
+  requirements; do not infer a target from a technology choice alone.
 - Agent instruction files: CLAUDE.md, AGENTS.md, GEMINI.md, .cursorrules,
   .cursor/rules, .github/copilot-instructions.md, .windsurfrules, nested copies in
   subdirectories, any memory or notes directories committed with the code, and the
@@ -59,7 +67,7 @@ stated model of the domain), return:
    unmerged branches (git branch -a, git log --all) and the outside memories and
    transcripts. If no origin is findable, say what you searched.
 3. The purpose the origin supports, stated as the problem it solves.
-4. The scope that purpose supports (which surfaces, people and data), and any later
+4. The scope that purpose supports (which surfaces, actors and data), and any later
    text that widened or narrowed it.
 5. Conflicts with other sources, quoted with locations.
 6. Provenance of each decision: the owner stated it (quote the owner), the owner
@@ -78,10 +86,10 @@ Use only read-only git commands. Do not assess the code yet.
 **Agent 1c: Gates, routing and cross-surface state**
 
 ```text
-Map where the product decides what a person can see or do, in <target>:
+Map where the product decides what an actor can see or do, in <target>:
 1. Every gate: middleware, route guards, layout checks, server actions, API
    authorization, plan or entitlement checks, onboarding redirects, feature checks.
-   For each: the state it reads and where it sends the person on each failure.
+   For each: the state it reads and where it sends the actor on each failure.
 2. Every redirect and return-to mechanism, with the destinations it can produce.
 3. Every multi-step flow with state that persists between steps (sign-up, sign-in,
    invitations, account linking, credential reset, onboarding, checkout, long-running
@@ -90,7 +98,9 @@ Map where the product decides what a person can see or do, in <target>:
 4. Every piece of state written on one surface and read on another: admin tools
    versus user apps, API versus UI, background jobs, second apps, cookies or tokens
    set in one place and read in another.
-5. Error pages, empty states and terminal screens, with the actions each offers.
+5. Error pages, empty states, terminal screens, command exits and tool results,
+   with the actions each offers. Trace task discovery, completion signals, retries,
+   cancellation and handoff for supported technical and agent workflows.
 Return repository-relative file:line references. Do not run anything.
 ```
 
@@ -104,12 +114,12 @@ For each status, enum value, mode and flag:
 1. Where it is defined, and where a database constraint mirrors it.
 2. Producers: every code path that writes or sets it.
 3. Consumers: every code path that reads or branches on it.
-4. Exits: how a record or person leaves that state.
+4. Exits: how a record or actor leaves that state.
 5. The commit that introduced it (git log -S on the value), with its message.
 Mark values with no producer, no consumer or no exit, flags with a single reachable
 value, and combinations of fields the code allows but other code assumes cannot
 happen. Report these as facts for hunters to assess.
-Then list every state machine, explicit or implicit: any record, person or screen
+Then list every state machine, explicit or implicit: any record, actor or screen
 that moves through states which change what someone can do. Look for status
 columns, booleans and nullable timestamps read together, time-derived states,
 rows whose existence stands for a stage, attempt counters, the same lifecycle held
@@ -117,11 +127,11 @@ in several runtimes (database, realtime server, queue, cache, third-party servic
 client state that forms a machine (loading, error and step variables, wizard steps
 in URLs, local storage or cookies), and instruction-file prose that describes a
 lifecycle. Use the signals in STATE-MACHINES.md, "When to use this file". For each:
-1. What moves, the people and agents affected, and where the states are defined
+1. What moves, the actors affected, and where the states are defined
    once, if anywhere.
 2. Storage: every field, row, runtime or client variable that holds part of the state.
-3. States: each with the person situation it stands for and every expression that
-   readers use to tell it, with file:line.
+3. States: each with the task situation or technical invariant it stands for and
+   every expression readers use to tell it, with file:line.
 4. Transitions: from, to, trigger, and every writer with the guard it applies.
 5. Readers, and contracts that expose the state (API, SDK, CLI, tool server,
    webhooks, exports, analytics, cookies, local storage, other apps).
@@ -137,7 +147,7 @@ Read the target's own setup documentation, scripts, environment examples, test
 configuration and seed tooling. Do not run anything and never print secret values.
 Return:
 1. How to start each app or service locally, and on which ports.
-2. How to sign in as fixture or demo people without real accounts, and which roles
+2. How to sign in as fixture or demo actors without real accounts, and which roles
    those fixtures cover.
 3. Which data store a local run uses, whether it is disposable, and how it is reset.
    Note any rule in the target's docs about which databases or branches may be used.
@@ -161,7 +171,7 @@ Add focused reconnaissance agents for apps or capabilities these five do not map
 
 ## Prior-run input
 
-Before selecting work, the parent reads every available prior `coverage-ledger.json`, `findings.json`, `intent-register.json` and `decisions.json` for the same repo and applies the rules in `SKILL.md`. Record paths and source refs used in `run-metadata.json`. Summarize only the coverage consequences in `architecture.md`.
+Before selecting work, the parent reads every available prior `coverage-ledger.json`, `findings.json`, `intent-register.json` and `decisions.json` for the same repo and applies the prior-run rules in [FULL-AUDIT.md](FULL-AUDIT.md). Record paths and source refs used in `run-metadata.json`. Summarize only the coverage consequences in `architecture.md`.
 
 ## Intent register
 
@@ -170,7 +180,7 @@ The parent writes `<output-dir>/intent-register.json` from agents 1a and 1b, che
 ```json
 {
   "capability": "Invite a teammate to a workspace",
-  "people": [{"role": "workspace admin", "goal": "add a colleague", "served": true}, {"role": "invited colleague", "goal": "join and start working", "served": true}],
+  "actors": [{"role": "workspace admin", "goal": "add a colleague", "served": true}, {"role": "invited colleague", "goal": "join and start working", "served": true}],
   "purpose": "Admins bring colleagues into the workspace; the colleague joins with the role the admin chose.",
   "sources": [{"kind": "file", "ref": "docs/workspaces.md", "line": 12, "quote": "...", "provenance": "unattributed"}, {"kind": "file", "ref": "docs/decisions.md", "line": 40, "quote": "D7: invitations are single use (accepted recommendation)", "provenance": "accepted_recommendation", "cites_rule": {"kind": "file", "ref": "AGENTS.md", "line": 88}}],
   "rules": [
@@ -191,14 +201,14 @@ The parent writes `<output-dir>/intent-register.json` from agents 1a and 1b, che
 
 Rules:
 
-- Every `purpose` cites at least one source that is not the implementation of that capability (P4).
+- Every `purpose` cites at least one source that is not the implementation of that capability (P4). `actors` contains actors, including agents and services. Their `goal` states the task and success condition; `purpose` records any technical requirement. Preserve authority and operating constraints in the architecture summary and finding conditions.
 - `origin.kind` is `commit`, `file`, `branch`, `transcript` or `not_traceable`; for `not_traceable`, `ref` is null and `quote` lists what was searched.
-- Findings accept only `file` (repository-relative) and `commit` in `intent.sources`. Cite a branch, transcript or outside memory in `evidence`. An intent that rests only on such sources becomes a `needs_owner_intent` record asking the owner to confirm it.
+- Findings accept `file` (repository-relative), `commit` and `transcript` in `intent.sources`. A transcript ref identifies a conversation and message or a prior run decision ID; quote the actual instruction or answer and retain its provenance in the register. It may confirm intent only when the verifier can read the cited excerpt and P4 permits that conclusion. Do not invent a repository path for outside material. Branch names alone do not establish intent: resolve to a cited commit or retain the question as `needs_owner_intent`.
 - `line` is a positive integer, or null when the source has no line (a commit, a branch, a transcript). Never write 0.
 - `provenance` on each source and rule is `owner_statement`, `accepted_recommendation`, `bulk_accepted_recommendation` or `unattributed`, as defined in P4. It is separate from `kind`. A decision whose reason is a written rule records that rule's location in `cites_rule`, so verifiers can see the scope question it inherits.
-- A person no source names but reconnaissance inferred has `inferred: {"basis": [<location>, ...], "derived_from": "<role of a named person>" | null}`, where each location is `{kind, ref, line}`. When `derived_from` names a person, that person's sourced goal applies in the derived situation, so a gap for the inferred person can be confirmed. When it is null, the goal rests on the code alone (P4): write the goal the code implies, and a gap for that person becomes `needs_owner_intent`, asking whether the product means to serve them.
-- A person a source names but no shipped surface serves has `served: false`. The missing surface is not underfit (SKILL.md anti-pattern 3); the owner session may ask whether it is still planned.
-- `decided_not_on_ref` lists decided changes missing from the reviewed ref, such as an unmerged branch. Hunters do not report the reviewed ref for a difference a listed change already removes. When a finding depends on one, the owner session asks whether it is still the plan.
+- An actor no source names but reconnaissance inferred has `inferred: {"basis": [<location>, ...], "derived_from": "<role of a named actor>" | null}`, where each location is `{kind, ref, line}`. When `derived_from` names an actor, that actor's sourced goal applies in the derived situation, so a gap for the inferred actor can be confirmed. When it is null, the goal rests on the code alone (P4): write the goal the code implies, and a gap for that actor becomes `needs_owner_intent`, asking whether the product means to serve them.
+- An actor with no supported path has `served: false`. This is an observation, not a scope decision: a missing path can be underfit when a source requires it now. If the source describes a future audience or leaves timing open, ask about intent instead of inventing a current obligation.
+- `decided_not_on_ref` lists decided changes missing from the reviewed ref, such as an unmerged branch. They can guide a recommendation but do not establish behaviour on the reviewed ref. Report a current gap when it still exists, note the planned fix, and avoid recommending duplicate work.
 - Each `conflicts` entry is `{"description": "...", "sources": [...]}` with at least two source entries, so both quotes are recorded. A conflict the sources do not resolve becomes an `open_questions` entry and, if it decides a candidate, a `needs_owner_intent` record later.
 - Leave suspected gaps out of the register; hunters assess them.
 
@@ -214,7 +224,7 @@ The parent writes `<output-dir>/state-machines.json` from agent 1d, checked agai
   "name": "Invitation lifecycle",
   "subject": "invitations row",
   "kind": "implicit",
-  "people": ["workspace admin", "invited colleague"],
+  "actors": ["workspace admin", "invited colleague"],
   "definition": null,
   "storage": [{"kind": "timestamp", "ref": "src/db/schema.ts", "line": 40, "description": "accepted_at"}],
   "states": [{"name": "pending", "situation": "The colleague has not answered yet.", "identified_by": [{"ref": "src/invitations/list.ts", "line": 12, "expression": "!accepted_at && !revoked_at"}]}],
@@ -230,31 +240,31 @@ Rules:
 
 - `kind` is `explicit` when a single place defines the states and the moves, and `definition` cites it; otherwise `implicit` with `definition: null`. An explicit machine whose writers bypass the definition stays explicit; the bypass is hunter work.
 - `storage.kind` is `column`, `boolean`, `timestamp`, `nullable_field`, `row`, `derived`, `runtime`, `client` or `external`.
-- State names describe what the record means to the people in `people`. For an implicit machine, take them from copy or docs where possible and say in `situation` where the name came from.
+- State names describe the task situation or technical invariant represented by the record; `actors` lists the affected human, agent or service actors. For an implicit machine, take them from copy or docs where possible and say in `situation` where the name came from.
 - `from: null` marks creation. Every transition has at least one writer, and every `coverage` entry names a listed transition. A transition with no check has no `coverage` entry.
 - Every `ref` is repository-relative and every `line` is a positive integer or null.
 - Leave suspected gaps out of the inventory; hunters assess them.
 
 Run `node <skill-dir>/validate-state-machines.cjs <output-dir>/state-machines.json` after writing it and after every change. Fix every error before seeding the ledger.
 
-## People and organisation check
+## Actors and organisation check
 
-Every finding depends on who the people are and how they relate. Reconnaissance builds that map from sources, code and memories, which can disagree or be out of date. A role the owner sees as a position inside an organisation can be modelled as a separate party, for example. Hunting on a wrong map produces findings that all have to be redone.
+Every finding depends on who the actors are and how they relate. Reconnaissance builds that map from sources, code and memories, which can disagree or be out of date. A role the owner sees as a position inside an organisation can be modelled as a separate party, for example. Hunting on a wrong map produces findings that all have to be redone.
 
-After the intent register is written and validated, and before the first hunter wave, the parent puts the map to the owner in one round, in the format of Phase 6 ([VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md), Run the session):
+After the intent register is written and validated, check the map against existing sources and owner decisions. Before hunting dependent units, put only material unresolved relations to the owner, one question at a time, in the format of Phase 6 ([VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md), Run the session):
 
-- Each kind of person, with the organisation or group they belong to, the role they hold there and their goal.
-- Each relation between kinds of organisation and person that the gates depend on: who belongs to whom, who acts for whom, who leads a case or account, and who may read what another person writes.
+- Each unresolved actor role and task, with its organisation or group where relevant. For agents and services, include whom they act for, the interfaces they can use and their authority.
+- Each relation between kinds of organisation and actor that the gates depend on: who belongs to whom, who acts for whom, who leads a case or account, and who may read what another actor writes.
 - Where sources disagree with each other or with the code about one of these, the options, with a recommended answer.
 
-Ask only about the map, not about findings. Record the answers in `decisions.json` with the provenance rules of Phase 6, and update `intent-register.json` and `architecture.md` before hunting. A correction to the map is an `owner_statement` source for every capability it touches. If the owner is not available, record the map as unconfirmed in `architecture.md`. Each finding that depends on an unconfirmed relation then becomes `needs_owner_intent` on that relation.
+Ask only about the map, not about findings. Record the answers in `decisions.json` with the provenance rules of Phase 6, and update `intent-register.json` and `architecture.md` before hunting. A correction to the map is an `owner_statement` source for every capability it touches. If the owner is not available, record the map as unconfirmed in `architecture.md`. Continue independent work. Each finding that depends on an unresolved relation then becomes `needs_owner_intent` on that relation.
 
 ## Architecture summary and companion selection
 
 The parent writes `<output-dir>/architecture.md`, capped at about 1,000 words:
 
 1. What the product does, for whom, in its own words.
-2. People and their goals.
+2. Actors, tasks, success conditions, authority and technical requirements.
 3. Apps, packages and services, and the capabilities each owns.
 4. Gates and the important multi-step flows.
 5. Shared state and the surfaces that write and read it.
@@ -264,13 +274,17 @@ The parent writes `<output-dir>/architecture.md`, capped at about 1,000 words:
 9. Prior coverage gaps and revalidation targets.
 10. Selected companions from [FIT-CLASSES.md](FIT-CLASSES.md), each with the surface that requires it.
 
+Select [TECHNICAL-AND-AGENT-TASKS.md](TECHNICAL-AND-AGENT-TASKS.md) when reconnaissance finds a supported agent task or technical requirement.
+
 Select a companion because reconnaissance found the surface its `When to use this file` section describes, never because a library or a word appears. [INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md) is selected whenever the target has any written rules, [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md) whenever it has persisted state, and [STATE-MACHINES.md](STATE-MACHINES.md) whenever `state-machines.json` holds an implicit machine or a machine with more than a single writer, runtime or surface.
 
 ## Deterministic coverage ledger
 
-The parent writes `<output-dir>/coverage-ledger.json` as a top-level array. Derive one unit for every material combination of entry surface, gate, capability and applicable fit class at the granularity the profile sets (`quick` uses the fixed capability value `profile/quick/all-in-scope-capabilities`; `deep` adds lifecycle modes; an audience-scoped run adds the person). For a scoped run, retain discovered excluded surfaces as `out_of_scope` units.
+The parent writes `<output-dir>/coverage-ledger.json` as a top-level array. Derive one unit for every material combination of entry surface, gate, capability and applicable fit class at the granularity the profile sets (`quick` uses the fixed capability value `profile/quick/all-in-scope-capabilities`; `deep` adds lifecycle modes; an audience-scoped run adds the actor). For a scoped run, retain discovered excluded surfaces as `out_of_scope` units.
 
 Before seeding, check that every starting path and gate path reconnaissance gave exists in the target at the reviewed state. Correct or drop a path that does not, and note the correction in `architecture.md`.
+
+For a required task with no implemented path, use its repository-relative requirement or interface declaration as the starting path and surface; use a stable gate reference such as `missing/task-entry`. If only a conversation establishes the missing capability and no relevant source path exists, record the coverage gap rather than inventing a path to satisfy the ledger.
 
 Seed these units in addition to flow units:
 
@@ -284,7 +298,7 @@ Derive `coverage_id` without lossy slugs:
 
 1. Require every reference to be Unicode NFC with visible content, no control, format, line or paragraph separator or default-ignorable code point, and no surrounding whitespace.
 2. Encode its UTF-8 bytes with RFC 3986 percent encoding: leave only `A-Z a-z 0-9 - . _ ~` unescaped and use uppercase `%HH` for every other byte.
-3. Join encoded `surface`, `gate`, `capability` and `fit_class` references with `::`. When present, append `p=` followed by the encoded `person`, then the encoded `lifecycle`, each after another `::`. A reference always encodes `=`, so the prefix keeps a person segment apart from a lifecycle segment.
+3. Join encoded `surface`, `gate`, `capability` and `fit_class` references with `::`. When present, append `a=` followed by the encoded `actor`, then the encoded `lifecycle`, each after another `::`. A reference always encodes `=`, so the prefix keeps an actor segment apart from a lifecycle segment.
 
 Do not include wave, agent, verdict, severity or line number in a reference or ID. Sort units by `coverage_id` before each assignment. Fail on duplicate IDs; treat duplicate IDs with different semantic fields as an identity collision and never merge them.
 
@@ -319,7 +333,7 @@ Each unit records:
 }
 ```
 
-`prior_needs_owner_intent` marks a unit linked to a prior `needs_owner_intent` record. When `lifecycle` is material, add both `canonical_refs.lifecycle` and a human `lifecycle` field. In an audience-scoped run, add both `canonical_refs.person`, the register role exactly as written, and a human `person` field. `ordinary_fit_class_block` is null only when no ordinary block applies. The selected companion list includes each applicable class plus its companion `Core discipline`, `Universal moves` and `Validation rules`; `excluded_blocks` records every considered but unselected block and the source fact that excludes it.
+`prior_needs_owner_intent` marks a unit linked to a prior `needs_owner_intent` record. When `lifecycle` is material, add both `canonical_refs.lifecycle` and a human `lifecycle` field. In an audience-scoped run, add both `canonical_refs.actor`, the register role exactly as written, and a human `actor` field. `ordinary_fit_class_block` is null only when no ordinary block applies. The selected companion list includes each applicable class plus its companion `Core discipline`, `Universal moves` and `Validation rules`; `excluded_blocks` records every considered but unselected block and the source fact that excludes it.
 
 `attempts` is an append-only archive for evidence-bearing assignments that a coverage critic reopens. Before reassignment, append the unit's exact `wave`, `status`, `agent_id`, `reviewed_paths`, `local_checks`, `result_fingerprints` and `unresolved`, plus the critic's `reassignment_reason`. Only `blocked`, `covered` and `candidate` states are archived. The next assignment increments `wave`, uses a fresh owner, and starts with empty live evidence.
 

@@ -11,7 +11,7 @@ const validatorPath = path.join(__dirname, "validate-intent-register.cjs");
 function entry() {
   return {
     capability: "Invite a teammate to a workspace",
-    people: [{ role: "workspace admin", goal: "add a colleague", served: true }],
+    actors: [{ role: "workspace admin", goal: "add a colleague", served: true }],
     purpose: "Admins bring colleagues into the workspace with the role they chose.",
     sources: [
       { kind: "file", ref: "docs/workspaces.md", line: 12, quote: "Admins invite colleagues.", provenance: "unattributed" },
@@ -59,19 +59,19 @@ test("rejects absolute file refs and unknown fields", () => {
   assert.match(errors, /\$\[0\]\.extra: unknown field/);
 });
 
-test("requires served on every person and two sources per conflict", () => {
+test("requires served on every actor and two sources per conflict", () => {
   const errors = errorsFor((e) => {
-    delete e.people[0].served;
+    delete e.actors[0].served;
     e.conflicts.push({ description: "Docs and AGENTS.md disagree.", sources: [e.sources[0]] });
   }).join("\n");
-  assert.match(errors, /people\[0\]\.served: required/);
+  assert.match(errors, /actors\[0\]\.served: required/);
   assert.match(errors, /conflicts\[0\]\.sources: a conflict quotes at least two sources/);
 });
 
-test("accepts inferred people and rejects an inferred person without code evidence", () => {
+test("accepts inferred actors and rejects an inferred actor without code evidence", () => {
   const inferred = { role: "member of two workspaces", goal: "switch between them", served: true, inferred: { basis: [{ kind: "file", ref: "src/db/schema.ts", line: 40 }], derived_from: "workspace admin" } };
-  assert.deepEqual(errorsFor((e) => { e.people.push(inferred); }), []);
-  assert.match(errorsFor((e) => { e.people.push({ ...inferred, inferred: { basis: [], derived_from: null } }); }).join("\n"), /inferred\.basis: must not be empty/);
+  assert.deepEqual(errorsFor((e) => { e.actors.push(inferred); }), []);
+  assert.match(errorsFor((e) => { e.actors.push({ ...inferred, inferred: { basis: [], derived_from: null } }); }).join("\n"), /inferred\.basis: must not be empty/);
 });
 
 test("rejects duplicate capabilities", () => {
@@ -87,4 +87,16 @@ test("CLI exits 0 for a valid register and 1 for an invalid one", () => {
   assert.equal(spawnSync(process.execPath, [validatorPath, good]).status, 0);
   assert.equal(spawnSync(process.execPath, [validatorPath, bad]).status, 1);
   fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("requires actors and explicitly migrates older registers", () => {
+  const { migrateRecords } = require("./migrate-actor-records.cjs");
+  const current = entry();
+  current.actors.push({ role: "coding agent", goal: "Implement the supported invitation flow.", served: true });
+  const previous = { ...current, people: current.actors };
+  delete previous.actors;
+  assert.notEqual(validateRegister([previous]).length, 0);
+  assert.deepEqual(migrateRecords("intent-register", [previous]), [current]);
+  assert.deepEqual(migrateRecords("intent-register", [current]), [current]);
+  assert.throws(() => migrateRecords("intent-register", [{ ...previous, actors: current.actors }]), /Both people and actors/);
 });

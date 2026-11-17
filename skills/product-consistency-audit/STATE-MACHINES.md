@@ -2,7 +2,7 @@
 
 ## When to use this file
 
-Select this file whenever a record, a person or a screen moves through states that change what someone can do. Use it for every unit seeded from `state-machines.json` and for a state machine run (SKILL.md).
+Select this file whenever a record, actor, task, process or screen moves through states that change the allowed actions or preserve a technical invariant. Use it for every unit seeded from `state-machines.json` and for a state machine run (FULL-AUDIT.md).
 
 A state machine is implicit when no single place names its states and the moves between them. Its state is spread across fields, rows, runtimes or client variables, and each writer and reader works the state out for itself. Reconnaissance agent 1d finds them from these signals:
 
@@ -28,7 +28,7 @@ DATA-MODEL-AND-STATE.md covers single states and fields: a status without an exi
 - An agent that operates the product through its API, CLI or tools cannot tell the state or the allowed next actions, attempts a move the product rejects, and gets an error that names neither.
 - A developer or a coding agent changing the lifecycle has to change several places that have already drifted, or follows an instruction file whose prose no longer matches the code.
 
-**Who uses a state machine.** Every finding and every recommendation in this file names its effect on each of these groups:
+**Who uses a state machine.** Every finding and recommendation names its effect on the applicable groups below. When a group is unaffected, say so; do not invent a human UI consequence for an internal technical task:
 
 - **People using the product** (UX): the states they see, what each state lets them do, the way out of each, and the message when a move is refused.
 - **Developers** (DX): how many places define the states, where a new state or move gets added, whether types and constraints reject an invalid state, and whether checks exercise the moves.
@@ -149,7 +149,7 @@ What to look for:
 - Instruction files, memories and docs that state transition rules in prose. Compare each rule with the code's moves, and note when no instruction file points to where the machine is defined.
 - Coding-agent instructions that tell agents to set the state directly in a place that skips the guard other writers use.
 
-What establishes a gap: the agent surface or instruction text, the code it disagrees with or the information it withholds, and the move an agent makes or the change a coding agent gets wrong because of it. An agent counts as the person (P1) when the product's sources name agents, API clients or tool users as people it serves, or when the repository's instruction files direct coding agents.
+What establishes a gap: the agent surface or instruction text, the code it disagrees with or the information it withholds, and the move an agent makes or the change a coding agent gets wrong because of it. An agent is an actor under P1 when sources establish its supported task, including repository instructions for coding agents.
 
 Not a gap:
 
@@ -158,11 +158,11 @@ Not a gap:
 
 ## Choosing the recommended shape
 
-A finding from this file recommends a shape for the whole machine, and that shape must improve the experience of people using the product, developers and agents. Write the effect on each in `remediation.experience` (`people`, `developers`, `agents`). Choose the smallest shape that improves all of them. When no shape improves one group, say which and why in that field, and put the choice to the owner as a fix decision with the alternatives.
+A finding from this file recommends a shape for the whole machine, and that shape must improve the experience of people using the product, developers and agents. Write the effect on each in `remediation.experience` (`human_users`, `developers`, `agents`). Choose the smallest shape that improves all of them. When no shape improves one group, say which and why in that field, and put the choice to the owner as a fix decision with the alternatives.
 
 Start from this shape and remove whatever the machine does not need (P6):
 
-- **State names.** Name each state for what it means to the person or agent who sees it. A step that only the system cares about stays out of a state that people see. Remove states that every reader treats alike. A new state needs a person situation behind it.
+- **State names.** Name each state for what it means to the person or agent who sees it. A step that only the system cares about stays out of a state that people see. Remove states only after checking all readers and technical obligations. A new state needs a task situation or technical invariant behind it, such as recovery or coordination.
 - **Definition.** The states and the allowed moves live in one module, written in the target's existing idiom: an enum with a transition map, a reducer, a typed union, a database type with a constraint mirroring it. Do not recommend a new state machine library unless the target already uses one.
 - **Storage.** When the states exclude each other, a single field holds the state. Timestamps stay as history beside it and stop being read as state. A state that time alone produces (expired) is computed by a function next to the definition.
 - **Transition function.** Every writer calls the same transition function. It checks the move against the definition, applies the move's side effects in one place, and refuses a disallowed move with an error that names the current state and the moves allowed from it.
@@ -200,6 +200,6 @@ A recommended change to a machine must keep every existing record, caller and st
 3. For disagreeing readers, confirm that a writer can produce the combination they disagree on. A constraint that prevents the combination refutes the finding.
 4. For an unguarded move, confirm the source that forbids it and that the unguarded writer is reachable by a person or agent.
 5. For a hidden lifecycle, confirm the agent surface or instruction text, and that the sources name agents, API clients or tool users as people the product serves, or that the instruction files direct coding agents.
-6. Check `remediation.experience`: each of `people`, `developers` and `agents` names a concrete improvement, or says why none is possible and the decision is put to the owner.
+6. Check `remediation.experience`: each of `human_users`, `developers` and `agents` names a concrete improvement, or says why none is possible and the decision is put to the owner.
 7. Check `remediation.change_safety` against source: every value writers produce is mapped, every writer and reader cited is listed, every contract found is listed, and the steps keep each existing caller working. A missing writer, reader, value or contract makes the record need a correction before it is final.
 8. For overfit elements of the machine, look for a stated need such as audit history, compliance or recovery. If one exists, reject. The source must pass the provenance test in P4 (PRINCIPLES.md).

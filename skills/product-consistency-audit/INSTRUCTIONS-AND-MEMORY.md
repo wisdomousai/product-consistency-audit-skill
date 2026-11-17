@@ -67,7 +67,7 @@ What to look for:
 - Database CHECK constraints or unique indexes that enforce a rule the origin tied to a single screen or action.
 - Code comments on schema fields that cite an instruction file or a conversation.
 
-What establishes a gap: the rule and its origin, the schema elements built from it with their introducing commit, a statement of the smaller shape that solves the origin's problem (often a single condition at the action the incident involved), and a cost: a state a person can enter and not leave, a combination other features must handle, a capability blocked, or a migration needed to change course. Severity follows the cost under SKILL.md.
+What establishes a gap: the rule and its origin, the schema elements built from it with their introducing commit, a statement of the smaller shape that solves the origin's problem (often a single condition at the action the incident involved), and a cost: a state a person can enter and not leave, a combination other features must handle, a capability blocked, or a migration needed to change course. When reporting severity, use [the severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty).
 
 Not a gap:
 

@@ -14,7 +14,7 @@ function machine() {
     name: "Invitation lifecycle",
     subject: "invitations row",
     kind: "implicit",
-    people: ["workspace admin", "invited colleague", "agent using the API"],
+    actors: ["workspace admin", "invited colleague", "agent using the API"],
     definition: null,
     storage: [
       { kind: "timestamp", ref: "src/db/schema.ts", line: 40, description: "accepted_at" },
@@ -85,4 +85,15 @@ test("CLI exits 0 for a valid inventory and 1 for an invalid one", () => {
   assert.equal(spawnSync(process.execPath, [validatorPath, good]).status, 0);
   assert.equal(spawnSync(process.execPath, [validatorPath, bad]).status, 1);
   fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("requires actors and migrates inventory without changing states or transitions", () => {
+  const { migrateRecords } = require("./migrate-actor-records.cjs");
+  const current = machine();
+  const previous = { ...current, people: current.actors };
+  delete previous.actors;
+  assert.notEqual(validateInventory([previous]).length, 0);
+  assert.deepEqual(migrateRecords("state-machines", [previous]), [current]);
+  assert.deepEqual(migrateRecords("state-machines", [current]), [current]);
+  assert.throws(() => migrateRecords("state-machines", [{ ...previous, actors: current.actors }]), /Both people and actors/);
 });

@@ -4,7 +4,7 @@
  * Validates intent-register.json against the shape in RECONNAISSANCE.md.
  * Usage: node validate-intent-register.cjs <path-to-intent-register.json>
  *
- * Checks entry and field shapes, inferred people, line numbers (positive integer
+ * Checks entry and field shapes, inferred actors, line numbers (positive integer
  * or null), provenance values, origin rules for not_traceable, and duplicate
  * capabilities. Whether a purpose is drawn from outside the code is left to
  * reconnaissance and the coverage critic.
@@ -25,7 +25,7 @@ const COMMIT_REF = /^[0-9a-f]{7,40}$/;
 const SOURCE_KINDS = new Set(["file", "commit", "branch", "transcript"]);
 const ORIGIN_KINDS = new Set([...SOURCE_KINDS, "not_traceable"]);
 const PROVENANCE = new Set(["owner_statement", "accepted_recommendation", "bulk_accepted_recommendation", "unattributed"]);
-const ENTRY_KEYS = ["capability", "people", "purpose", "sources", "rules", "conflicts", "open_questions", "decided_not_on_ref"];
+const ENTRY_KEYS = ["capability", "actors", "purpose", "sources", "rules", "conflicts", "open_questions", "decided_not_on_ref"];
 
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const isText = (value) => typeof value === "string" && hasVisibleProse(value) && value.trim() === value;
@@ -104,16 +104,16 @@ function validateRegister(register) {
     else if (capabilities.has(entry.capability)) errors.push(`${base}.capability: duplicate capability`);
     else capabilities.add(entry.capability);
     if (!isText(entry.purpose)) errors.push(`${base}.purpose: invalid text`);
-    checkArray(entry.people, `${base}.people`, errors, { nonempty: true }).forEach((person, i) => {
-      const at = `${base}.people[${i}]`;
-      if (!checkKeys(person, ["role", "goal", "served", "inferred"], ["role", "goal", "served"], at, errors)) return;
-      if (!isText(person.role)) errors.push(`${at}.role: invalid text`);
-      if (!isText(person.goal)) errors.push(`${at}.goal: invalid text`);
-      if (typeof person.served !== "boolean") errors.push(`${at}.served: must be true or false`);
-      if ("inferred" in person && checkKeys(person.inferred, ["basis", "derived_from"], ["basis", "derived_from"], `${at}.inferred`, errors)) {
-        checkArray(person.inferred.basis, `${at}.inferred.basis`, errors, { nonempty: true })
+    checkArray(entry.actors, `${base}.actors`, errors, { nonempty: true }).forEach((actor, i) => {
+      const at = `${base}.actors[${i}]`;
+      if (!checkKeys(actor, ["role", "goal", "served", "inferred"], ["role", "goal", "served"], at, errors)) return;
+      if (!isText(actor.role)) errors.push(`${at}.role: invalid text`);
+      if (!isText(actor.goal)) errors.push(`${at}.goal: invalid text`);
+      if (typeof actor.served !== "boolean") errors.push(`${at}.served: must be true or false`);
+      if ("inferred" in actor && checkKeys(actor.inferred, ["basis", "derived_from"], ["basis", "derived_from"], `${at}.inferred`, errors)) {
+        checkArray(actor.inferred.basis, `${at}.inferred.basis`, errors, { nonempty: true })
           .forEach((location, j) => checkLocation(location, `${at}.inferred.basis[${j}]`, errors));
-        if (person.inferred.derived_from !== null && !isText(person.inferred.derived_from)) {
+        if (actor.inferred.derived_from !== null && !isText(actor.inferred.derived_from)) {
           errors.push(`${at}.inferred.derived_from: must be a role or null`);
         }
       }
