@@ -25,7 +25,7 @@ Select this file when reconnaissance finds any of these surfaces:
 
 - `source`: the gate, the setup state, every writer and reader of it.
 - `history`: the commit that added each required step or field, and its origin.
-- `local`: a walkthrough under the execution boundary in SKILL.md with a fresh fixture person per path (founder, invited member, admin-created member). Stop at the first screen that holds the person.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md with a fresh fixture actor per path (founder, invited member, admin-created member). Stop at the first screen that holds the person.
 
 ## Forced setup redirect
 

@@ -27,7 +27,7 @@ Select this file when reconnaissance finds any of these surfaces:
 
 - `source`: middleware, route guards, callback handlers, session code and the chain map.
 - `history`: commits that added gates, markers and redirects, and the incident or instruction behind each.
-- `local`: a walkthrough under the execution boundary in SKILL.md, using the target's local or demo identity provider with fixture people and a local email outbox. Never use a real identity provider account or a deployed sign-in page. States that need a real provider (a third-party session expiring, a provider-side account lock) stay at `method: source`.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md, using the target's local or demo identity provider with fixture actors and a local email outbox. Never use a real identity provider account or a deployed sign-in page. States that need a real provider (a third-party session expiring, a provider-side account lock) stay at `method: source`.
 
 ## Cross-app sign-in loop
 

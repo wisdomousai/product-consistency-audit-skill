@@ -146,7 +146,7 @@ For `confirmed`, check:
 4. That no exit, case or rule the intent names was missed.
 5. For overfit: that `literal_source` is accurate, the `excess` items exist and have no stated need behind them, and `proportionate_shape` serves the purpose.
 6. Severity: likelihood, demonstrated impact, overall no greater than impact.
-7. That the remediation restores the fit, names any instruction change, and creates no new stuck state. When it changes a lifecycle, a stored state or a status vocabulary: that `remediation.experience` describes the effect on people using the product, developers and agents, marking unaffected groups explicitly, and that `remediation.change_safety` maps every value writers produce and lists every writer, reader and contract the verifier can find.
+7. That the remediation restores the fit, names any instruction change, and creates no new stuck state. When it changes a lifecycle, a stored state or a status vocabulary: that `remediation.experience` describes the effect on human users, developers and agents, marking unaffected groups explicitly, and that `remediation.change_safety` maps every value writers produce and lists every writer, reader and contract the verifier can find.
 8. That every decision record the verdict relies on passes the provenance test in Phase 3, step 2.
 
 For a `rejected` record that rests on a decision record, apply P4, including independently justified, individually accepted recommendations. Replace it with `needs_owner_intent` only if no admissible source resolves the deciding point.
@@ -176,7 +176,7 @@ Write `<output-dir>/SUMMARY.md`, short enough to read in a couple of minutes:
 3. Coverage from the ledger: covered, candidate, blocked and deferred counts, the main exclusions, and the final critic result.
 4. In a state machine run, a table of every machine in `state-machines.json`: name, explicit or implicit, where its state is stored, how many writers and runtimes it has, and the fingerprints found for it.
 
-The summary does not restate findings. Their detail stays in `findings.json` and is read out during the session when a question needs it.
+The summary does not restate findings. Take every count and fingerprint in it from the final `findings.json` and ledger, after Phase 5, so the two never differ. Their detail stays in `findings.json` and is read out during the session when a question needs it.
 
 #### Build the decision tree
 

@@ -85,7 +85,16 @@ test("CLI exits 0 for a valid register and 1 for an invalid one", () => {
   fs.writeFileSync(good, JSON.stringify([entry()]));
   fs.writeFileSync(bad, JSON.stringify([{ capability: "x" }]));
   assert.equal(spawnSync(process.execPath, [validatorPath, good]).status, 0);
-  assert.equal(spawnSync(process.execPath, [validatorPath, bad]).status, 1);
+  const badResult = spawnSync(process.execPath, [validatorPath, bad], { encoding: "utf8" });
+  assert.equal(badResult.status, 1);
+  assert.doesNotMatch(badResult.stderr, /HINT/);
+  const earlier = entry();
+  earlier.people = earlier.actors;
+  delete earlier.actors;
+  fs.writeFileSync(bad, JSON.stringify([earlier]));
+  const earlierResult = spawnSync(process.execPath, [validatorPath, bad], { encoding: "utf8" });
+  assert.equal(earlierResult.status, 1);
+  assert.match(earlierResult.stderr, /HINT: .*migrate-actor-records\.cjs \(RECORD-FORMAT\.md\)/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

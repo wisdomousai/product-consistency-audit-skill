@@ -26,7 +26,7 @@ Select this file when reconnaissance finds state written on one surface and read
 
 - `source`: the writer and reader table and each path.
 - `history`: commits that added admin actions, imports or second-app readers, and the origin of each rule they apply or skip.
-- `local`: a walkthrough under the execution boundary in SKILL.md with the actor and the affected person as separate fixture people on separate local sessions. Serialise walkthroughs that share a data store.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md with the one making the change and the affected person as separate fixture actors on separate local sessions. Serialise walkthroughs that share a data store.
 
 ## Unhandled externally produced values
 
@@ -180,7 +180,7 @@ Not a gap:
 
 - Build the writer and reader table for every piece of shared state in scope before reading individual paths.
 - For every interface rule, list every other path that performs the same action.
-- Walk each external change with two fixture people: the actor and the person mid-task on another surface.
+- Walk each external change with two fixture actors: the one making the change and the person mid-task on another surface.
 - Check what every surface does for the person after removal, role change, archive and workspace switch.
 - Read copy on admin actions and compare it with the effect on the affected person's surface (PUBLIC-CLAIMS.md covers wider copy checks).
 

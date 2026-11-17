@@ -25,7 +25,7 @@ Select this file when reconnaissance finds any of these surfaces:
 
 - `source`: the entitlement map and each gate's failure path.
 - `history`: the commits that added plan checks, grants and special cases, and their origins.
-- `local`: a walkthrough under the execution boundary in SKILL.md, with the payment provider on a fake or test mode the target documents and a local data store. Never take a real payment or call a live provider. States that need a real subscription lifecycle (a failed renewal at the provider, a dispute) stay at `method: source`.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md, with the payment provider on a fake or test mode the target documents and a local data store. Never take a real payment or call a live provider. States that need a real subscription lifecycle (a failed renewal at the provider, a dispute) stay at `method: source`.
 
 ## Paywall without a purchase route
 

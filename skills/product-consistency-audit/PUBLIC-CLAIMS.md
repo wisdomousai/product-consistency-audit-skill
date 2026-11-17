@@ -25,7 +25,7 @@ Select this file when reconnaissance finds text that tells a person what the pro
 
 - `source`: the text and the code path it describes.
 - `history`: when the text and the behaviour last changed, and which changed after the other.
-- `local`: a walkthrough under the execution boundary in SKILL.md as the reader, following the text's own instructions. Emails go to a local outbox only. Never send real email or load a deployed page.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md as the reader, following the text's own instructions. Emails go to a local outbox only. Never send real email or load a deployed page.
 
 ## Capability claims
 

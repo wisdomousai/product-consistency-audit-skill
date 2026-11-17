@@ -11,6 +11,7 @@
  */
 
 const {
+  EARLIER_FORMAT_HINT,
   JsonStructureError,
   LIMITS,
   SafeInputError,
@@ -19,6 +20,7 @@ const {
   hasVisibleProse,
   isSafeRelativeSourcePath,
   readFileWithinLimit,
+  usesEarlierActorFields,
 } = require("./validate-findings.cjs");
 
 const COMMIT_REF = /^[0-9a-f]{7,40}$/;
@@ -173,6 +175,7 @@ function run(file) {
   const errors = validateRegister(register);
   for (const message of errors) console.error("ERROR:", escapeUnsafeDiagnosticCharacters(message));
   if (errors.length > 0) {
+    if (usesEarlierActorFields(register)) console.error(EARLIER_FORMAT_HINT);
     console.error(`FAIL: ${errors.length} validation error(s)`);
     return 1;
   }

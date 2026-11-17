@@ -88,7 +88,7 @@ function run(args) {
     output = `${JSON.stringify(migrateRecords(kind, input), null, 2)}\n`;
     if (Buffer.byteLength(output) > findings.LIMITS.inputBytes) throw new Error("Formatted output exceeds the artifact size limit.");
   } catch (error) {
-    console.error(findings.escapeUnsafeDiagnosticCharacters(error.message));
+    for (const line of String(error.message).split("\n")) console.error(findings.escapeUnsafeDiagnosticCharacters(line));
     return 1;
   }
   try {

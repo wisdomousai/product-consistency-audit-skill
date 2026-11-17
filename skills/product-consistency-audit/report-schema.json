@@ -405,7 +405,7 @@
               },
               "experience": {
                 "type": "object",
-                "description": "Effect of the change on people using the product, developers and agents (STATE-MACHINES.md).",
+                "description": "Effect of the change on human users, developers and agents (STATE-MACHINES.md).",
                 "properties": {
                   "human_users": {
                     "type": "string",

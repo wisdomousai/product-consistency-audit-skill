@@ -110,6 +110,17 @@ const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 class JsonStructureError extends Error {}
 class SafeInputError extends Error {}
 
+const EARLIER_FORMAT_HINT = "HINT: this artifact uses the earlier person/people fields; convert it with migrate-actor-records.cjs (RECORD-FORMAT.md)";
+
+function usesEarlierActorFields(records) {
+  const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+  return Array.isArray(records) && records.some((record) => isRecord(record) && (
+    hasOwn(record, "person") || hasOwn(record, "people") ||
+    (isRecord(record.canonical_refs) && hasOwn(record.canonical_refs, "person")) ||
+    (isRecord(record.remediation) && isRecord(record.remediation.experience) && hasOwn(record.remediation.experience, "people"))
+  ));
+}
+
 function escapeUnsafeDiagnosticCharacters(value) {
   return String(value).replace(UNSAFE_DIAGNOSTIC_CHARACTER, (character) => {
     const codePoint = character.codePointAt(0);
@@ -865,6 +876,7 @@ function run(file) {
   }
   for (const message of errors) console.error("ERROR:", message);
   if (errors.length > 0) {
+    if (usesEarlierActorFields(ledger)) console.error(EARLIER_FORMAT_HINT);
     const cap = errors.length === LIMITS.validationErrors ? `; output capped at ${LIMITS.validationErrors}` : "";
     console.error(`FAIL: ${errors.length} validation error(s)${cap}`);
     return 1;

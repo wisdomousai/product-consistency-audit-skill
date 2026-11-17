@@ -84,7 +84,7 @@ Not a gap: an invented scale target, an unsupported environment, or hypothetical
 2. Trace the supported route from inputs to an observable result, including failure, recovery and handoff where the contract requires them.
 3. Compare tool descriptions, instructions, API/CLI outputs and actual behaviour under P12 and P13. Use FIT-CLASSES.md for divergent implementations or unsupported promises.
 4. For suspected overfit, search for the technical obligation that could justify the machinery. Use DATA-MODEL-AND-STATE.md or STATE-MACHINES.md for state-specific findings.
-5. Use source and history first. Offline tools may use disposable fixtures outside the target; networked walkthroughs remain localhost-only under SKILL.md. An audit of a coding-agent task does not authorize edits to the target.
+5. Use source and history first. Offline tools may use disposable fixtures outside the target; networked walkthroughs remain localhost-only under SKILL.md and WALKTHROUGHS.md. An audit of a coding-agent task does not authorize edits to the target.
 
 ## Validation rules
 

@@ -40,7 +40,7 @@ RECONNAISSANCE.md seeds one unit per status enum, state machine and core entity.
 
 - `source`: the definition, mirrors, producers, consumers and exits, with paths.
 - `history`: the introducing commit, the request or rule behind it, later changes to producers and consumers.
-- `local`: a walkthrough under the execution boundary in SKILL.md, used to show that a person reaches a state and what they can do there. Use a disposable local data store and a fixture person. Never write to a shared or hosted database to build a state.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md, used to show that a person reaches a state and what they can do there. Use a disposable local data store and a fixture actor. Never write to a shared or hosted database to build a state.
 
 ## State without a person situation
 

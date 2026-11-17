@@ -26,7 +26,7 @@ Select this file when reconnaissance finds work that spans more than a single re
 
 - `source`: the lifecycle map, server close paths, client handlers, clean-up jobs.
 - `history`: the commits that introduced limits, locks and close handling, with their origins.
-- `local`: a walkthrough under the execution boundary in SKILL.md with realtime and model providers on fakes or deterministic local modes. Simulate a closed tab, a dropped connection and a second tab locally. Never use paid realtime or model providers to build a state.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md with realtime and model providers on fakes or deterministic local modes. Simulate a closed tab, a dropped connection and a second tab locally. Never use paid realtime or model providers to build a state.
 
 ## Orphaned reservation
 

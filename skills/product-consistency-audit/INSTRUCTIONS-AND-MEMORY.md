@@ -37,7 +37,7 @@ Record each source's provenance under P4. A decision record that says the owner 
 
 - `history`: the origin commit, the co-committed diff, later edits and removed lines. Most findings in this domain rest on history.
 - `source`: every enforcement point of the rule in code and data, listed with paths.
-- `local`: a walkthrough under the execution boundary in SKILL.md, used only when the effect on a person decides the finding (the person is blocked, sees a wrong message, cannot leave a state). Record the fixture person and the steps.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md, used only when the effect on a person decides the finding (the person is blocked, sees a wrong message, cannot leave a state). Record the fixture actor and the steps.
 
 **Build a rule record before hunting.** For each assigned rule, write down in scratch:
 

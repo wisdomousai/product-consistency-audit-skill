@@ -1010,8 +1010,11 @@ test("migration CLI validates before writing and never overwrites input or outpu
     assert.equal(fs.readFileSync(input, "utf8"), original);
     fs.writeFileSync(input, JSON.stringify([{ ...old, severity: {} }]));
     const invalidOutput = path.join(dir, "invalid.json");
-    assert.equal(run(invalidOutput).status, 1);
+    result = run(invalidOutput);
+    assert.equal(result.status, 1);
     assert.equal(fs.existsSync(invalidOutput), false);
+    assert.doesNotMatch(result.stderr, /\\u000a/);
+    assert.ok(result.stderr.trim().split("\n").length > 1, cliOutput(result));
     fs.writeFileSync(input, '{"unterminated":');
     result = run(invalidOutput);
     assert.equal(result.status, 1);

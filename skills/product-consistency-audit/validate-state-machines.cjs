@@ -12,6 +12,7 @@
  */
 
 const {
+  EARLIER_FORMAT_HINT,
   JsonStructureError,
   LIMITS,
   SafeInputError,
@@ -20,6 +21,7 @@ const {
   hasVisibleProse,
   isSafeRelativeSourcePath,
   readFileWithinLimit,
+  usesEarlierActorFields,
 } = require("./validate-findings.cjs");
 
 const MACHINE_ID = /^[a-z0-9][a-z0-9-]{0,127}$/;
@@ -163,6 +165,7 @@ function run(file) {
   const errors = validateInventory(inventory);
   for (const message of errors) console.error("ERROR:", escapeUnsafeDiagnosticCharacters(message));
   if (errors.length > 0) {
+    if (usesEarlierActorFields(inventory)) console.error(EARLIER_FORMAT_HINT);
     console.error(`FAIL: ${errors.length} validation error(s)`);
     return 1;
   }

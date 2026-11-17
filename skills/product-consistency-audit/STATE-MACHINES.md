@@ -42,7 +42,7 @@ DATA-MODEL-AND-STATE.md covers single states and fields: a status without an exi
 
 - `source`: storage, the expressions readers use to tell each state, every writer with its guard, contracts that expose the state, and the checks that exercise each transition.
 - `history`: the commit that introduced each field and transition, and later commits that added a writer or a reader that skips the others' guard.
-- `local`: a walkthrough under the execution boundary in SKILL.md that moves a fixture record through the machine on a disposable data store. Never query or write a shared or hosted store to count values or build a state.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md that moves a fixture record through the machine on a disposable data store. Never query or write a shared or hosted store to count values or build a state.
 
 ## Lifecycle spread across fields
 
@@ -158,7 +158,7 @@ Not a gap:
 
 ## Choosing the recommended shape
 
-A finding from this file recommends a shape for the whole machine, and that shape must improve the experience of people using the product, developers and agents. Write the effect on each in `remediation.experience` (`human_users`, `developers`, `agents`). Choose the smallest shape that improves all of them. When no shape improves one group, say which and why in that field, and put the choice to the owner as a fix decision with the alternatives.
+A finding from this file recommends a shape for the whole machine, and that shape must improve the experience of human users, developers and agents. Write the effect on each in `remediation.experience` (`human_users`, `developers`, `agents`). Choose the smallest shape that improves all of them. When no shape improves one group, say which and why in that field, and put the choice to the owner as a fix decision with the alternatives.
 
 Start from this shape and remove whatever the machine does not need (P6):
 

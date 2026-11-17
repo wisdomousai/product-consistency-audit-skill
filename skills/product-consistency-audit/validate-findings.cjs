@@ -68,6 +68,17 @@ class JsonStructureError extends Error {}
 class SafeInputError extends Error {}
 class PrinciplesError extends Error {}
 
+const EARLIER_FORMAT_HINT = "HINT: this artifact uses the earlier person/people fields; convert it with migrate-actor-records.cjs (RECORD-FORMAT.md)";
+
+function usesEarlierActorFields(records) {
+  const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+  return Array.isArray(records) && records.some((record) => isRecord(record) && (
+    hasOwn(record, "person") || hasOwn(record, "people") ||
+    (isRecord(record.canonical_refs) && hasOwn(record.canonical_refs, "person")) ||
+    (isRecord(record.remediation) && isRecord(record.remediation.experience) && hasOwn(record.remediation.experience, "people"))
+  ));
+}
+
 function escapeUnsafeDiagnosticCharacters(value) {
   return String(value).replace(UNSAFE_DIAGNOSTIC_CHARACTER, (character) => {
     const codePoint = character.codePointAt(0);
@@ -874,6 +885,7 @@ function run(file) {
   }
   for (const message of errors) console.error("ERROR:", escapeUnsafeDiagnosticCharacters(message));
   if (errors.length > 0) {
+    if (usesEarlierActorFields(findings)) console.error(EARLIER_FORMAT_HINT);
     const cap = errors.length === LIMITS.validationErrors ? `; output capped at ${LIMITS.validationErrors}` : "";
     console.error(`FAIL: ${errors.length} validation error(s)${cap}`);
     return 1;
@@ -889,6 +901,7 @@ module.exports = {
   SafeInputError,
   UNSAFE_DIAGNOSTIC_CHARACTER,
   VISIBLE_CONTENT,
+  EARLIER_FORMAT_HINT,
   WINDOWS_RESERVED_COMPONENT,
   collect,
   collectFindingSemanticErrors,
@@ -899,6 +912,7 @@ module.exports = {
   isSafeRelativeSourcePath,
   loadPrincipleIds,
   readFileWithinLimit,
+  usesEarlierActorFields,
   validateDocument,
 };
 
