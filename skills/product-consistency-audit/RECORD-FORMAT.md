@@ -1,6 +1,6 @@
 # Actor Record Format
 
-Read this when producing structured artifacts or importing an earlier run. New run metadata records `artifact_format: "actors-v2"`. The four artifact files remain top-level arrays.
+Read this when producing structured artifacts or importing an earlier run. New run metadata records `artifact_format: "actors-v2"`. The four artifact files below remain top-level arrays. `term-register.json`, added later, is also a top-level array; it has no actor fields and needs no migration.
 
 | Artifact | Current field | Earlier field |
 |---|---|---|

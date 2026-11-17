@@ -5,9 +5,10 @@
  * Usage: node validate-intent-register.cjs <path-to-intent-register.json>
  *
  * Checks entry and field shapes, inferred actors, line numbers (positive integer
- * or null), provenance values, origin rules for not_traceable, and duplicate
- * capabilities. Whether a purpose is drawn from outside the code is left to
- * reconnaissance and the coverage critic.
+ * or null), provenance values, origin rules for not_traceable, duplicate
+ * capabilities, and that optional term links are term-register IDs. Whether a
+ * purpose is drawn from outside the code is left to reconnaissance and the
+ * coverage critic.
  */
 
 const {
@@ -28,6 +29,8 @@ const SOURCE_KINDS = new Set(["file", "commit", "branch", "transcript"]);
 const ORIGIN_KINDS = new Set([...SOURCE_KINDS, "not_traceable"]);
 const PROVENANCE = new Set(["owner_statement", "accepted_recommendation", "bulk_accepted_recommendation", "unattributed"]);
 const ENTRY_KEYS = ["capability", "actors", "purpose", "sources", "rules", "conflicts", "open_questions", "decided_not_on_ref"];
+const OPTIONAL_ENTRY_KEYS = ["terms"];
+const TERM_ID = /^[a-z0-9][a-z0-9-]{0,127}$/;
 
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const isText = (value) => typeof value === "string" && hasVisibleProse(value) && value.trim() === value;
@@ -101,7 +104,14 @@ function validateRegister(register) {
   const capabilities = new Set();
   register.forEach((entry, index) => {
     const base = `$[${index}]`;
-    if (!checkKeys(entry, ENTRY_KEYS, ENTRY_KEYS, base, errors)) return;
+    if (!checkKeys(entry, [...ENTRY_KEYS, ...OPTIONAL_ENTRY_KEYS], ENTRY_KEYS, base, errors)) return;
+    if ("terms" in entry) {
+      const terms = checkArray(entry.terms, `${base}.terms`, errors);
+      terms.forEach((id, i) => {
+        if (typeof id !== "string" || !TERM_ID.test(id)) errors.push(`${base}.terms[${i}]: must be a term-register id`);
+      });
+      if (new Set(terms).size !== terms.length) errors.push(`${base}.terms: duplicate term id`);
+    }
     if (!isText(entry.capability)) errors.push(`${base}.capability: invalid text`);
     else if (capabilities.has(entry.capability)) errors.push(`${base}.capability: duplicate capability`);
     else capabilities.add(entry.capability);
@@ -183,6 +193,6 @@ function run(file) {
   return 0;
 }
 
-module.exports = { validateRegister };
+module.exports = { validateRegister, checkSource, checkLocation };
 
 if (require.main === module) process.exit(run(process.argv[2]));

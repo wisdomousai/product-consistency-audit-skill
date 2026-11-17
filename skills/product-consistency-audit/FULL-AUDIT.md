@@ -48,12 +48,14 @@ The parent creates and is the only writer of shared run files:
 - `architecture.md`
 - `intent-register.json`
 - `state-machines.json`
+- `term-register.json`
 - `coverage-ledger.json`
 - `findings.json`
 - `SUMMARY.md`
 - `decision-tree.json`
 - `decisions.json`
 - `DECISIONS.md`
+- `GLOSSARY-PROPOSAL.md`
 - `recon/`, holding each reconnaissance report verbatim as `recon/<agent>.md`
 - `briefs/`, holding shared hunter and verifier briefs ([HUNTING.md](HUNTING.md), [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md))
 
@@ -67,7 +69,7 @@ Before delegation, the parent writes `run-metadata.json` with at least `run_id`,
 
 Report only the coverage established by this run. Build a deterministic coverage plan before hunting and update it after every agent result. [RECONNAISSANCE.md](RECONNAISSANCE.md) defines the coverage units and [HUNTING.md](HUNTING.md) defines coverage-critic waves. The parent alone updates the ledger.
 
-If prior runs exist, read every compatible `coverage-ledger.json`, `findings.json` and `intent-register.json` before planning:
+If prior runs exist, read every compatible `coverage-ledger.json`, `findings.json`, `intent-register.json` and `term-register.json` before planning:
 
 1. Compare the relevant current source and instruction files with each prior record and unit. A prior source ref alone is not evidence that a path is unchanged. A changed instruction file or memory counts as changed source for every unit that cites it.
 2. Bring a prior `confirmed` record into the current candidate set only when its source, intent sources and conditions are unchanged. Link it to a current `planned` unit, exclude only that root cause from hunters, and send it through current verification.
@@ -75,6 +77,7 @@ If prior runs exist, read every compatible `coverage-ledger.json`, `findings.jso
 4. Read prior `decisions.json`. A recorded decision is an intent source with the provenance its `answered_as` field gives under P4. At `owner_statement` rank it outranks every written source and clears a later candidate on the same point; a finding the owner accepted as intended at that rank is not reported again unless its source changed. A `bulk_accepted` answer has bulk rank and is asked again when a candidate depends on it. Prior `needs_owner_intent` records without an answer become current work with the same fingerprint.
 5. Prior `deferred`, `blocked`, `out_of_scope` and changed-source units become current work. A prior `rejected` record suppresses only its unchanged claim, never coverage of its unit.
 6. A prior `quick` or scoped ledger contributes only its recorded evidence and gaps, never an implied "the rest is fine."
+7. A prior settled term carries over with its cases and outcome when its definitions and use sites are unchanged and the decisions it cites have `owner_statement` provenance. Ask its cases again only for a use site that is new or changed. A prior `open` or `unconfirmed` term becomes current work.
 
 If no prior ledger exists, say so in the final coverage statement.
 
@@ -106,6 +109,15 @@ A **state machine run** finds every lifecycle in the target, explicit or implici
 
 A state machine run combines with any profile and with an audience scope.
 
+A **term run** settles what the product's domain words mean and finds the behaviour built on the wrong meaning. It is a scoped run over [DOMAIN-TERMS.md](DOMAIN-TERMS.md), started by requests such as "check our domain terms", "what does visit mean in this codebase" or "which words in our glossary are missing or overloaded".
+
+- Reconnaissance runs as usual. The parent selects terms by signal, or takes the terms the owner names, runs agent 1f, writes `term-register.json` and runs the Owner term check ([RECONNAISSANCE.md](RECONNAISSANCE.md)).
+- The ledger gets a unit per term for each DOMAIN-TERMS.md class its entry makes plausible. Flows that use no selected term are `out_of_scope`.
+- Every confirmed record names the glossary change in `remediation.instruction_changes`. The run always writes `GLOSSARY-PROPOSAL.md`, including definitions for terms the glossary was missing.
+- The decision tree puts each term's outcome to the owner as one decision, with the findings for that term below it.
+
+A term run combines with any profile, with an audience scope and with a state machine run.
+
 A **fix verification run** checks fixes made after an earlier run. It starts from the prior `findings.json`, `decisions.json` and the diff between the prior source ref and the current one, and is recorded as `scope: "fix_verification"` with `prior_run` in `run-metadata.json`.
 
 - The ledger gets one unit per prior `confirmed` record the owner decided to fix, with the record's entrypoint as the surface. Each unit also cites the changed paths that touch the record's trace.
@@ -121,7 +133,7 @@ Profiles change breadth and redundancy. The evidence bar is the same in every pr
 
 When a budget is set, record the maximum agent invocations and a list of reservations in `run-metadata.json`. Each reservation names its job and whether it is reserved, running or spent. A new agent consumes one invocation; continuing an existing agent does not. Never exceed the limit or spend a verification reservation on hunting.
 
-Before reconnaissance, reserve its five calls, the next hunter assignment, the mandatory critics (one in `quick`, a post-wave and a final-clean critic otherwise), and review for one candidate. Review reserves one fresh verifier in `quick` or two in `standard` and `deep`. If these cannot fit, record `incomplete` with reason `budget_cannot_fund_reconnaissance_and_reserves` and offer a smaller run or guidance; do not launch an unfundable audit.
+Before reconnaissance, reserve its six calls (agents 1a–1f), the next hunter assignment, the mandatory critics (one in `quick`, a post-wave and a final-clean critic otherwise), and review for one candidate. Review reserves one fresh verifier in `quick` or two in `standard` and `deep`. If these cannot fit, record `incomplete` with reason `budget_cannot_fund_reconnaissance_and_reserves` and offer a smaller run or guidance; do not launch an unfundable audit.
 
 Before each hunter assignment:
 
@@ -135,22 +147,23 @@ Release unused reservations after the result, and spend the reserved calls on ac
 
 In full audit mode, follow all six phases in order:
 
-1. **Reconnaissance**: map actors, goals, intent sources and their origins, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json`, `state-machines.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md), and validate the register with `validate-intent-register.cjs` and the machine inventory with `validate-state-machines.cjs`. Before hunting, resolve material uncertainty in the actor, authority and organisation map (RECONNAISSANCE.md, Actors and organisation check).
+1. **Reconnaissance**: map actors, goals, intent sources and their origins, domain terms, gates, cross-surface state, the data model and local walkthrough capability; write `architecture.md`, `intent-register.json`, `state-machines.json`, `term-register.json` and the initial ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md), and validate the register with `validate-intent-register.cjs`, the machine inventory with `validate-state-machines.cjs` and the term register with `validate-term-register.cjs`. Before hunting, resolve material uncertainty in the actor, authority and organisation map and in the meaning of the selected terms (RECONNAISSANCE.md, Actors and organisation check and Owner term check).
 2. **Coverage-led hunting waves**: assign isolated hunters from the ledger and collect structured results with [HUNTING.md](HUNTING.md), [FIT-CLASSES.md](FIT-CLASSES.md) and the selected companions.
 3. **Candidate validation**: give every candidate to a fresh verifier that re-derives the intent before reading the hunter's wording, as defined in [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md).
 4. **Structured output**: write final `confirmed`, `needs_owner_intent` and `rejected` records to `findings.json`; validate with `report-schema.json` and `validate-findings.cjs`, and validate the ledger with `validate-coverage-ledger.cjs`.
 5. **Independent record verification**: fresh agents verify final records and reconcile corrections.
-6. **Owner review**: write a short `SUMMARY.md`, turn the verified records into a decision tree, and work through it with the owner one decision at a time, each with a recommended answer, until every decision is made. Record the answers in `decisions.json` and `DECISIONS.md`.
+6. **Owner review**: write a short `SUMMARY.md`, turn the verified records into a decision tree, and work through it with the owner one decision at a time, each with a recommended answer, until every decision is made. Record the answers in `decisions.json` and `DECISIONS.md`, and write `GLOSSARY-PROPOSAL.md` from the settled terms.
 
 The run ends in one of three states: the owner session is finished and its decisions are recorded; the summary and decision tree are written and the session is pending because the owner is not available; or `run_status: "incomplete"` is recorded with its reason and the gap is disclosed in the summary. Every validator passes in the first two. If a phase cannot finish, preserve its artifacts and record the precise incomplete state; do not imply completion.
 
 ## Completion evidence
 
-Run all four validators against the actual final artifacts and record each command and exit status in `run-metadata.json` under `validation_checks`:
+Run all five validators against the actual final artifacts and record each command and exit status in `run-metadata.json` under `validation_checks`:
 
 ```sh
 node <skill-dir>/validate-intent-register.cjs <output-dir>/intent-register.json
 node <skill-dir>/validate-state-machines.cjs <output-dir>/state-machines.json
+node <skill-dir>/validate-term-register.cjs <output-dir>/term-register.json <output-dir>/decisions.json
 node <skill-dir>/validate-coverage-ledger.cjs <output-dir>/coverage-ledger.json
 node <skill-dir>/validate-findings.cjs <output-dir>/findings.json
 ```

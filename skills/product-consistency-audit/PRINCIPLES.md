@@ -165,3 +165,13 @@ Bulk-accepted and unattributed sources state intent for the register, but they n
 **Evidence.** The lifecycle, the places that encode or derive its state, and a cost: readers that tell the same record's state differently, a move the sources forbid that a writer can still make, an actor left in a state with no named next action, or a lifecycle change that has to be made in several places that have already drifted.
 
 **Not a gap.** A fact with two values, a single writer and no moves that a boolean already names. A lifecycle defined in a library or framework the target uses, when every writer goes through it. A definition mirrored in a database constraint and a code type that a check keeps in step.
+
+### P15 One meaning per term
+
+**Statement.** A domain term that shapes behaviour has one meaning, established outside the code, that says what it covers and what it does not. Schema, APIs, screens, copy in every language, model prompts, tool descriptions and instruction files use the term in that meaning. When the domain has several things under one word, each has its own word. A distinction actors need has a word.
+
+**Check.** For each term that names a record, a status, a role field, a guard or an action, find its written definition, or record that it has none or only example sentences. List its use sites by surface. For each use site, note what it assumes about who takes part, where, whether it is paid or booked, and what must follow. Sort the use sites into senses. Find the field, if any, that code uses to choose between two words.
+
+**Evidence.** Two use sites of the same term that assume different things, or a use site that assumes something the definition excludes, and an actor or record that one of them mishandles. For an undefined term, the use sites, the absence of a definition, and the behaviour that rests on the meaning the code chose.
+
+**Not a gap.** Identifiers that keep an old word when a source says so and a written mapping gives the current word. Everyday use that a reader cannot mistake for the domain term and that has no behaviour attached ("visit the help page" in a help menu). Two words for one thing when no rule, state or gate differs between them.

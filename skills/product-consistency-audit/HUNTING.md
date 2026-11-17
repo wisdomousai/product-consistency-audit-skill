@@ -16,15 +16,16 @@ Every hunter prompt contains these parts in this order:
 2. [PRINCIPLES.md](PRINCIPLES.md), verbatim or by absolute path with an instruction to read it in full.
 3. `architecture.md`, verbatim or by absolute path with the same instruction.
 4. The intent register entries for the assigned capabilities, verbatim, and the `state-machines.json` entries for any machine the assigned units name.
-5. Assigned coverage IDs, capability, gate, starting paths, and each unit's block map from `coverage-ledger.json`.
-6. The selected blocks copied verbatim: each ordinary fit-class block from [FIT-CLASSES.md](FIT-CLASSES.md), and from each selected companion its `Core discipline`, each chosen class subsection, `Universal moves` and `Validation rules`. Never send block names alone.
-7. Excluded blocks, each with its reason.
-8. The core hunting method below.
-9. The candidate gate below.
-10. Same-source prior confirmations brought into this run, limited to fingerprint, title and root cause, plus peer-owned coverage IDs this hunter must not duplicate.
-11. The agent's scratch path, agent ID, candidate cap (FULL-AUDIT.md, Budget reservations), whether walkthroughs are enabled and with which fixture actor, and the structured-result contract including the `confirmed` and `needs_owner_intent` branches of `report-schema.json` copied verbatim. Include the [severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty), or its absolute path and section with an instruction to read it before assigning severity.
+5. The `term-register.json` entries, verbatim, for every term the assigned capabilities list in `terms` and every term the assigned units name. When none apply, say that the register has no entry for these units.
+6. Assigned coverage IDs, capability, gate, starting paths, and each unit's block map from `coverage-ledger.json`.
+7. The selected blocks copied verbatim: each ordinary fit-class block from [FIT-CLASSES.md](FIT-CLASSES.md), and from each selected companion its `Core discipline`, each chosen class subsection, `Universal moves` and `Validation rules`. Never send block names alone.
+8. Excluded blocks, each with its reason.
+9. The core hunting method below.
+10. The candidate gate below.
+11. Same-source prior confirmations brought into this run, limited to fingerprint, title and root cause, plus peer-owned coverage IDs this hunter must not duplicate.
+12. The agent's scratch path, agent ID, candidate cap (FULL-AUDIT.md, Budget reservations), whether walkthroughs are enabled and with which fixture actor, and the structured-result contract including the `confirmed` and `needs_owner_intent` branches of `report-schema.json` copied verbatim. Include the [severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty), or its absolute path and section with an instruction to read it before assigning severity.
 
-The parent may write the parts every hunter shares (2, 3, 8, 9 and the contract from 11) once, to `<output-dir>/briefs/hunter-brief.md`, with the method, the gate and the contract copied verbatim and PRINCIPLES.md and `architecture.md` given by absolute path. The per-agent parts (4, 5, 6, 7, 10, and the ID, scratch path and cap) go to `agents/<agent-id>/scratch/assigned-units.json`. The prompt then gives both absolute paths and tells the hunter to read them in full before starting. For agents that can read files, part 6 may list each block by file and heading with the skill directory's absolute path and an instruction to read every listed block in full. A block name without that instruction does not count as sending the block.
+The parent may write the parts every hunter shares (2, 3, 9, 10 and the contract from 12) once, to `<output-dir>/briefs/hunter-brief.md`, with the method, the gate and the contract copied verbatim and PRINCIPLES.md and `architecture.md` given by absolute path. The per-agent parts (4, 5, 6, 7, 8, 11, and the ID, scratch path and cap) go to `agents/<agent-id>/scratch/assigned-units.json`. The prompt then gives both absolute paths and tells the hunter to read them in full before starting. For agents that can read files, part 7 may list each block by file and heading with the skill directory's absolute path and an instruction to read every listed block in full. A block name without that instruction does not count as sending the block.
 
 Scope sets what the hunter must cover. Units owned by peers or excluded stay with their owners. If a different capability, gate or rule appears, return it under `uncovered` so the parent creates a unit for the next wave.
 
@@ -52,6 +53,16 @@ START FROM THE ACTOR AND THE TASK.
    unit as blocked with that reason (P4).
 3. For each written rule that shapes the capability, read its origin and the scope
    the origin supports (P2, P3).
+
+READ DOMAIN WORDS FROM THE TERM REGISTER.
+A word for a record, event or action means what the term register says, not what
+it usually means and not what the code's names suggest (P15). For a settled term,
+use its definition and quote the case that covers your situation. For an open or
+unconfirmed term, trace each sense; where the verdict differs between senses,
+propose needs_owner_intent with a case as the question. When a word your verdict
+depends on is not in the register and its use sites differ, do not choose a
+meaning: return it under uncovered with a DOMAIN-TERMS.md class. A table, enum,
+route, tool or file name shows what was built, not what it means (P4).
 
 TRACE THE ACTOR THROUGH THE CODE.
 Follow the actor from each entry surface through every gate, redirect, state write
@@ -134,6 +145,10 @@ notes or screenshots in scratch. Record the exact steps and fixture actor.
 9. Return at most your candidate cap, strongest first by severity and by how many
    actors each reaches. Put the rest under uncovered, with its fingerprint in
    fingerprint and a one-sentence claim in reason.
+10. Name each domain term the verdict depends on and the register case or
+   definition you used for it. A meaning taken from an identifier or from
+   everyday usage is not intent. A verdict that depends on an open or
+   unconfirmed term is needs_owner_intent.
 ```
 
 ## Structured hunter result
@@ -202,7 +217,7 @@ The owner may ask other models or tools to review the target during a run, or br
 
 ## Coverage-critic waves
 
-Immediately after each hunter wave, spend the reserved invocation on a fresh `research` post-wave coverage critic, with its own agent directory. It receives [PRINCIPLES.md](PRINCIPLES.md), `architecture.md`, `intent-register.json`, the full ledger with block maps, current candidate fingerprints and states, and the prior-run gap summary. It reads source and history but does not run the target. It writes exactly this JSON to its `scratch/result.json`:
+Immediately after each hunter wave, spend the reserved invocation on a fresh `research` post-wave coverage critic, with its own agent directory. It receives [PRINCIPLES.md](PRINCIPLES.md), `architecture.md`, `intent-register.json`, `term-register.json`, the full ledger with block maps, current candidate fingerprints and states, and the prior-run gap summary. It reads source and history but does not run the target. It writes exactly this JSON to its `scratch/result.json`:
 
 ```json
 {
@@ -224,7 +239,7 @@ Immediately after each hunter wave, spend the reserved invocation on a fresh `re
 }
 ```
 
-The critic checks for: capabilities in the register with no unit, including unsupported actors whose tasks are required now; actors and technical tasks the sources or implementation imply that the register neither names nor infers; in an audience-scoped run, surfaces an audience actor reaches with no unit for that actor, and actions by other actors that change an audience actor's state with no unit; written rules in the register with no Instructions-and-memory unit; status enums and core entities with no Data-model unit; lifecycles the source shows that `state-machines.json` lacks, and machines with no State-machines unit; gates and multi-step flows with no unit for the lifecycle cases that apply; selected companion classes without a unit; unjustified exclusions; units closed without paths or checks; units closed with an intent that rests only on the code under review; and prior `needs_owner_intent` or changed-source gaps no unit addresses. It proposes coverage units only and leaves candidate gaps to hunters. `stop` is `true` only when it proposes nothing.
+The critic checks for: capabilities in the register with no unit, including unsupported actors whose tasks are required now; actors and technical tasks the sources or implementation imply that the register neither names nor infers; in an audience-scoped run, surfaces an audience actor reaches with no unit for that actor, and actions by other actors that change an audience actor's state with no unit; written rules in the register with no Instructions-and-memory unit; status enums and core entities with no Data-model unit; lifecycles the source shows that `state-machines.json` lacks, and machines with no State-machines unit; words for records, events or actions that carry different qualifiers, translations or actors across surfaces and have no entry in `term-register.json`, and terms with no Domain-terms unit; units closed as `covered` whose verdict depends on an open or unconfirmed term; gates and multi-step flows with no unit for the lifecycle cases that apply; selected companion classes without a unit; unjustified exclusions; units closed without paths or checks; units closed with an intent that rests only on the code under review; and prior `needs_owner_intent` or changed-source gaps no unit addresses. It proposes coverage units only and leaves candidate gaps to hunters. `stop` is `true` only when it proposes nothing.
 
 The parent rejects proposed units outside scope or the execution boundary, derives canonical IDs, deduplicates against current units, and fails rather than merging an ID collision. For each legitimate `reassign_id` with live evidence, append the unit's terminal record to `attempts` with the critic's reason, increment `wave`, and give the next attempt a fresh owner and empty live evidence. In `standard` and `deep`, when the post-wave critic proposes nothing and no `planned` units remain, spend the reserved invocation on a distinct final-clean critic. Coverage is complete only when that critic also proposes nothing. If it finds work, queue it and repeat.
 

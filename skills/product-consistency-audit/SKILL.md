@@ -1,6 +1,6 @@
 ---
 name: product-consistency-audit
-description: Audit whether an implementation serves its intended human users, agents and technical tasks. Find missing task paths, unnecessary machinery and conflicting behaviour using sourced requirements. Use for focused flow, tool, data-model or state-machine reviews, or explicit full codebase audits with verified findings and owner decisions.
+description: Audit whether an implementation serves its intended human users, agents and technical tasks. Find missing task paths, unnecessary machinery and conflicting behaviour using sourced requirements. Use for focused flow, tool, data-model, state-machine or domain-term reviews, or explicit full codebase audits with verified findings and owner decisions.
 ---
 
 # Product Consistency Audit
@@ -19,13 +19,16 @@ An actor may be a human user, developer, operator, agent or automated service. S
 
 **Full audit requires an explicit request** to audit a codebase end to end or produce audit artifacts. Read [FULL-AUDIT.md](FULL-AUDIT.md) before starting. It defines the six phases, profiles, budgets, write ownership, prior runs and validation requirements. A completed full audit requires actual artifacts, a maintained ledger, executed validators and independent review. If those cannot be completed, report the run as incomplete with its demonstrated coverage.
 
+In guidance mode, when the answer would change under another reading of a domain word, search the word on at least two kinds of surface (schema or code, and copy, prompts or tool descriptions) and state the reading used, with its source. If two readings survive, ask the owner one example case ("A neighbour with no account drops in. Is that a visit?") or give the conclusion under each reading. For a word with no written definition, propose one with what it covers and what it does not, and confirm it with cases.
+
 For an ambiguous request, start with bounded guidance. Ask only when missing information prevents useful work.
 
 | Question or discovered surface | Read when relevant |
 |---|---|
 | Instructions, memories, rule origins or overfit | P2–P7 and [INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md) |
-| Gates, recovery, contradictions or an unfamiliar gap | Relevant P6–P14 and selected classes in [FIT-CLASSES.md](FIT-CLASSES.md) |
+| Gates, recovery, contradictions or an unfamiliar gap | Relevant P6–P15 and selected classes in [FIT-CLASSES.md](FIT-CLASSES.md) |
 | Technical obligations or agent task completion | [TECHNICAL-AND-AGENT-TASKS.md](TECHNICAL-AND-AGENT-TASKS.md) and its cited principles |
+| A domain word, a glossary entry, an undefined term or a word used in more than one sense | P4, P5, P15 and [DOMAIN-TERMS.md](DOMAIN-TERMS.md) |
 | Persisted state or lifecycle changes | P6, P10, P12, P14 and [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md) or [STATE-MACHINES.md](STATE-MACHINES.md) |
 | Access, onboarding, billing, long-running work, cross-surface state or public claims | The matching companion linked from [FIT-CLASSES.md](FIT-CLASSES.md) |
 | Ranking a finding by severity | [Separate priority from certainty](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty) in VALIDATION-AND-OWNER-REVIEW.md, that section only |
@@ -33,7 +36,7 @@ For an ambiguous request, start with bounded guidance. Ask only when missing inf
 
 ## Evidence bar
 
-Every finding needs a named actor and goal, intent grounded outside the implementation under review, a reachable situation and evidence of the consequence. Trace from entrypoint to outcome; distinguish source, history and local execution evidence. Missing features are gaps only when sources require them. A planned fix does not establish behaviour on the reviewed ref.
+Every finding needs a named actor and goal, intent grounded outside the implementation under review, a reachable situation and evidence of the consequence. A domain word means what its definition or the owner's answers say; an identifier or everyday usage does not establish its meaning (P15). Trace from entrypoint to outcome; distinguish source, history and local execution evidence. Missing features are gaps only when sources require them. A planned fix does not establish behaviour on the reviewed ref.
 
 [PRINCIPLES.md](PRINCIPLES.md) is authoritative for purpose, provenance and exceptions. Apply P4 to every source, including owner decisions, task transcripts and instruction files; an unattributed restatement cannot settle the scope of the rule it repeats. When the deciding intent remains open, use `needs_owner_intent` with the question and what each answer requires. It has no severity. A disproved claim is rejected, not left as an intent question.
 

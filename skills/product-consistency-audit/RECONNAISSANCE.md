@@ -1,6 +1,6 @@
 # Reconnaissance
 
-### Phase 1: Map intent, actors, gates and the data model, then plan coverage
+### Phase 1: Map intent, actors, terms, gates and the data model, then plan coverage
 
 The parent initializes `run-metadata.json`, applies the budget reservations in [FULL-AUDIT.md](FULL-AUDIT.md), then creates agent directories and the shared ledger before hunting. Reconnaissance reads source, documentation, instruction files and git history. It does not run the target, contact deployed services, or write files; agents return structured facts to the parent.
 
@@ -40,6 +40,9 @@ it and do not use the network. Return:
 6. When the run names an audience: which named or inferred actors each audience
    term covers, with the source or code that ties them, and every surface those
    actors reach.
+7. Domain words as the sources write them. Quote the words for records, events
+   and actions exactly, do not replace them with your own, and say where a source
+   uses a word without defining it.
 Return only facts with repository-relative file:line references or precise
 conversation/message references for supplied task and owner statements.
 ```
@@ -57,6 +60,10 @@ Find every written source of product intent in <target>:
   subdirectories, any memory or notes directories committed with the code, and the
   memory or transcript paths outside the repository listed below, read only.
 - Plan files, TODO lists and changelogs.
+- Glossaries, vocabulary sections in style or voice guides, and vocabulary lint
+  tools. For each, list the terms it defines, whether it defines what a term
+  covers or only which word to use, and the domain words used nearby that it
+  does not define.
 For each material rule (a "must", "never", "always", "only", a stated limit or a
 stated model of the domain), return:
 1. The rule text and location.
@@ -118,7 +125,10 @@ For each status, enum value, mode and flag:
 5. The commit that introduced it (git log -S on the value), with its message.
 Mark values with no producer, no consumer or no exit, flags with a single reachable
 value, and combinations of fields the code allows but other code assumes cannot
-happen. Report these as facts for hunters to assess.
+happen. Also list fields that code reads to decide which word or kind applies to a
+record (a kind derived from whether a place or price is filled in), and role
+fields whose references admit fewer kinds of actor than a name suggests. Report
+these as facts for hunters to assess.
 Then list every state machine, explicit or implicit: any record, actor or screen
 that moves through states which change what someone can do. Look for status
 columns, booleans and nullable timestamps read together, time-derived states,
@@ -165,13 +175,36 @@ Return:
    real subscription).
 ```
 
+**Agent 1f: Term senses**
+
+Launch this agent after 1a–1d return and the parent has selected terms (Term register below). Skip it when no term is selected.
+
+```text
+For each term below, find every use in <target>: schema, migrations, code,
+API and tool schemas, tool and MCP descriptions, model prompts the product sends,
+copy in every locale, docs, guides and instruction files. Search every form:
+each locale's words, singular and plural, identifiers and route segments. Do not
+run anything and do not decide what the term should mean. Return per term:
+1. Written definitions, quoted with location, and example sentences that imply
+   one. Say if none exists.
+2. The senses the uses fall into. For each sense: what it assumes about who
+   takes part, where, paid or unpaid, booked or not, and what must follow; and
+   its use sites with surface, repository-relative file:line and a short quote.
+3. For each sense, the rules, guards, statuses, flags and messages that depend
+   on it.
+4. Fields the code reads to choose between this term and another.
+5. Locales whose word for the term carries a different meaning.
+6. The commit that first tied the term to one sense, with its message.
+Terms: <terms with their selection signals>
+```
+
 Save each report verbatim as `<output-dir>/recon/<agent>.md` as soon as it returns. Hunters and verifiers can then be pointed at a report, and the parent's context is not its only copy.
 
-Add focused reconnaissance agents for apps or capabilities these five do not map. If the budget blocks one, seed the unmapped area as a `deferred` ledger unit with reason `budget_cannot_reserve_critics_and_validation` and disclose the gap.
+Add focused reconnaissance agents for apps or capabilities that agents 1a–1e do not map. If the budget blocks one, seed the unmapped area as a `deferred` ledger unit with reason `budget_cannot_reserve_critics_and_validation` and disclose the gap.
 
 ## Prior-run input
 
-Before selecting work, the parent reads every available prior `coverage-ledger.json`, `findings.json`, `intent-register.json` and `decisions.json` for the same repo and applies the prior-run rules in [FULL-AUDIT.md](FULL-AUDIT.md). Record paths and source refs used in `run-metadata.json`. Summarize only the coverage consequences in `architecture.md`.
+Before selecting work, the parent reads every available prior `coverage-ledger.json`, `findings.json`, `intent-register.json`, `term-register.json` and `decisions.json` for the same repo and applies the prior-run rules in [FULL-AUDIT.md](FULL-AUDIT.md). Record paths and source refs used in `run-metadata.json`. Summarize only the coverage consequences in `architecture.md`.
 
 ## Intent register
 
@@ -210,6 +243,7 @@ Rules:
 - An actor with no supported path has `served: false`. This is an observation, not a scope decision: a missing path can be underfit when a source requires it now. If the source describes a future audience or leaves timing open, ask about intent instead of inventing a current obligation.
 - `decided_not_on_ref` lists decided changes missing from the reviewed ref, such as an unmerged branch. They can guide a recommendation but do not establish behaviour on the reviewed ref. Report a current gap when it still exists, note the planned fix, and avoid recommending duplicate work.
 - Each `conflicts` entry is `{"description": "...", "sources": [...]}` with at least two source entries, so both quotes are recorded. A conflict the sources do not resolve becomes an `open_questions` entry and, if it decides a candidate, a `needs_owner_intent` record later.
+- `terms` is optional and lists the IDs of entries in `term-register.json` whose term the capability uses. The parent adds it after the Owner term check.
 - Leave suspected gaps out of the register; hunters assess them.
 
 Run `node <skill-dir>/validate-intent-register.cjs <output-dir>/intent-register.json` after writing the register and after every change to it. Fix every error before seeding the ledger.
@@ -257,7 +291,85 @@ After the intent register is written and validated, check the map against existi
 - Each relation between kinds of organisation and actor that the gates depend on: who belongs to whom, who acts for whom, who leads a case or account, and who may read what another actor writes.
 - Where sources disagree with each other or with the code about one of these, the options, with a recommended answer.
 
-Ask only about the map, not about findings. Record the answers in `decisions.json` with the provenance rules of Phase 6, and update `intent-register.json` and `architecture.md` before hunting. A correction to the map is an `owner_statement` source for every capability it touches. If the owner is not available, record the map as unconfirmed in `architecture.md`. Continue independent work. Each finding that depends on an unresolved relation then becomes `needs_owner_intent` on that relation.
+Ask only about the map, not about findings. Words for roles stay in this check; other domain words go to the Owner term check below. Record the answers in `decisions.json` with the provenance rules of Phase 6, and update `intent-register.json` and `architecture.md` before hunting. A correction to the map is an `owner_statement` source for every capability it touches. If the owner is not available, record the map as unconfirmed in `architecture.md`. Continue independent work. Each finding that depends on an unresolved relation then becomes `needs_owner_intent` on that relation.
+
+## Term register
+
+Agents read a word and assume what it means. The parent writes `<output-dir>/term-register.json` so that every later agent works from the meaning the owner settled, not from its own reading of a word.
+
+1. Select terms from the 1a–1d reports by the signals in [DOMAIN-TERMS.md](DOMAIN-TERMS.md), Term selection, within the profile's cap. Record the signals in `selected_for`. List terms over the cap in `architecture.md` as not examined.
+2. Run agent 1f on the selected terms, and save its report as `recon/1f.md`.
+3. Write one entry per term with `status: "open"`, then run the Owner term check below.
+
+The register is a top-level array with one entry per term:
+
+```json
+{
+  "id": "visit",
+  "term": "visit",
+  "forms": [{"form": "Besuch", "kind": "word", "locale": "de-CH"}, {"form": "coordination_visit_series", "kind": "identifier", "locale": null}],
+  "glossary_status": "implied_by_examples",
+  "selected_for": ["names_record", "gates_behaviour", "actors_narrower_than_sources", "sense_from_other_field", "in_prompt_or_tool", "undefined_in_glossary"],
+  "definitions": [{"kind": "file", "ref": "docs/VOICE-AND-SLOP-GUIDE.md", "line": 10, "quote": "They work within their job and the visit they have.", "provenance": "unattributed"}],
+  "senses": [
+    {"id": "anyone", "meaning": "Anyone from the support network spends time with the person.", "uses": [{"surface": "doc", "ref": "PRODUCT.md", "line": 22, "quote": "recording a visit"}]},
+    {"id": "paid-booking", "meaning": "A companion's booked time, with claiming and cover.", "uses": [{"surface": "api", "ref": "apps/web/lib/repositories/coordination-visits.ts", "line": 258, "quote": "This visit already has a companion"}]},
+    {"id": "page-view", "meaning": "The reader last opened the brief.", "uses": [{"surface": "copy", "ref": "apps/web/i18n/messages/communication/en-CH.json", "line": 539, "quote": "Since your last visit on"}]}
+  ],
+  "cases": [
+    {"id": "c1", "kind": "use_site", "text": "A neighbour with no account drops in on Tuesday.", "basis": [{"ref": "apps/web/lib/visit-status.ts", "line": 15}], "product_now": "She cannot be named as the visitor; the day shows Needs cover.", "recommended": {"verdict": "is", "term": null}, "answer": {"verdict": "is", "term": null, "decision_id": "T1"}},
+    {"id": "c2", "kind": "boundary", "text": "An agency companion comes every Thursday for two booked hours.", "basis": [], "product_now": "Shown as a visit with claiming and cover.", "recommended": {"verdict": "is_not", "term": "session"}, "answer": {"verdict": "is_not", "term": "session", "decision_id": "T2", "words": "That's a session."}}
+  ],
+  "status": "settled",
+  "outcome": {
+    "kind": "split",
+    "decision_ids": ["T3"],
+    "resulting_terms": [
+      {"term": "visit", "definition": "Anyone from the support network spending time with the person, at home unless a place is given.", "is": ["A neighbour with no account drops in on Tuesday."], "is_not": ["An agency companion's two booked hours on Thursday."], "forms": [{"form": "Besuch", "kind": "word", "locale": "de-CH"}], "identifiers": "unchanged"},
+      {"term": "session", "definition": "A companion's booked, paid visit.", "is": ["An agency companion's two booked hours on Thursday."], "is_not": ["A daughter dropping in after work."], "forms": [{"form": "Einsatz", "kind": "word", "locale": "de-CH"}], "identifiers": "unchanged"}
+    ]
+  }
+}
+```
+
+Rules:
+
+- `glossary_status` is `defined` when a source states what the term covers, `implied_by_examples` when only example sentences do, and `missing` when nothing does. `definitions` uses the intent register's source shape with P4 provenance; it is empty for `missing`.
+- `selected_for` holds the signals from DOMAIN-TERMS.md. Every sense has at least one use site with a `surface` of `schema`, `code`, `api`, `copy`, `prompt`, `tool_description`, `doc`, `instruction` or `test`, a repository-relative `ref` and a quote.
+- A `use_site` case cites its basis. A `boundary` case may have none. `recommended` is null when the sources are silent. An `answer` cites the decision that recorded it, and `words` keeps the owner's own words when they gave any.
+- `status` is `open` while the parent asks, `unconfirmed` when the owner is not available, and `settled` when every case is answered and the outcome is decided. Only a settled term has an `outcome`.
+- `outcome.kind` is `keep`, `define`, `redefine`, `rename`, `split` or `merge`, as defined in DOMAIN-TERMS.md, Outcomes. `define` applies only to a term the glossary does not define. A split gives two or more resulting terms; every other outcome gives one. A merge lists the words it merges in `merged_with`. Every resulting term has a definition, at least one `is` and one `is_not` case, its locale words, and `identifiers` as `unchanged` or a list of `{from, to}`.
+- Leave suspected gaps out of the register; hunters assess them.
+
+Run `node <skill-dir>/validate-term-register.cjs <output-dir>/term-register.json` after writing the register and after every change, and add `<output-dir>/decisions.json` as a second argument once it exists. Fix every error before seeding the ledger.
+
+## Owner term check
+
+Run this check in the same sitting as the Actors and organisation check, after it, and before hunting units that depend on a term. It follows the session format of Phase 6 ([VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md), Run the session).
+
+- Ask one case per question, as a situation with ordinary people, what the product does with it now, and the file and line. Never ask the owner for a definition.
+- Word the question so "yes" accepts the recommendation. When the sources are silent, say so and give no recommendation.
+- Ask one use-site case per sense, then boundary cases that change one attribute of an answered case, as described in [DOMAIN-TERMS.md](DOMAIN-TERMS.md), Example cases.
+- Accept answers in the owner's own words, including answers that reject every option offered. Record them verbatim in `words`.
+- Stop a term at five cases, or when two answers in a row move no boundary.
+- Then read the definition back with its is and is-not lists, and ask the outcome as the final question for that term. For a term with no definition, the read-back is the proposed glossary entry.
+- When the answers show a situation no selected term covers, ask a case that names it and propose a word. A new word gets its own register entry with `glossary_status: "missing"` and the outcome `define`.
+
+```
+❓ **T1** - **visit**: A neighbour with no account drops in on Tuesday. The schedule cannot name her as the visitor and shows Needs cover (apps/web/lib/visit-status.ts:15). Is that a visit?
+
+➡️ Yes. A visit is anyone from the support network spending time with the person (PRODUCT.md:22), so she should be the visitor and nothing needs cover.
+```
+
+Record each question in `decisions.json` with `id: "T<n>"`, the term ID, the case ID, the owner's answer in their words, `answered_as`, and the action `term_case`, or for the final question `term_kept`, `term_defined`, `term_redefined`, `term_renamed`, `term_split` or `term_merged`. Provenance follows Phase 6. A bulk reply leaves the term `open` and the cases it covered unanswered.
+
+After each settled term:
+
+- Update the register entry and run the validator with `decisions.json`.
+- Add the term ID to `terms` in every intent-register entry whose capability uses it. Add the answers as `transcript` sources at the provenance their `answered_as` gives, rewrite `purpose` in the settled words, and add any actor the answers name.
+- Update `architecture.md`.
+
+If the owner is not available, set the term to `unconfirmed` and continue independent work. Every finding whose verdict depends on the term becomes `needs_owner_intent`, with a case from the register as its question, and Phase 6 asks those cases first.
 
 ## Architecture summary and companion selection
 
@@ -273,10 +385,11 @@ The parent writes `<output-dir>/architecture.md`, capped at about 1,000 words:
 8. Local walkthrough capability: enabled or blocked, and why.
 9. Prior coverage gaps and revalidation targets.
 10. Selected companions from [FIT-CLASSES.md](FIT-CLASSES.md), each with the surface that requires it.
+11. Domain terms: each selected term with its status and outcome, the glossary files found, and the terms over the cap that were not examined.
 
 Select [TECHNICAL-AND-AGENT-TASKS.md](TECHNICAL-AND-AGENT-TASKS.md) when reconnaissance finds a supported agent task or technical requirement.
 
-Select a companion because reconnaissance found the surface its `When to use this file` section describes, never because a library or a word appears. [INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md) is selected whenever the target has any written rules, [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md) whenever it has persisted state, and [STATE-MACHINES.md](STATE-MACHINES.md) whenever `state-machines.json` holds an implicit machine or a machine with more than a single writer, runtime or surface.
+Select a companion because reconnaissance found the surface its `When to use this file` section describes, never because a library or a word appears. [INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md) is selected whenever the target has any written rules, [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md) whenever it has persisted state, [STATE-MACHINES.md](STATE-MACHINES.md) whenever `state-machines.json` holds an implicit machine or a machine with more than a single writer, runtime or surface, and [DOMAIN-TERMS.md](DOMAIN-TERMS.md) whenever `term-register.json` holds a term.
 
 ## Deterministic coverage ledger
 
@@ -290,6 +403,7 @@ Seed these units in addition to flow units:
 
 - An Instructions-and-memory unit for every material rule in the intent register, with the rule's location as the surface and its enforcement points as starting paths.
 - A Data-model unit for every status enum and core entity, with the definition as the surface.
+- A Domain-terms unit for every term in `term-register.json` and each DOMAIN-TERMS.md class its entry makes plausible, with the term's main definition or, without one, its first use site as the surface, and its use sites as starting paths. In `quick`, one unit per term with the class most of its senses suggest.
 - A State-machines unit for every machine in `state-machines.json` and each STATE-MACHINES.md class its record makes plausible, with the definition, or the main storage location of an implicit machine, as the surface and its writers as starting paths.
 
 Each dimension has a human label and a stable source-derived value in `canonical_refs`. Suitable references are a repository-relative path plus a route, export or heading; a rule location; an enum or table name; and the exact fit-class block reference. A block reference is `FILE.md#` plus the exact class name as written in that file: the `##` heading text in a companion, or the bold class name in [FIT-CLASSES.md](FIT-CLASSES.md) without the principle list that follows it (`FIT-CLASSES.md#Lockout`). Section blocks use their heading text (`INSTRUCTIONS-AND-MEMORY.md#Core discipline`). Do not lowercase or slug display labels.

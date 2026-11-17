@@ -7,7 +7,7 @@ Verifiers, critics and outside reviewers are all asked to attack something. An a
 - **Target**: the exact claims, records or units under attack, given as trace and evidence. Never the parent's or the hunter's conclusion, unless the mechanism in Phase 3 releases it after the blind reading.
 - **Angle**: what this reviewer tries to show. Examples are a missed exit, a stated need behind an overfit element, an intent source that says otherwise, an actor who cannot reach the entrypoint, a fix that creates a new stuck state, or a part of a plan that is not built. When several reviewers attack the same target, give each a different angle, and record which angles no one covers.
 - **Evidence bar**: a refutation needs the same evidence as a confirmation, with a path, a line or a reproduction. A refutation without evidence leaves the claim standing, and the claim goes to a fresh verifier. A claim that rests on an open intent becomes `needs_owner_intent`, whichever side the reviewer takes.
-- **Known decisions**: the owner's recorded decisions and the actors and organisation map. The reviewer may show that the code breaks a decision, but does not argue the decision itself. A reviewer who thinks a decision is wrong returns that as a note for the owner session.
+- **Known decisions**: the owner's recorded decisions, the actors and organisation map, and the settled entries in `term-register.json`. The reviewer may show that the code breaks a decision, but does not argue the decision itself. A reviewer who thinks a decision is wrong returns that as a note for the owner session.
 - **Role and tools**: source reader or walker (FULL-AUDIT.md, Role assignment), the fixture actor for a walker, and what the reviewer may not do.
 - **Stopping rule and budget**: when the reviewer stops, for example at the first refutation with evidence, after each angle is checked once, or at a fixed number of claims.
 - **Output**: the result shape the parent can merge, never prose only.
@@ -23,7 +23,7 @@ After the clean coverage-critic pass or a recorded early stop, consolidate Phase
 Assign each verifier a unique lowercase ID with its own `scratch/` and `artifacts/`. It receives, in this order:
 
 1. [PRINCIPLES.md](PRINCIPLES.md), verbatim or by absolute path with an instruction to read it in full.
-2. The intent register entry for the capability, its cited sources, `architecture.md`, and the `state-machines.json` entry when the candidate concerns a machine.
+2. The intent register entry for the capability, its cited sources, `architecture.md`, the `state-machines.json` entry when the candidate concerns a machine, and the `term-register.json` entries for the terms the capability lists or the trace uses, with `recommended` removed from every unanswered case.
 3. The candidate's trace, evidence and actor, **without** the hunter's intent statement, `literal_source`, `excess` or `proportionate_shape`.
 4. The exact selected companion `Validation rules` blocks.
 5. Whether walkthroughs are enabled, with a fixture actor distinct from the hunter's.
@@ -51,8 +51,11 @@ edit the target. Write only in your scratch directory.
 
 1. Before reading the hunter's wording, state the capability's purpose and the
    actor's goal from the intent sources you were given. Cite them. Read every
-   written rule for its purpose and the scope its origin supports. If the sources
-   do not establish the purpose for the situation in the trace, say so.
+   written rule for its purpose and the scope its origin supports. For each domain
+   term in the trace, state what it means for this situation from the term
+   register: the settled definition and the case that covers it, or that the term
+   is open. Do not take a meaning from an identifier or from everyday usage. If the
+   sources do not establish the purpose for the situation in the trace, say so.
    Return this reading as {"intent_reading": {...}} and wait for the candidate.
 2. Compare your reading with the hunter's. If they differ on the deciding point and
    the sources cannot decide it, the verdict is needs_owner_intent. A decision
@@ -61,7 +64,10 @@ edit the target. Write only in your scratch directory.
    a scope question. Bulk acceptance or an unattributed restatement of the rule
    cannot. If a decision's reason relies on the rule being challenged, check that
    scope question rather than using the decision as circular justification.
-   Use needs_owner_intent only when the deciding point remains unresolved.
+   Use needs_owner_intent only when the deciding point remains unresolved. When
+   the hunter's verdict rests on a sense of a term that the register does not
+   settle for this situation, the verdict is needs_owner_intent with a case as
+   the question.
 3. Verify every trace and evidence entry: file, positive line number, scope and
    description. Confirm the entrypoint is a place the named actor arrives
    and the outcome is the claimed situation.
@@ -148,6 +154,7 @@ For `confirmed`, check:
 6. Severity: likelihood, demonstrated impact, overall no greater than impact.
 7. That the remediation restores the fit, names any instruction change, and creates no new stuck state. When it changes a lifecycle, a stored state or a status vocabulary: that `remediation.experience` describes the effect on human users, developers and agents, marking unaffected groups explicitly, and that `remediation.change_safety` maps every value writers produce and lists every writer, reader and contract the verifier can find.
 8. That every decision record the verdict relies on passes the provenance test in Phase 3, step 2.
+9. That every domain term the verdict depends on is read in its settled meaning from `term-register.json`, and that a verdict depending on an open or unconfirmed term is `needs_owner_intent`.
 
 For a `rejected` record that rests on a decision record, apply P4, including independently justified, individually accepted recommendations. Replace it with `needs_owner_intent` only if no admissible source resolves the deciding point.
 
@@ -175,6 +182,7 @@ Write `<output-dir>/SUMMARY.md`, short enough to read in a couple of minutes:
 2. Counts by family (underfit, overfit, inconsistency) and by severity, plus the number of open intent questions. An audience-scoped run gives these counts per actor.
 3. Coverage from the ledger: covered, candidate, blocked and deferred counts, the main exclusions, and the final critic result.
 4. In a state machine run, a table of every machine in `state-machines.json`: name, explicit or implicit, where its state is stored, how many writers and runtimes it has, and the fingerprints found for it.
+5. A list of the terms in `term-register.json`: each with its glossary status, its status, its outcome, and the fingerprints found for it.
 
 The summary does not restate findings. Take every count and fingerprint in it from the final `findings.json` and ledger, after Phase 5, so the two never differ. Their detail stays in `findings.json` and is read out during the session when a question needs it.
 
@@ -182,14 +190,15 @@ The summary does not restate findings. Take every count and fingerprint in it fr
 
 Write `<output-dir>/decision-tree.json` from the final `confirmed` and `needs_owner_intent` records. Each node is a decision for the owner, with the fingerprints it covers, the decisions it depends on, and a recommended answer drawn from the verified records. Build it in this order of dependency:
 
-1. **Intent questions.** Each `needs_owner_intent` record becomes a decision. Findings whose verdict or fix depends on that intent hang below it. When several findings rest on recommendations the owner accepted in bulk, ask first which of those count as the owner's decisions. When a fix depends on an entry in `decided_not_on_ref` or on edits in a dirty worktree, ask whether that change is still the plan. In an audience-scoped run, an audience whose support requirement is unresolved, and each inferred actor whose task has no independent source, come first: whether the product means to serve them decides every finding below.
-2. **Rules behind overfit.** Group overfit records by their `literal_source`. Each rule, memory or example becomes one decision: keep it as written, narrow it to the scope its origin supports, or remove it. The findings it produced hang below it, so a single answer decides many of them.
-3. **Fixes.** Each remaining confirmed record, or cluster sharing a root cause, becomes a decision about its remediation: the proposed change, a different change the owner prefers, or accepting the current behaviour as intended. Findings about the same state machine form one decision about the machine's shape, and its recommended answer gives the effect on the applicable users, developers and agents from `remediation.experience` and the main points of `remediation.change_safety`, including any `owner_checks` to run first.
-4. **Order.** Once fixes are decided, what to do first. Recommend by severity and by how many actors each fix reaches.
+1. **Terms.** Each term still `open` or `unconfirmed` becomes a decision, asked as cases under the Owner term check ([RECONNAISSANCE.md](RECONNAISSANCE.md)). Findings whose fingerprint starts with `term:<id>:`, or whose verdict depends on the term, hang below it. A settled `rename`, `split` or `define` outcome becomes a decision about applying it: the glossary entry in `GLOSSARY-PROPOSAL.md`, the copy in each locale, prompts and tool descriptions, and whether identifiers and stored values change.
+2. **Intent questions.** Each `needs_owner_intent` record becomes a decision. Findings whose verdict or fix depends on that intent hang below it. When several findings rest on recommendations the owner accepted in bulk, ask first which of those count as the owner's decisions. When a fix depends on an entry in `decided_not_on_ref` or on edits in a dirty worktree, ask whether that change is still the plan. In an audience-scoped run, an audience whose support requirement is unresolved, and each inferred actor whose task has no independent source, come first: whether the product means to serve them decides every finding below.
+3. **Rules behind overfit.** Group overfit records by their `literal_source`. Each rule, memory or example becomes one decision: keep it as written, narrow it to the scope its origin supports, or remove it. The findings it produced hang below it, so a single answer decides many of them.
+4. **Fixes.** Each remaining confirmed record, or cluster sharing a root cause, becomes a decision about its remediation: the proposed change, a different change the owner prefers, or accepting the current behaviour as intended. Findings about the same state machine form one decision about the machine's shape, and its recommended answer gives the effect on the applicable users, developers and agents from `remediation.experience` and the main points of `remediation.change_safety`, including any `owner_checks` to run first.
+5. **Order.** Once fixes are decided, what to do first. Recommend by severity and by how many actors each fix reaches.
 
 #### Run the session
 
-Choose one unresolved decision whose prerequisites are decided. Ask that question with a recommended answer and wait for the owner's response before selecting the next. Prioritize intent questions that unblock other decisions; do not bundle independent questions into a round.
+Choose one unresolved decision whose prerequisites are decided. Ask that question with a recommended answer and wait for the owner's response before selecting the next. Prioritize term and intent questions that unblock other decisions; do not bundle independent questions into a round.
 
 ```
 ❓ **Q1** - **<decision title>**: <what the product does now, for which actor, and why it does not fit the intent; the options>
@@ -207,6 +216,8 @@ The session ends when no decisions remain and the owner confirms the understandi
 
 #### Record the decisions
 
-Write `<output-dir>/decisions.json` and a short `<output-dir>/DECISIONS.md`. For every decision: the question, the owner's answer in their words, the fingerprints it resolves, and the resulting action (fix now, fix later, accepted as intended, rule kept, rule narrowed, rule removed). Record how each answer was given in `answered_as`: `own_words`, `accepted_recommendation` ("yes" to that single question) or `bulk_accepted` (one reply accepting several questions without answering each). An `own_words` answer, or a "yes" to a single question that put the deciding point to the owner, has `owner_statement` provenance under P4. For imported decisions or an unsolicited reply accepting several recommendations at once, preserve `bulk_accepted` provenance. Ask about an individual deciding point only if its authority remains material under P4. For accepted-as-intended and rule decisions, record the owner's statement of intent with the date; later runs use it as an intent source at the provenance its `answered_as` gives.
+Write `<output-dir>/decisions.json` and a short `<output-dir>/DECISIONS.md`. For every decision: an `id` (`Q<n>`, or `T<n>` for term decisions), the question, the owner's answer in their words, the fingerprints it resolves, and the resulting action (fix now, fix later, accepted as intended, rule kept, rule narrowed, rule removed, or a term action from the Owner term check in [RECONNAISSANCE.md](RECONNAISSANCE.md)). A term decision also records the term ID and, for a case, the case ID. Record how each answer was given in `answered_as`: `own_words`, `accepted_recommendation` ("yes" to that single question) or `bulk_accepted` (one reply accepting several questions without answering each). An `own_words` answer, or a "yes" to a single question that put the deciding point to the owner, has `owner_statement` provenance under P4. For imported decisions or an unsolicited reply accepting several recommendations at once, preserve `bulk_accepted` provenance. Ask about an individual deciding point only if its authority remains material under P4. For accepted-as-intended and rule decisions, record the owner's statement of intent with the date; later runs use it as an intent source at the provenance its `answered_as` gives.
 
-The audit does not modify the target. After the session, offer to make the agreed code and instruction changes, and start only when the owner says so.
+Write `<output-dir>/GLOSSARY-PROPOSAL.md` from every settled term whose outcome is not `keep`: the term, its definition, its is and is-not cases, its words in each locale, the mapping from old identifiers if any, and the target glossary file and section it belongs in. When the target has no glossary, name the file where one should live, following the target's documentation and instruction-file conventions. Run `validate-term-register.cjs` with `decisions.json` once more.
+
+The audit does not modify the target. After the session, offer to make the agreed code and instruction changes and to apply `GLOSSARY-PROPOSAL.md`, and start only when the owner says so.

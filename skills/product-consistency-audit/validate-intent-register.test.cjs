@@ -109,3 +109,9 @@ test("requires actors and explicitly migrates older registers", () => {
   assert.deepEqual(migrateRecords("intent-register", [current]), [current]);
   assert.throws(() => migrateRecords("intent-register", [{ ...previous, actors: current.actors }]), /Both people and actors/);
 });
+
+test("accepts optional term links and rejects malformed ones", () => {
+  assert.deepEqual(errorsFor((e) => { e.terms = ["visit", "session"]; }), []);
+  assert.match(errorsFor((e) => { e.terms = ["Visit"]; }).join("\n"), /terms\[0\]: must be a term-register id/);
+  assert.match(errorsFor((e) => { e.terms = ["visit", "visit"]; }).join("\n"), /terms: duplicate term id/);
+});

@@ -14,6 +14,8 @@ Use `confirmed` only when the actor, the cited intent, the trace and the reachab
 >
 > **Persisted state** (schemas, migrations, enums, status machines, flags, settings, modes): use [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md).
 >
+> **Domain terms** (words for records, events and actions that carry more than one meaning, a meaning narrower than the sources, or no written definition; glossaries and vocabulary sections): use [DOMAIN-TERMS.md](DOMAIN-TERMS.md).
+>
 > **Lifecycles** (states spread across fields, rows, runtimes or client variables; transitions written by many writers; state that APIs, tools and instruction files describe): use [STATE-MACHINES.md](STATE-MACHINES.md).
 >
 > **Sign-in and access** (sign-up, sign-in across apps, sign-out, sessions, invitations, account linking, credential reset, role routing, return-to parameters): use [ACCESS-AND-IDENTITY-FLOWS.md](ACCESS-AND-IDENTITY-FLOWS.md).
@@ -44,6 +46,7 @@ Entities, relations or states that model a wrong reading of the domain.
 - List field combinations the model allows that the domain makes impossible, and the code written to handle or forbid them.
 - Trace the misunderstanding to its origin in history when possible: the first commit, the request it answered, the example data it was built against.
 - Report the consequence for actors (states they get stuck in, capabilities they cannot reach) and for the product (cases every feature must handle, migrations needed to change course).
+- When the misreading comes from a domain word, such as an entity built for one sense of a term the sources use more widely, seed the matching [DOMAIN-TERMS.md](DOMAIN-TERMS.md) class and use one fingerprint for the word and the model.
 
 **Rule spread** (P3)
 A rule that came from one surface, audience or data type enforced on others.
@@ -123,6 +126,7 @@ Parallel implementations of a single capability that have drifted apart.
 **Words and behaviour apart** (P13)
 Labels, messages, docs or emails that describe behaviour the product does not have at that moment for that actor.
 - Compare each claim with the path it describes. Include error messages that name the wrong cause and buttons whose label promises a different action.
+- Copy that uses a domain term in a sense other than its settled meaning belongs to [DOMAIN-TERMS.md](DOMAIN-TERMS.md), Sense differing by surface or language.
 
 ## Wildcard
 
@@ -132,6 +136,7 @@ You are not given a class. Find intent gaps outside the classes already assigned
 - Which features look half-finished, bolted on, or built for a single conversation? Find the conversation in history or instruction files.
 - Which rule in the instruction files is most absolute ("never", "always", "every")? Follow it into the code.
 - Which state would a new teammate find hardest to explain to an actor using the product?
+- Which domain word would two teammates define differently? Read its uses in the schema, the copy and the prompts, and check whether they agree.
 - What happens when features meet that were built at different times: an invitation sent before a plan change, a draft created before a role change, an account linked after a workspace was archived?
 - Which tests encode an example rather than a rule? What does the code do outside that example?
 
