@@ -28,6 +28,7 @@ For an ambiguous request, start with bounded guidance. Ask only when missing inf
 | Technical obligations or agent task completion | [TECHNICAL-AND-AGENT-TASKS.md](TECHNICAL-AND-AGENT-TASKS.md) and its cited principles |
 | Persisted state or lifecycle changes | P6, P10, P12, P14 and [DATA-MODEL-AND-STATE.md](DATA-MODEL-AND-STATE.md) or [STATE-MACHINES.md](STATE-MACHINES.md) |
 | Access, onboarding, billing, long-running work, cross-surface state or public claims | The matching companion linked from [FIT-CLASSES.md](FIT-CLASSES.md) |
+| Ranking a finding by severity | [Separate priority from certainty](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty) in VALIDATION-AND-OWNER-REVIEW.md, that section only |
 | Running the target locally | [WALKTHROUGHS.md](WALKTHROUGHS.md), before execution |
 
 ## Evidence bar
