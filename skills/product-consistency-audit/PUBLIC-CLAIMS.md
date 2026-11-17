@@ -2,11 +2,11 @@
 
 ## When to use this file
 
-Select this file when reconnaissance finds text that tells an actor what the product does or will do:
+Select this file when reconnaissance finds text that tells a reader what the product does or will do:
 
 - Marketing pages, landing pages and product descriptions, including page metadata.
 - Pricing pages and plan comparison tables.
-- Help content, documentation for actors using the product, FAQs and changelogs shown to them.
+- Help content, user documentation, FAQs and changelogs shown to users.
 - Transactional emails and notifications: invitations, receipts, reminders, alerts.
 - In-product promises: empty states, onboarding copy, tooltips, confirmation dialogs, success messages, labels on actions.
 - Error messages and failure pages.
@@ -17,7 +17,7 @@ Select this file when reconnaissance finds text that tells an actor what the pro
 
 **Where intent is written.** Public text is itself an intent source (P4). It can be the stale side or the current side of a disagreement. Decide which by its history and other sources: the commit that wrote the text, product docs and decision records, instruction files about copy (read under INSTRUCTIONS-AND-MEMORY.md), and the history of the behaviour. When text and behaviour disagree and no source shows which one states the intent, record `needs_owner_intent`.
 
-**Actor and goal.** Name the reader precisely: an anonymous visitor deciding to sign up, a buyer comparing plans, a member who received an email, an actor reading an error, an invited actor reading the invitation. The same text can be true for one reader and false for another (a feature listed for every plan and gated for some).
+**Actor and goal.** Name the reader precisely: an anonymous visitor deciding to sign up, a buyer comparing plans, a member who received an email, a user reading an error, an invited colleague reading the invitation. The same text can be true for one reader and false for another (a feature listed for every plan and gated for some).
 
 **Claim inventory.** For each surface in scope, extract every sentence that states a capability, a limit, a timing, a price, an automatic behaviour, a guarantee about data, or a next step. Record location, reader and the path it describes.
 
@@ -76,7 +76,7 @@ Principles: P13, P8
 
 Family: inconsistency
 
-Help pages and docs for actors using the product describe steps, screens and settings that have changed.
+Help pages and user docs describe steps, screens and settings that have changed.
 
 What to look for:
 
@@ -97,7 +97,7 @@ Principles: P13, P8, P11
 
 Family: underfit
 
-Emails and notifications send actors to a page. The page rejects them, has moved, needs a state they lack, or no longer offers what the email described.
+Emails and notifications send readers to a page. The page rejects them, has moved, needs a state they lack, or no longer offers what the email described.
 
 What to look for:
 
@@ -162,7 +162,7 @@ Principles: P11, P1
 
 Family: inconsistency
 
-Text written for one actor is shown to another: admin instructions shown to members, buyer copy shown to actors who cannot buy, setup steps shown to invited actors who will never perform them.
+Text written for one reader is shown to another: admin instructions shown to members, buyer copy shown to members who cannot buy, setup steps shown to invited members who will never perform them.
 
 What to look for:
 
