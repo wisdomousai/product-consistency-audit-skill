@@ -13,11 +13,11 @@ Select this file when reconnaissance finds any of these surfaces:
 
 ## Core discipline
 
-**Bar for a finding.** A person who has paid, is entitled, or is willing to pay cannot use what the intent says they get, cannot find how to get it, loses something the intent says they keep, or is told one thing and given another. A finding names the buyer and every person whose access depends on the purchase, the entitlement state, every place that reads it, and the outcome.
+**Bar for a finding.** An actor who has paid, is entitled, or is willing to pay cannot use what the intent says they get, cannot find how to get it, loses something the intent says they keep, or is told one thing and given another. A finding names the buyer and every actor whose access depends on the purchase, the entitlement state, every place that reads it, and the outcome.
 
-**Where intent is written.** Pricing pages and plan comparison copy; checkout and upgrade copy; billing and cancellation help pages; terms that describe what a person keeps after a plan ends; decision records about plans, seats and grants; instruction files and memories about billing (read under INSTRUCTIONS-AND-MEMORY.md); the plan catalogue in configuration or the database, read as data and checked against the copy.
+**Where intent is written.** Pricing pages and plan comparison copy; checkout and upgrade copy; billing and cancellation help pages; terms that describe what an actor keeps after a plan ends; decision records about plans, seats and grants; instruction files and memories about billing (read under INSTRUCTIONS-AND-MEMORY.md); the plan catalogue in configuration or the database, read as data and checked against the copy.
 
-**Person and goal.** Billing separates the person who pays from the people who use. Name both: the buyer or billing admin who can change the plan, and the member who meets the gate and often cannot change it. Also name the person after the plan changes: lapsed, downgraded, removed from a seat, at the end of a trial, mid-way through a paid task when the limit is reached.
+**Actor and goal.** Billing separates the actor who pays from the actors who use. Name both: the buyer or billing admin who can change the plan, and the member who meets the gate and often cannot change it. Also name the actor after the plan changes: lapsed, downgraded, removed from a seat, at the end of a trial, mid-way through a paid task when the limit is reached.
 
 **Entitlement map.** For each entitlement, write down its source of truth (a provider subscription, a local plan column, a grant table, a credit balance), every writer (checkout, webhook, admin tool, job, migration), every reader (gates, limits, copy), and the moments each reader refreshes.
 
@@ -33,16 +33,16 @@ Principles: P9, P11
 
 Family: underfit
 
-A gate requires a plan, seat or credit. The person who meets it cannot buy it and is not told who can.
+A gate requires a plan, seat or credit. The actor who meets it cannot buy it and is not told who can.
 
 What to look for:
 
 - Every plan gate's failure path and what it shows. An upgrade button shown to a member who lacks billing rights, leading to a page that rejects them.
 - Gates that show a generic error or an empty screen and never name the requirement.
-- Upgrade flows that require a role, a verified email or a completed profile the person lacks.
-- Gates on capabilities that the pricing copy lists for the person's current plan.
+- Upgrade flows that require a role, a verified email or a completed profile the actor lacks.
+- Gates on capabilities that the pricing copy lists for the actor's current plan.
 
-What establishes a gap: the gate, the requirement, the person blocked, and the absence of a reachable route to meet it or of a message naming who can (the billing admin, the workspace owner).
+What establishes a gap: the gate, the requirement, the actor blocked, and the absence of a reachable route to meet it or of a message naming who can (the billing admin, the workspace owner).
 
 Not a gap:
 
@@ -54,21 +54,21 @@ Principles: P8, P11, P13
 
 Family: underfit
 
-A trial ends, a payment fails, a plan is cancelled or downgraded. The product's sources say what a person keeps. The implementation removes more, keeps more, or leaves people in a state with no way forward.
+A trial ends, a payment fails, a plan is cancelled or downgraded. The product's sources say what an actor keeps. The implementation removes more, keeps more, or leaves actors in a state with no way forward.
 
 What to look for:
 
 - What the sources promise after a plan ends: read access to existing documents, export, a grace period, data retention for a stated time.
 - Every gate that reads plan state, and what it does on lapse: hide, block, delete, read-only.
-- Over-limit states after downgrade: more members than seats, more projects than the plan allows. What each person sees and what an admin can do to resolve it.
-- Data created under the higher plan that becomes unreachable, including the person's own documents.
-- The route back: resubscribe, update payment, upgrade. Whether a lapsed person can reach it from the screens they see.
+- Over-limit states after downgrade: more members than seats, more projects than the plan allows. What each actor sees and what an admin can do to resolve it.
+- Data created under the higher plan that becomes unreachable, including the actor's own documents.
+- The route back: resubscribe, update payment, upgrade. Whether a lapsed actor can reach it from the screens they see.
 
-What establishes a gap: the plan-end event, the promised outcome with its source, the implemented outcome traced through each gate, and the person affected. Loss of a person's own data with no recovery meets the critical level in [the severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty).
+What establishes a gap: the plan-end event, the promised outcome with its source, the implemented outcome traced through each gate, and the actor affected. Loss of an actor's own data with no recovery meets the critical level in [the severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty).
 
 Not a gap:
 
-- Removal of access the sources say ends with the plan, when the person is told and offered a route back.
+- Removal of access the sources say ends with the plan, when the actor is told and offered a route back.
 
 ## Checkout return paths
 
@@ -81,12 +81,12 @@ Checkout leaves the product and comes back through a success, cancel or failure 
 What to look for:
 
 - The success return page and what it reads. A success page that checks the local entitlement before the webhook has written it and shows "not subscribed".
-- Cancel and failure returns: where they land, and whether the person can retry without a duplicate subscription or a stuck pending record.
+- Cancel and failure returns: where they land, and whether the actor can retry without a duplicate subscription or a stuck pending record.
 - Pending checkout records written before redirect that block a second attempt.
 - Webhook handlers that fail on an unexpected event order (an update before a create) and leave the entitlement unwritten.
-- Retry and idempotency handling for webhooks, and what the person sees while the entitlement is pending.
+- Retry and idempotency handling for webhooks, and what the actor sees while the entitlement is pending.
 
-What establishes a gap: the sequence (redirect, return, webhook timing), the state written at each step, and a trace showing the person is denied what they paid for, charged twice, or blocked from retrying.
+What establishes a gap: the sequence (redirect, return, webhook timing), the state written at each step, and a trace showing the actor is denied what they paid for, charged twice, or blocked from retrying.
 
 Not a gap:
 
@@ -105,9 +105,9 @@ What to look for:
 - Every reader of plan state and which source it uses. Apps of the same product that read different sources.
 - Grants or overrides that some gates check and others ignore.
 - Session or token claims that hold the plan and are refreshed only at sign-in, so an upgrade or lapse shows on one surface and not another.
-- Admin views showing a plan or seat status that the person's surface does not honour.
+- Admin views showing a plan or seat status that the actor's surface does not honour.
 
-What establishes a gap: the sources, the readers that use each, a sequence that puts them apart (upgrade, lapse, grant, seat removal), and the person who gets different answers.
+What establishes a gap: the sources, the readers that use each, a sequence that puts them apart (upgrade, lapse, grant, seat removal), and the actor who gets different answers.
 
 Not a gap:
 
@@ -128,11 +128,11 @@ What to look for:
 - Limits checked on one path (UI) and skipped on another (API, import), so counts exceed the plan and later gates block everyone.
 - Counts computed differently on the billing page and at the gate.
 
-What establishes a gap: the counting points, the sequence that puts the count wrong, and the person blocked or charged as a result.
+What establishes a gap: the counting points, the sequence that puts the count wrong, and the actor blocked or charged as a result.
 
 Not a gap:
 
-- A count that a source says is reconciled by a scheduled job, when the job runs and the person is not blocked in the meantime.
+- A count that a source says is reconciled by a scheduled job, when the job runs and the actor is not blocked in the meantime.
 
 ## Plan identifiers in conditions
 
@@ -161,16 +161,16 @@ Principles: P6, P2, P3
 
 Family: overfit
 
-Plan logic grows states, tables and flags that the pricing never described: per-person overrides added for a single customer request, a trial status machine with values no path produces, grant types for situations that occurred once.
+Plan logic grows states, tables and flags that the pricing never described: per-actor overrides added for a single customer request, a trial status machine with values no path produces, grant types for situations that occurred once.
 
 What to look for:
 
 - Grant, override and exception tables. For each, its producers, the request or incident behind it, and whether any reader treats its types differently.
 - Trial and subscription statuses beyond what the provider and the pricing copy distinguish.
-- Flags that exempt one person or workspace from a gate, added in a commit that names a single case.
+- Flags that exempt one actor or workspace from a gate, added in a commit that names a single case.
 - Instruction-file rules about billing that produced this machinery (read under INSTRUCTIONS-AND-MEMORY.md).
 
-What establishes a gap: the machinery, its origin, the absence of a distinct person situation in the pricing sources, and the cost: gates that must handle the extra states, a person stuck in one, or disagreement with the provider's view.
+What establishes a gap: the machinery, its origin, the absence of a distinct actor situation in the pricing sources, and the cost: gates that must handle the extra states, an actor stuck in one, or disagreement with the provider's view.
 
 Not a gap:
 
@@ -179,7 +179,7 @@ Not a gap:
 ## Universal moves
 
 - Build the entitlement map before reading gates. Most findings here come from a writer and a reader using different sources or moments.
-- Walk every gate as a member without billing rights, as the billing admin, and as a person after lapse, downgrade and seat removal.
+- Walk every gate as a member without billing rights, as the billing admin, and as an actor after lapse, downgrade and seat removal.
 - Follow checkout through every return and every webhook order the provider documents.
 - List every literal plan name, price identifier, limit and trial length in code and compare with the catalogue and the pricing copy.
 - Compare the pricing copy line by line with the gates for each plan (PUBLIC-CLAIMS.md holds the wider copy checks).
@@ -188,8 +188,8 @@ Not a gap:
 
 1. Rebuild the entitlement map for the state in the candidate and confirm every writer and reader cited.
 2. Confirm the plan state is reachable in the deployed configuration. A state that only a test-mode fixture can produce, with no production writer, is out of scope.
-3. Look for exits: an upgrade path the person can reach, a message naming the billing admin, a grace period, a support route the intent names.
+3. Look for exits: an upgrade path the actor can reach, a message naming the billing admin, a grace period, a support route the intent names.
 4. For plan-end findings, confirm the promised outcome in the cited source and its date. A later source that changed the promise refutes or narrows the finding.
 5. For overfit machinery, look for a stated operating need (support, partner, compliance) before reporting. The source must pass the provenance test in P4 (PRINCIPLES.md).
 6. For provider-dependent states, keep `method: source` and confirm the source trace matches the provider behaviour the code relies on.
-7. Check that the remediation does not grant paid capability to a person the pricing excludes.
+7. Check that the remediation does not grant paid capability to an actor the pricing excludes.

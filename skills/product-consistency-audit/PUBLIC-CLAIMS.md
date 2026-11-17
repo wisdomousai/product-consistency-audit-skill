@@ -2,22 +2,22 @@
 
 ## When to use this file
 
-Select this file when reconnaissance finds text that tells a person what the product does or will do:
+Select this file when reconnaissance finds text that tells an actor what the product does or will do:
 
 - Marketing pages, landing pages and product descriptions, including page metadata.
 - Pricing pages and plan comparison tables.
-- Help content, documentation for people using the product, FAQs and changelogs shown to them.
+- Help content, documentation for actors using the product, FAQs and changelogs shown to them.
 - Transactional emails and notifications: invitations, receipts, reminders, alerts.
 - In-product promises: empty states, onboarding copy, tooltips, confirmation dialogs, success messages, labels on actions.
 - Error messages and failure pages.
 
 ## Core discipline
 
-**Bar for a finding.** Text describes behaviour the product does not have at that moment for the person who reads it (P13), or sends them to a path that does not work for them (P8). A finding names the text and its location, the person who reads it, the behaviour on the path it describes for that person, and the difference. Wording preferences with no difference in meaning are out of scope.
+**Bar for a finding.** Text describes behaviour the product does not have at that moment for the actor who reads it (P13), or sends them to a path that does not work for them (P8). A finding names the text and its location, the actor who reads it, the behaviour on the path it describes for that actor, and the difference. Wording preferences with no difference in meaning are out of scope.
 
 **Where intent is written.** Public text is itself an intent source (P4). It can be the stale side or the current side of a disagreement. Decide which by its history and other sources: the commit that wrote the text, product docs and decision records, instruction files about copy (read under INSTRUCTIONS-AND-MEMORY.md), and the history of the behaviour. When text and behaviour disagree and no source shows which one states the intent, record `needs_owner_intent`.
 
-**Person and goal.** Name the reader precisely: an anonymous visitor deciding to sign up, a buyer comparing plans, a member who received an email, a person reading an error, an invited person reading the invitation. The same text can be true for one reader and false for another (a feature listed for every plan and gated for some).
+**Actor and goal.** Name the reader precisely: an anonymous visitor deciding to sign up, a buyer comparing plans, a member who received an email, an actor reading an error, an invited actor reading the invitation. The same text can be true for one reader and false for another (a feature listed for every plan and gated for some).
 
 **Claim inventory.** For each surface in scope, extract every sentence that states a capability, a limit, a timing, a price, an automatic behaviour, a guarantee about data, or a next step. Record location, reader and the path it describes.
 
@@ -64,11 +64,11 @@ What to look for:
 - Features listed as included that the gate checks against a different plan, or a literal plan name the catalogue no longer uses (see PLANS-BILLING-AND-ENTITLEMENTS.md).
 - What the pricing copy says about cancellation, downgrade and data kept, compared with the implementation.
 
-What establishes a gap: the pricing statement, the plan, the enforced behaviour for a person on that plan, and the difference.
+What establishes a gap: the pricing statement, the plan, the enforced behaviour for an actor on that plan, and the difference.
 
 Not a gap:
 
-- Rounding or presentation differences with no effect on what a person can do or pays.
+- Rounding or presentation differences with no effect on what an actor can do or pays.
 
 ## Help content drift
 
@@ -76,7 +76,7 @@ Principles: P13, P8
 
 Family: inconsistency
 
-Help pages and docs for people using the product describe steps, screens and settings that have changed.
+Help pages and docs for actors using the product describe steps, screens and settings that have changed.
 
 What to look for:
 
@@ -85,7 +85,7 @@ What to look for:
 - Help that describes a self-service action now reserved for an admin, or the reverse.
 - Help linked from the product itself (a "learn more" link next to a control) whose target describes other behaviour.
 
-What establishes a gap: the help text, the reader, the steps that fail or differ, and the person's resulting dead end.
+What establishes a gap: the help text, the reader, the steps that fail or differ, and the actor's resulting dead end.
 
 Not a gap:
 
@@ -97,7 +97,7 @@ Principles: P13, P8, P11
 
 Family: underfit
 
-Emails and notifications send people to a page. The page rejects them, has moved, needs a state they lack, or no longer offers what the email described.
+Emails and notifications send actors to a page. The page rejects them, has moved, needs a state they lack, or no longer offers what the email described.
 
 What to look for:
 
@@ -111,7 +111,7 @@ What establishes a gap: the email, the recipient, their state on click, the dest
 
 Not a gap:
 
-- A link to a sign-in page that returns the person to the intended destination after sign-in.
+- A link to a sign-in page that returns the actor to the intended destination after sign-in.
 
 ## Error message cause
 
@@ -124,7 +124,7 @@ Error messages name a cause and suggest an action. The real cause differs, or th
 What to look for:
 
 - Every error branch on the paths in scope, and the message each produces.
-- Messages that blame the person's input for a server-side or plan-side failure.
+- Messages that blame the actor's input for a server-side or plan-side failure.
 - "Try again" on failures that repeat on every attempt.
 - Messages that name an internal identifier, a status value or a stack trace in place of a cause the reader understands.
 - Several distinct causes collapsed into one message whose action fits only some of them.
@@ -146,7 +146,7 @@ Interface text promises behaviour: "saved automatically", "you can undo this", "
 What to look for:
 
 - Every sentence with "automatically", "always", "you can", "we will", "later", "undo" or a stated duration in interface copy.
-- The path each promise describes, traced for the person reading it.
+- The path each promise describes, traced for the actor reading it.
 - Confirmation dialogs that describe the effect of an action, compared with what the action writes.
 - Success messages shown before the operation is confirmed.
 
@@ -162,7 +162,7 @@ Principles: P11, P1
 
 Family: inconsistency
 
-Text written for one person is shown to another: admin instructions shown to members, buyer copy shown to people who cannot buy, setup steps shown to invited people who will never perform them.
+Text written for one actor is shown to another: admin instructions shown to members, buyer copy shown to actors who cannot buy, setup steps shown to invited actors who will never perform them.
 
 What to look for:
 
@@ -189,6 +189,6 @@ Not a gap:
 1. Confirm the text exists at the cited location and is shown to the named reader in the deployed configuration.
 2. Trace the described behaviour independently for that reader and confirm the difference.
 3. Check history for which side changed last and whether a source states which is the intent. If nothing decides it, the verdict is `needs_owner_intent`.
-4. For link findings, look for a sign-in step that returns the person, an alternative destination, or a message naming who can help.
+4. For link findings, look for a sign-in step that returns the actor, an alternative destination, or a message naming who can help.
 5. For error findings, confirm the real cause from source and that the action shown does not work for it.
 6. Check that the remediation names whether the text or the behaviour should change, and that changing one does not break another surface that relies on it.

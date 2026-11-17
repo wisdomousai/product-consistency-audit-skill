@@ -16,7 +16,7 @@ RECONNAISSANCE.md seeds one unit per material rule. A rule is material when it u
 
 ## Core discipline
 
-**Bar for a finding.** A written rule is a record of a decision. A finding in this domain is a gap between the problem the rule was written to solve and what the code does in the rule's name: enforcement past the origin (overfit), a stated need nobody built (underfit), or written sources and code paths that disagree (inconsistency). Every finding names the rule's text and location, its origin or a record of what was searched, the purpose that origin supports, the enforcement point or missing case, and the person affected or the change made harder (P1, P2, P3).
+**Bar for a finding.** A written rule is a record of a decision. A finding in this domain is a gap between the problem the rule was written to solve and what the code does in the rule's name: enforcement past the origin (overfit), a stated need nobody built (underfit), or written sources and code paths that disagree (inconsistency). Every finding names the rule's text and location, its origin or a record of what was searched, the purpose that origin supports, the enforcement point or missing case, and the actor affected or the change made harder (P1, P2, P3).
 
 **Where intent is written.** The rule's own text is the first source and the least reliable for scope. Read, in this order:
 
@@ -31,20 +31,20 @@ RECONNAISSANCE.md seeds one unit per material rule. A rule is material when it u
 
 Record each source's provenance under P4. A decision record that says the owner accepted a set of recommendations is `bulk_accepted_recommendation`, a decision that cites a rule as its reason inherits the rule's scope question, and a commit by the owner's account that has agent trailers or restates an instruction file is `unattributed` until the owner confirms writing it.
 
-**Person and goal.** Name the person the rule was meant to protect or serve and the person the enforcement reaches. They are often different. A rule written to stop a workspace admin from deleting shared documents by mistake may end up blocking a member from deleting their own drafts. Name both, with their goals.
+**Actor and goal.** Name the actor the rule was meant to protect or serve and the actor the enforcement reaches. They are often different. A rule written to stop a workspace admin from deleting shared documents by mistake may end up blocking a member from deleting their own drafts. Name both, with their goals.
 
 **Evidence methods.**
 
 - `history`: the origin commit, the co-committed diff, later edits and removed lines. Most findings in this domain rest on history.
 - `source`: every enforcement point of the rule in code and data, listed with paths.
-- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md, used only when the effect on a person decides the finding (the person is blocked, sees a wrong message, cannot leave a state). Record the fixture actor and the steps.
+- `local`: a walkthrough under the execution boundary in SKILL.md and WALKTHROUGHS.md, used only when the effect on an actor decides the finding (the actor is blocked, sees a wrong message, cannot leave a state). Record the fixture actor and the steps.
 
 **Build a rule record before hunting.** For each assigned rule, write down in scratch:
 
 - Text and location, plus every copy of the same rule in other instruction files.
 - Origin: commit, message, co-committed paths, any incident named. Or `not_traceable` with the searches run.
 - Purpose: the problem the origin shows, in one sentence.
-- Supported scope: the surfaces, people and data where that problem can occur.
+- Supported scope: the surfaces, actors and data where that problem can occur.
 - Enforcement points: every place the rule shows up. Search identifiers, comments, schema, migrations, database constraints, seed data, validation schemas, middleware, shared helpers, tests, lint or boundary scripts, CI checks, model prompts the product sends, and user-facing copy.
 - For each enforcement point: inside or outside the supported scope, and what it costs there.
 
@@ -67,13 +67,13 @@ What to look for:
 - Database CHECK constraints or unique indexes that enforce a rule the origin tied to a single screen or action.
 - Code comments on schema fields that cite an instruction file or a conversation.
 
-What establishes a gap: the rule and its origin, the schema elements built from it with their introducing commit, a statement of the smaller shape that solves the origin's problem (often a single condition at the action the incident involved), and a cost: a state a person can enter and not leave, a combination other features must handle, a capability blocked, or a migration needed to change course. When reporting severity, use [the severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty).
+What establishes a gap: the rule and its origin, the schema elements built from it with their introducing commit, a statement of the smaller shape that solves the origin's problem (often a single condition at the action the incident involved), and a cost: a state an actor can enter and not leave, a combination other features must handle, a capability blocked, or a migration needed to change course. When reporting severity, use [the severity guide](VALIDATION-AND-OWNER-REVIEW.md#separate-priority-from-certainty).
 
 Not a gap:
 
 - Schema that the rule's source asks for in so many words, such as "keep an audit log of every role change".
 - Fields that also serve a stated need unrelated to the rule (audit, recovery, compliance, a documented capability).
-- A rule turned into a single column that every reader handles the same way and that no person can get stuck in.
+- A rule turned into a single column that every reader handles the same way and that no actor can get stuck in.
 
 ## Absolute wording past its origin
 
@@ -88,10 +88,10 @@ What to look for:
 - Every "never", "always", "only", "every", "all", "must" and "no" in the assigned instruction files. Rank them by how much code cites or follows them.
 - For each absolute: the noun it governs ("user data", "actions", "members"). Then search the code for every type, table and action that noun could be read to cover.
 - Shared helpers, middleware, base classes, validation schemas and database defaults that apply the rule globally. One global helper often explains dozens of enforcement points.
-- Enforcement on data the origin never involved. A rule written after a person lost a document applied to invitations, sessions and expired tokens. Soft-deleted invitations then collide with a unique index, and an admin cannot invite the same address again.
+- Enforcement on data the origin never involved. A rule written after an actor lost a document applied to invitations, sessions and expired tokens. Soft-deleted invitations then collide with a unique index, and an admin cannot invite the same address again.
 - Enforcement on audiences the origin never involved. A confirmation step written for destructive admin actions applied to a member saving a draft.
 
-What establishes a gap: the absolute rule, an origin narrower than its words (from the commit, the surrounding paragraph or the incident it names), an enforcement point outside that origin, and a person who is blocked, confused or burdened there, or a model element that exists only to satisfy the wording.
+What establishes a gap: the absolute rule, an origin narrower than its words (from the commit, the surrounding paragraph or the incident it names), an enforcement point outside that origin, and an actor who is blocked, confused or burdened there, or a model element that exists only to satisfy the wording.
 
 Not a gap:
 
@@ -115,7 +115,7 @@ What to look for:
 - Tests whose fixtures match the instruction's example and whose assertions stop there.
 - Branches that only the example data reaches, checked against seed data and the deployed configuration.
 
-What establishes a gap: the instruction with its example, the code that encodes the example, the general case the instruction's purpose covers (cited from the instruction's own wording or another source), and a real person or record that the special case mishandles in the deployed configuration.
+What establishes a gap: the instruction with its example, the code that encodes the example, the general case the instruction's purpose covers (cited from the instruction's own wording or another source), and a real actor or record that the special case mishandles in the deployed configuration.
 
 Not a gap:
 
@@ -135,10 +135,10 @@ What to look for:
 - Memory or notes entries phrased as general rules whose body or commit names a single incident ("after the owner pointed out", "the reviewer complained", "in the invitation screen").
 - Memory entries with no counterpart in product docs, decision records or user-facing copy. These are personal working notes until another source confirms them as product intent.
 - Code comments or commit messages that cite a memory entry, or that repeat its distinctive wording.
-- Memory entries about how an agent should write or work (tooling, style, process) that have turned into product behaviour, such as a writing preference turned into a validation rule on what people may type.
+- Memory entries about how an agent should write or work (tooling, style, process) that have turned into product behaviour, such as a writing preference turned into a validation rule on what actors may type.
 - Memory entries whose date precedes a later instruction or decision that changed the same topic, still followed by newer code.
 
-What establishes a gap: the memory entry, the context it came from (its own body, its commit, the conversation or incident it names), the purpose that context supports, code that enforces the entry outside that purpose, and the cost for a person or for later changes.
+What establishes a gap: the memory entry, the context it came from (its own body, its commit, the conversation or incident it names), the purpose that context supports, code that enforces the entry outside that purpose, and the cost for an actor or for later changes.
 
 Not a gap:
 
@@ -162,12 +162,12 @@ What to look for:
 - Copy, help text and emails that still describe the withdrawn behaviour.
 - A replacement rule implemented alongside the old enforcement, so both run.
 
-What establishes a gap: the withdrawal (removed text and its commit, or the superseding record), the surviving enforcement or state, and its cost: a state a person can still reach, a guard that still blocks, a case other features must still handle, data that misleads, or copy that describes behaviour that no longer exists.
+What establishes a gap: the withdrawal (removed text and its commit, or the superseding record), the surviving enforcement or state, and its cost: a state an actor can still reach, a guard that still blocks, a case other features must still handle, data that misleads, or copy that describes behaviour that no longer exists.
 
 Not a gap:
 
 - Data kept for history when a source names that need and no reader branches on it.
-- A withdrawn rule whose removal commit states that existing data stays as it is, when no person can reach the old state.
+- A withdrawn rule whose removal commit states that existing data stays as it is, when no actor can reach the old state.
 
 ## Contradicting written rules
 
@@ -184,7 +184,7 @@ What to look for:
 - Paths that follow each reading. Search for the code each rule produced and note which commit and which instruction version it followed.
 - Conventions that decide precedence: a nested file narrows the root for its directory, a dated decision record supersedes an earlier one, an owner decision outranks both. Check whether any source states such a convention for this repository.
 
-What establishes a gap: both rules quoted with locations, the surface where they collide, and code paths that follow different rules for the same person situation (inconsistency, P12). When the sources and their origins show which rule governs, the path following the other is the finding. When nothing decides it, record `needs_owner_intent` with both readings and what each would require of the code (P5).
+What establishes a gap: both rules quoted with locations, the surface where they collide, and code paths that follow different rules for the same actor situation (inconsistency, P12). When the sources and their origins show which rule governs, the path following the other is the finding. When nothing decides it, record `needs_owner_intent` with both readings and what each would require of the code (P5).
 
 Not a gap:
 
@@ -207,7 +207,7 @@ What to look for:
 - Divergent duplicates (FIT-CLASSES.md) whose split traces back to differing instruction copies.
 - Nested copies that repeat a root rule with a narrower or wider scope than the root.
 
-What establishes a gap: the differing passages with locations, the edit history showing which copy is current and why, and code that follows the stale copy on a path where a person or a later change is affected. When history cannot show which copy states the current intent, record `needs_owner_intent`.
+What establishes a gap: the differing passages with locations, the edit history showing which copy is current and why, and code that follows the stale copy on a path where an actor or a later change is affected. When history cannot show which copy states the current intent, record `needs_owner_intent`.
 
 Not a gap:
 
@@ -221,22 +221,22 @@ Principles: P4, P8, P9
 
 Family: underfit
 
-Instruction files and decision records often state what a person must be able to do: "removed members keep read access to their own documents", "an expired invitation can be resent by any admin", "people can leave a workspace on their own". Some of those statements were never implemented, or were implemented on one path only.
+Instruction files and decision records often state what an actor must be able to do: "removed members keep read access to their own documents", "an expired invitation can be resent by any admin", "actors can leave a workspace on their own". Some of those statements were never implemented, or were implemented on one path only.
 
 What to look for:
 
-- Rules phrased as a person capability ("can", "must be able to", "keeps", "is never left without").
+- Rules phrased as an actor capability ("can", "must be able to", "keeps", "is never left without").
 - Lifecycle statements in decision records: what happens on removal, lapse, archive, expiry, role change.
 - Plan items marked done whose described behaviour has no implementation.
-- For each statement, the code path that should deliver it, traced from the person's entry point.
+- For each statement, the code path that should deliver it, traced from the actor's entry point.
 
-What establishes a gap: the statement with its location and date, its origin or a record of what was searched, the person and situation it covers, and a trace showing the situation is reachable and the stated capability is absent or broken there. The statement is intent from outside the code (P4). Its absence becomes a dead end or a prerequisite out of reach for the person (P8, P9).
+What establishes a gap: the statement with its location and date, its origin or a record of what was searched, the actor and situation it covers, and a trace showing the situation is reachable and the stated capability is absent or broken there. The statement is intent from outside the code (P4). Its absence becomes a dead end or a prerequisite out of reach for the actor (P8, P9).
 
 Not a gap:
 
-- A statement that a plan file, roadmap or decision record marks as future work, when no surface tells a person it exists.
+- A statement that a plan file, roadmap or decision record marks as future work, when no surface tells an actor it exists.
 - A statement withdrawn later in history.
-- A capability delivered through a support path that the intent names, when the person is told how to reach it.
+- A capability delivered through a support path that the intent names, when the actor is told how to reach it.
 
 ## Universal moves
 

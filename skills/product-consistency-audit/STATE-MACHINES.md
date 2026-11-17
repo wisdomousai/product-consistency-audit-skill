@@ -12,7 +12,7 @@ A state machine is implicit when no single place names its states and the moves 
 - String status columns with no constraint, compared with literals in several files, or written with values the type does not list.
 - The existence of a row standing for a stage: an invitation row means pending, its deletion means accepted or withdrawn, and readers cannot tell which.
 - Status values switched on in many files, with each writer setting the status directly.
-- Counters and attempt fields that gate behaviour (`attempts >= 3` locks the person out).
+- Counters and attempt fields that gate behaviour (`attempts >= 3` locks the actor out).
 - The same lifecycle held in more than a single runtime: a database row and a realtime server, a queue, a cache, a worker's memory or a third-party service, each with its own status and its own timer.
 - Client state that forms a machine: clusters of `isLoading`, `isSubmitting`, `hasError`, `step` variables; wizard steps in the URL, local storage or a cookie; optimistic updates with their own rollback logic.
 - Soft deletion combined with a status, so a record can be `active` and deleted at once.
@@ -24,13 +24,13 @@ DATA-MODEL-AND-STATE.md covers single states and fields: a status without an exi
 
 **Bar for a finding.** P14 (PRINCIPLES.md) asks that each lifecycle is defined once and that every writer and reader goes through that definition. An implicit lifecycle becomes a finding when it costs someone something:
 
-- A person sees conflicting answers about the same record, is moved to a state the product means to forbid, or is left in a state with no next action.
+- An actor sees conflicting answers about the same record, is moved to a state the product means to forbid, or is left in a state with no next action.
 - An agent that operates the product through its API, CLI or tools cannot tell the state or the allowed next actions, attempts a move the product rejects, and gets an error that names neither.
 - A developer or a coding agent changing the lifecycle has to change several places that have already drifted, or follows an instruction file whose prose no longer matches the code.
 
 **Who uses a state machine.** Every finding and recommendation names its effect on the applicable groups below. When a group is unaffected, say so; do not invent a human UI consequence for an internal technical task:
 
-- **People using the product** (UX): the states they see, what each state lets them do, the way out of each, and the message when a move is refused.
+- **Actors using the product** (UX): the states they see, what each state lets them do, the way out of each, and the message when a move is refused.
 - **Developers** (DX): how many places define the states, where a new state or move gets added, whether types and constraints reject an invalid state, and whether checks exercise the moves.
 - **Agents** (AX): coding agents editing the repository, and agents that use the product through an API, SDK, CLI or tool server. An agent should find the machine from a file the instruction files point to, read the state and the allowed next actions from tool and API responses, and get a refusal that names the current state and what is allowed from it.
 
@@ -59,7 +59,7 @@ What to look for:
 - States named in copy or docs ("Expired", "Awaiting payment") that no field holds and that each screen computes differently.
 - Time-derived states computed in several places with different clocks, time zones or boundaries (`<` in one, `<=` in another).
 
-What establishes a gap: the machine, at least a pair of reader expressions with paths, a combination a writer can produce, and the person, agent or developer who gets a different answer on each surface or path.
+What establishes a gap: the machine, at least a pair of reader expressions with paths, a combination a writer can produce, and the actor, agent or developer who gets a different answer on each surface or path.
 
 Not a gap:
 
@@ -81,7 +81,7 @@ What to look for:
 - Writers that skip side effects the main path performs on the same move (notifications, timestamps, counters, cache invalidation, an update to another runtime).
 - Recovery or clean-up code that writes values outside the vocabulary.
 
-What establishes a gap: the move, the writer that performs it without the guard or the side effect, the writer that enforces it, the source that says which is intended, and the person, agent or record affected.
+What establishes a gap: the move, the writer that performs it without the guard or the side effect, the writer that enforces it, the source that says which is intended, and the actor, agent or record affected.
 
 Not a gap:
 
@@ -100,10 +100,10 @@ What to look for:
 
 - For each machine, every runtime that holds its state and the vocabulary each uses.
 - Moves that reach a single runtime: a timer ending the realtime session without updating the row, an API call ending the row while the realtime server keeps running, a third-party webhook that is never delivered.
-- Readers that trust different runtimes, so a launcher, a list and a person's screen each show a different state.
+- Readers that trust different runtimes, so a launcher, a list and an actor's screen each show a different state.
 - Recovery code that reconciles the runtimes and writes values the vocabulary does not list.
 
-What establishes a gap: the runtimes, a move that updates only part of them, the readers that then disagree, and the person or agent who sees the disagreement or is blocked by the stale copy.
+What establishes a gap: the runtimes, a move that updates only part of them, the readers that then disagree, and the actor or agent who sees the disagreement or is blocked by the stale copy.
 
 Not a gap:
 
@@ -122,15 +122,15 @@ What to look for:
 
 - Independent loading, submitting, error and success variables on a screen, and the combinations they allow: loading and error at once, success shown after a failed save.
 - A failure branch that leaves a spinner or a disabled button with no way to retry (P11).
-- Wizard steps or progress kept in the client that outlive the server record, so the person is sent to a step for a record that moved on or was removed (P10).
+- Wizard steps or progress kept in the client that outlive the server record, so the actor is sent to a step for a record that moved on or was removed (P10).
 - Optimistic updates whose rollback leaves the client in a state the server never had.
 - Reloads and second tabs that rebuild client state from defaults instead of from the server.
 
-What establishes a gap: the screen, the client variables, a reachable combination or divergence, and what the person sees and can do there.
+What establishes a gap: the screen, the client variables, a reachable combination or divergence, and what the actor sees and can do there.
 
 Not a gap:
 
-- Purely visual state (an open menu, a hover) that changes nothing the person can do.
+- Purely visual state (an open menu, a hover) that changes nothing the actor can do.
 - Client state rebuilt from the server on every load, when the source accepts the delay before it refreshes.
 
 ## Lifecycle hidden from agents
@@ -162,7 +162,7 @@ A finding from this file recommends a shape for the whole machine, and that shap
 
 Start from this shape and remove whatever the machine does not need (P6):
 
-- **State names.** Name each state for what it means to the person or agent who sees it. A step that only the system cares about stays out of a state that people see. Remove states only after checking all readers and technical obligations. A new state needs a task situation or technical invariant behind it, such as recovery or coordination.
+- **State names.** Name each state for what it means to the actor or agent who sees it. A step that only the system cares about stays out of a state that actors see. Remove states only after checking all readers and technical obligations. A new state needs a task situation or technical invariant behind it, such as recovery or coordination.
 - **Definition.** The states and the allowed moves live in one module, written in the target's existing idiom: an enum with a transition map, a reducer, a typed union, a database type with a constraint mirroring it. Do not recommend a new state machine library unless the target already uses one.
 - **Storage.** When the states exclude each other, a single field holds the state. Timestamps stay as history beside it and stop being read as state. A state that time alone produces (expired) is computed by a function next to the definition.
 - **Transition function.** Every writer calls the same transition function. It checks the move against the definition, applies the move's side effects in one place, and refuses a disallowed move with an error that names the current state and the moves allowed from it.
@@ -198,8 +198,8 @@ A recommended change to a machine must keep every existing record, caller and st
 1. Re-derive the intended states and moves from the sources before reading the candidate's wording.
 2. Confirm every writer, reader, runtime and contract cited, and search for ones the candidate missed: jobs, webhooks, admin tools, recovery scripts, migrations, tool servers and second apps.
 3. For disagreeing readers, confirm that a writer can produce the combination they disagree on. A constraint that prevents the combination refutes the finding.
-4. For an unguarded move, confirm the source that forbids it and that the unguarded writer is reachable by a person or agent.
-5. For a hidden lifecycle, confirm the agent surface or instruction text, and that the sources name agents, API clients or tool users as people the product serves, or that the instruction files direct coding agents.
+4. For an unguarded move, confirm the source that forbids it and that the unguarded writer is reachable by an actor or agent.
+5. For a hidden lifecycle, confirm the agent surface or instruction text, and that the sources name agents, API clients or tool users as actors the product serves, or that the instruction files direct coding agents.
 6. Check `remediation.experience`: each of `human_users`, `developers` and `agents` names a concrete improvement, or says why none is possible and the decision is put to the owner.
 7. Check `remediation.change_safety` against source: every value writers produce is mapped, every writer and reader cited is listed, every contract found is listed, and the steps keep each existing caller working. A missing writer, reader, value or contract makes the record need a correction before it is final.
 8. For overfit elements of the machine, look for a stated need such as audit history, compliance or recovery. If one exists, reject. The source must pass the provenance test in P4 (PRINCIPLES.md).
