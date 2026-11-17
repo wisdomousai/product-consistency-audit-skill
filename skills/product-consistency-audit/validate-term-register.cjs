@@ -35,6 +35,7 @@ const SIGNALS = new Set([
   "in_prompt_or_tool",
   "locales_differ",
   "undefined_in_glossary",
+  "glossary_inventory",
 ]);
 const SURFACES = new Set(["schema", "code", "api", "copy", "prompt", "tool_description", "doc", "instruction", "test"]);
 const FORM_KINDS = new Set(["word", "identifier"]);
@@ -99,7 +100,12 @@ function checkVerdict(value, base, errors, extra = [], extraRequired = []) {
 
 function checkResultingTerm(value, base, errors) {
   const keys = ["term", "definition", "is", "is_not", "forms", "identifiers"];
-  if (!checkKeys(value, keys, keys, base, errors)) return;
+  if (!checkKeys(value, [...keys, "avoid"], keys, base, errors)) return;
+  if ("avoid" in value) {
+    checkArray(value.avoid, `${base}.avoid`, errors).forEach((word, i) => {
+      if (!isText(word)) errors.push(`${base}.avoid[${i}]: invalid text`);
+    });
+  }
   for (const field of ["term", "definition"]) if (!isText(value[field])) errors.push(`${base}.${field}: invalid text`);
   for (const field of ["is", "is_not"]) {
     checkArray(value[field], `${base}.${field}`, errors, { nonempty: true }).forEach((example, i) => {

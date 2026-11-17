@@ -192,6 +192,11 @@ test("rejects duplicate ids, absolute refs and line 0", () => {
   assert.match(errors, /basis\[0\]\.line: must be a positive integer or null/);
 });
 
+test("accepts the glossary inventory signal and words to avoid", () => {
+  assert.equal(errorsFor((t) => { t.selected_for = ["glossary_inventory"]; t.outcome.resulting_terms[1].avoid = ["paid visit", "Helfer"]; }), "");
+  assert.match(errorsFor((t) => { t.outcome.resulting_terms[1].avoid = [""]; }), /resulting_terms\[1\]\.avoid\[0\]: invalid text/);
+});
+
 test("with decisions, every cited decision id must exist", () => {
   assert.equal(errorsFor(() => {}, visit, new Set(["T1", "T2", "T3"])), "");
   assert.match(errorsFor(() => {}, visit, new Set(["T1", "T3"])), /cases\[1\]\.answer\.decision_id: decision T2 is not in decisions\.json/);

@@ -1,6 +1,6 @@
 ---
 name: product-consistency-audit
-description: Audit whether an implementation serves its intended human users, agents and technical tasks. Find missing task paths, unnecessary machinery and conflicting behaviour using sourced requirements. Use for focused flow, tool, data-model, state-machine or domain-term reviews, or explicit full codebase audits with verified findings and owner decisions.
+description: Audit whether an implementation serves its intended human users, agents and technical tasks. Find missing task paths, unnecessary machinery and conflicting behaviour using sourced requirements. Use for focused flow, tool, data-model, state-machine or domain-term reviews, for building a domain glossary by asking the owner example cases, or for explicit full codebase audits with verified findings and owner decisions.
 ---
 
 # Product Consistency Audit
@@ -18,6 +18,8 @@ An actor may be a human user, developer, operator, agent or automated service. S
 **Guidance is the default.** For a focused question about a flow, rule, task or model, read P1–P5 in [PRINCIPLES.md](PRINCIPLES.md), then the relevant fit principles and reference sections below. Include each selected principle's “Not a gap” distinction. Read additional sections as evidence makes them relevant; do not load every companion or the full-audit procedures. Do not create audit artifacts. Return the supported conclusion, source locations, uncertainty and smallest useful change. Do not claim independent verification unless it occurred.
 
 **Full audit requires an explicit request** to audit a codebase end to end or produce audit artifacts. Read [FULL-AUDIT.md](FULL-AUDIT.md) before starting. It defines the six phases, profiles, budgets, write ownership, prior runs and validation requirements. A completed full audit requires actual artifacts, a maintained ledger, executed validators and independent review. If those cannot be completed, report the run as incomplete with its demonstrated coverage.
+
+**Glossary build requires an explicit request**, such as "build the glossary" or "define our domain terms". Read [DOMAIN-TERMS.md](DOMAIN-TERMS.md), Glossary build, and P4, P5 and P15. It lists the domain terms, settles each with the owner through example cases, and writes `GLOSSARY.md`. It does not audit the code and does not need FULL-AUDIT.md.
 
 In guidance mode, when the answer would change under another reading of a domain word, search the word on at least two kinds of surface (schema or code, and copy, prompts or tool descriptions) and state the reading used, with its source. If two readings survive, ask the owner one example case ("A neighbour with no account drops in. Is that a visit?") or give the conclusion under each reading. For a word with no written definition, propose one with what it covers and what it does not, and confirm it with cases.
 

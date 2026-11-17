@@ -38,12 +38,15 @@ You can also ask a focused question:
 - "Can an agent complete an export using only the documented tools?"
 - "Does the worker meet the documented restart and retry requirements?"
 - "What does 'visit' mean in this codebase, and where do the meanings differ?"
+- "Build the glossary."
 
 Focused questions use guidance mode and write no audit files. They load the intent principles and relevant domain sections, without full-audit coordination. A full audit writes its reports to `~/product-consistency-audit/<repo-name>/run-<N>`, outside the codebase. It requires a maintained ledger, independent review and successful execution of all five artifact validators; missing capabilities or unfinished verification produce an incomplete audit.
 
 To limit a run, name a profile (`quick`, `standard` or `deep`), part of the codebase, roles to audit as, or a budget in agent invocations. For example: "Audit this product as an invited colleague and as a buyer on the free plan, using the quick profile."
 
 You can request a term audit with "Check our domain terms." Agents build behaviour from a reading of a word: a coding agent that reads "visit" next to "companion" builds rules for paid visits, and a family member's visit then shows as needing cover. The audit selects the words that name records, gate behaviour or appear in prompts and tool descriptions, collects the senses in which the code and copy use each one, and asks you example cases one at a time ("A neighbour with no account drops in. Is that a visit?"). From your answers it settles each word: keep, define, redefine, rename, split or merge. Words the glossary is missing get a definition with what they cover and what they do not. The results go into `term-register.json` and a `GLOSSARY-PROPOSAL.md` for the target's glossary. Full audits run a shorter version of this check on the most important words.
+
+To build a complete glossary without an audit, ask "Build the glossary." The skill lists every domain term it finds in the schema, copy, prompts and docs, ranked by how much behaviour depends on each one, and you drop or add terms before it starts. It then asks example cases one term at a time. A clear term gets one confirmation question, and later questions use the words you have already settled. The result is `GLOSSARY.md`: each term with its definition, what it covers and what it does not, its words in each language, words to avoid, and old code names mapped to the current term. Code that contradicts a definition is listed in `MISMATCHES.md` for a later audit. You can stop at any point, and the next run continues with the open terms.
 
 You can request a state machine audit with "Find the implicit state machines in this codebase." Full audits already record state machines in `state-machines.json`; this scope examines them in detail, including lifecycles spread across booleans, timestamps or separate runtimes. Where a machine causes a problem, the audit recommends a simpler or more complete design and identifies the stored data and callers that a change must account for.
 
@@ -91,7 +94,7 @@ All skill files are in [`skills/product-consistency-audit/`](skills/product-cons
 | `VALIDATION-AND-OWNER-REVIEW.md` | Verification, reports and decision review |
 | `INSTRUCTIONS-AND-MEMORY.md` | Rule origins in instructions, memories and plans |
 | `TECHNICAL-AND-AGENT-TASKS.md` | Agent tasks, development workflows and operational requirements |
-| `DOMAIN-TERMS.md` | Domain words, glossaries, senses and the owner term check |
+| `DOMAIN-TERMS.md` | Domain words, the owner term check and the glossary build |
 | `DATA-MODEL-AND-STATE.md` | Schemas, enums and flags |
 | `STATE-MACHINES.md` | Lifecycle design and safe changes |
 | `ACCESS-AND-IDENTITY-FLOWS.md` | Sign-up, sessions, invitations and roles |

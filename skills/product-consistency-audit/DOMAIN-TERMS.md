@@ -2,7 +2,7 @@
 
 ## When to use this file
 
-Select this file whenever reconnaissance selects a term for `term-register.json` (RECONNAISSANCE.md, Term register). Terms are selected by signal, never because a word is common. The surfaces are:
+Select this file whenever reconnaissance selects a term for `term-register.json` (RECONNAISSANCE.md, Term register). In an audit, terms are selected by signal, never because a word is common. A glossary build (below) takes every domain term instead. The surfaces are:
 
 - Words that name records, statuses, role fields and actions in the schema, APIs and tools.
 - Glossaries, vocabulary sections in style or voice guides, vocabulary lint tools, and product descriptions that define domain words, by statement or by example.
@@ -44,8 +44,9 @@ The parent selects a term for the register when at least one signal holds:
 - `in_prompt_or_tool`: it appears in a model prompt the product sends or a tool description.
 - `locales_differ`: locales translate it with words that carry different meanings.
 - `undefined_in_glossary`: the glossary defines its neighbours and omits it, or defines it only by example.
+- `glossary_inventory`: a glossary build listed it, and the owner kept it on the list. Only a glossary build uses this signal.
 
-A word with no signal gets no entry. Default caps are 3 terms in `quick`, 6 in `standard` and 12 in `deep`, ranked by the number of signals and then by the number of capabilities that use the term. List the rest in `architecture.md` as not examined. Words for roles ("member", "admin", "companion") go to the Actors and organisation check unless a gate reads a role word in more than one sense.
+In an audit, a word with no signal gets no entry. Default caps are 3 terms in `quick`, 6 in `standard` and 12 in `deep`, ranked by the number of signals and then by the number of capabilities that use the term. List the rest in `architecture.md` as not examined. Words for roles ("member", "admin", "companion") go to the Actors and organisation check unless a gate reads a role word in more than one sense.
 
 ## Example cases
 
@@ -69,7 +70,60 @@ After the cases, read the definition back with its is and is-not lists, and ask 
 - **Split**: each sense gets its own word and definition, for example visit, session and appointment.
 - **Merge**: two words name one thing, and one survives.
 
-Every resulting term has a definition, at least one is case and one is-not case, its words in each locale, and either `unchanged` identifiers or a mapping from old to new.
+Every resulting term has a definition, at least one is case and one is-not case, its words in each locale, and either `unchanged` identifiers or a mapping from old to new. It may list in `avoid` the words that must not be used for it, such as "helper" for a paid companion.
+
+## Glossary build
+
+A glossary build finds the product's domain terms, settles each one with the owner through example cases, and writes a complete glossary. It starts only on an explicit request, such as "build the glossary", "build a glossary for this codebase" or "define our domain terms". It does not audit the code: it writes no ledger and no findings, and it runs no hunters or verifiers.
+
+**Setup.** Resolve the target, the repo name and the source ref as in FULL-AUDIT.md, Full audit setup. The output directory defaults to `~/product-consistency-audit/<repo-name>/glossary-<N>`. Read the latest earlier glossary build or audit run for the same repo. A term settled there carries over when its definitions and use sites are unchanged and its decisions have `owner_statement` provenance. Earlier `open` and `unconfirmed` terms continue where they stopped. The execution boundary in SKILL.md applies: read source, docs and history only, and never edit the target.
+
+**Inventory.** Launch one `research` agent with this prompt:
+
+```text
+List the domain terms of <target>: the nouns and verbs for the records, events,
+roles, places and actions that the product, its users and its agents talk about.
+Read the schema and migrations, API and tool schemas, tool and MCP descriptions,
+model prompts the product sends, copy in every locale, docs, guides, glossaries,
+vocabulary lint tools and instruction files. Do not run anything and do not
+decide what a term should mean. Leave out programming terms (request, cache,
+handler) and everyday words that carry no product meaning. Return per term:
+1. The term as the sources write it, and its forms: each locale's words and the
+   identifiers that use it.
+2. Its written definition, quoted with location, the example sentences that
+   imply one, or "none".
+3. The surfaces it appears on, with a count and two or three repository-relative
+   file:line examples.
+4. The signals from DOMAIN-TERMS.md, Term selection, that hold for it.
+5. Words that seem to name the same thing, and words the glossary says to avoid.
+Then list existing glossaries and vocabulary sections, with their format.
+```
+
+Save its report as `recon/inventory.md`. Rank the terms by the behaviour that depends on them: the number of signals, then the number of surfaces. Show the owner the ranked list with each term's glossary status, and let them drop terms, add terms and merge obvious duplicates before any case is asked. Roles go on the same list, since a glossary build has no separate actor check.
+
+**Senses.** Run agent 1f (RECONNAISSANCE.md) on the kept terms, in batches of about ten in ranked order, so that the first questions can start while later batches are read. Write each term to `term-register.json` with `status: "open"`, `glossary_inventory` in `selected_for`, and any other signal that holds. Validate the register after each batch.
+
+**Questions.** Ask the terms in ranked order, with the method in Example cases and Outcomes and the question format of the Owner term check (RECONNAISSANCE.md).
+
+- A term with one sense, a written definition that matches its uses, and no signal other than `glossary_inventory` gets one confirmation question: the definition read back with one is case and one is-not case. "Yes" settles it as `keep`, or as `define` when the definition was only implied.
+- Other terms get use-site cases, boundary cases and the outcome question, with the five-case limit.
+- Once a term is settled, later cases use the settled words. After the owner says booked companion time is a "session", a later case says "a session", not "a paid visit".
+- When the answers show a thing with no word, add it to the list with `glossary_status: "missing"`, propose a word, and ask its cases next.
+- Record each answer in `decisions.json` as in the Owner term check, and validate the register with `decisions.json` after each settled term.
+
+The owner may stop at any point. Terms not yet asked stay `open`, and the next glossary build continues with them.
+
+**Uses that differ.** When a use site contradicts a settled definition, such as code that treats every visit as paid time, list it in `<output-dir>/MISMATCHES.md` with the term, the file and line, and what the code assumes. Do not trace it further. A later audit or term run can start from that file.
+
+**Glossary.** Write `<output-dir>/GLOSSARY.md` with every settled term, including terms kept as they were:
+
+- The term and its definition.
+- What it covers and what it does not, from the owner's is and is-not cases.
+- Its words in each locale, and the words to avoid.
+- Old identifiers and the term they now mean, when a rename or split leaves them unchanged.
+- Related terms, such as the other terms of a split.
+
+When the target has a glossary, follow its format and order, and mark each entry as new, changed or unchanged. When it has none, name the file where one should live, following the target's documentation and instruction-file conventions. End with the terms still `open` or `unconfirmed`. After the session, offer to apply the glossary to the target, and start only when the owner says so.
 
 ## Term narrowed to one case
 
