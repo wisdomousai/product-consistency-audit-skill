@@ -198,15 +198,7 @@ Write `<output-dir>/decision-tree.json` from the final `confirmed` and `needs_ow
 
 #### Run the session
 
-Choose one unresolved decision whose prerequisites are decided. Ask that question with a recommended answer and wait for the owner's response before selecting the next. Prioritize term and intent questions that unblock other decisions; do not bundle independent questions into a round.
-
-```
-❓ **Q1** - **<decision title>**: <what the product does now, for which actor, and why it does not fit the intent; the options>
-
-➡️ <recommended answer, with the fingerprint(s) it resolves>
-```
-
-Word each question so that "yes" accepts the recommendation. Keep the body to what the owner needs to decide: the actor, the situation, the intent source, and the options. Offer the full trace when asked.
+Choose one unresolved decision whose prerequisites are decided. Ask that question with a recommended answer, as described in Ask the owner below, and wait for the owner's response before selecting the next. Prioritize term and intent questions that unblock other decisions; do not bundle independent questions into a round.
 
 Facts are the parent's job. When a question needs a fact (a file, a commit, what a screen shows), look it up or dispatch a `research` agent; do not ask the owner. Only the questions that depend on that fact wait. Decisions are the owner's; never answer one on their behalf.
 
@@ -214,9 +206,47 @@ Each answer reshapes the tree. An answer to an intent question may turn findings
 
 The session ends when no decisions remain and the owner confirms the understanding is shared. If the owner is not available, stop after writing the summary and the tree, and say that the session is pending. Recommendations in an unanswered tree are the audit's opinions and are never recorded as decisions.
 
+#### Ask the owner
+
+Every question the skill puts to the owner uses these rules: the memory question and the Actors and organisation check in reconnaissance, the Owner term check, the glossary build, guidance mode and this session.
+
+**Use the structured question tool.** When the platform has a tool that asks the user a question with options, such as `AskUserQuestion` in Claude Code, ask every owner question with it. Write the question as plain text only when no such tool exists.
+
+- One decision per call. Cases for the same term go one per call, because each answer shapes the next case.
+- **Header**: the decision ID and a word or two, at most 12 characters, such as `T1 visit` or `Q3 invite`.
+- **Question**: one or two short sentences, at most about 40 words: the situation and what you are asking. Leave the trace, the sources and the reasoning out of the question.
+- **Options**: two to four, each a different answer. Put the recommended answer first and end its label with "(Recommended)". Labels are at most five words. Each description is one sentence that says what follows from that answer: the fix, the term outcome, or the findings it resolves. When the sources are silent, give the options without a recommendation.
+- Do not add an "Other" option. The tool adds a free-text answer, and the owner's own words always count.
+- **Evidence**: when the owner needs a fact to decide, such as what the product does now, put it in the recommended option's description in one line with the file and line, or in an option `preview` when the tool supports one. Give the full trace only when the owner asks.
+- Use `multiSelect` only for choices that do not exclude each other, such as which of up to four terms to drop from a glossary list.
+
+A term case with the tool:
+
+```json
+{
+  "header": "T1 visit",
+  "question": "A neighbour with no account drops in on Tuesday. Is that a visit?",
+  "options": [
+    {"label": "Yes, a visit (Recommended)", "description": "Today she can't be the visitor and the day shows Needs cover (visit-status.ts:15); this would change."},
+    {"label": "No, something else", "description": "She is not a visit; you name what it is."}
+  ],
+  "multiSelect": false
+}
+```
+
+**Plain text.** Without the tool, use the same limits and this format:
+
+```
+❓ **Q1 - <title>**: <the situation and the question, at most about 40 words>
+
+➡️ <recommended answer in one sentence>, <the fingerprints or term it resolves>
+```
+
+Word plain-text questions so that "yes" accepts the recommendation.
+
 #### Record the decisions
 
-Write `<output-dir>/decisions.json` and a short `<output-dir>/DECISIONS.md`. For every decision: an `id` (`Q<n>`, or `T<n>` for term decisions), the question, the owner's answer in their words, the fingerprints it resolves, and the resulting action (fix now, fix later, accepted as intended, rule kept, rule narrowed, rule removed, or a term action from the Owner term check in [RECONNAISSANCE.md](RECONNAISSANCE.md)). A term decision also records the term ID and, for a case, the case ID. Record how each answer was given in `answered_as`: `own_words`, `accepted_recommendation` ("yes" to that single question) or `bulk_accepted` (one reply accepting several questions without answering each). An `own_words` answer, or a "yes" to a single question that put the deciding point to the owner, has `owner_statement` provenance under P4. For imported decisions or an unsolicited reply accepting several recommendations at once, preserve `bulk_accepted` provenance. Ask about an individual deciding point only if its authority remains material under P4. For accepted-as-intended and rule decisions, record the owner's statement of intent with the date; later runs use it as an intent source at the provenance its `answered_as` gives.
+Write `<output-dir>/decisions.json` and a short `<output-dir>/DECISIONS.md`. For every decision: an `id` (`Q<n>`, or `T<n>` for term decisions), the question, the owner's answer in their words, the fingerprints it resolves, and the resulting action (fix now, fix later, accepted as intended, rule kept, rule narrowed, rule removed, or a term action from the Owner term check in [RECONNAISSANCE.md](RECONNAISSANCE.md)). A term decision also records the term ID and, for a case, the case ID. Record how each answer was given in `answered_as`: `own_words` (free text), `chose_option` (an option other than the recommendation), `accepted_recommendation` ("yes" or the recommended option, to that single question) or `bulk_accepted` (one reply accepting several questions without answering each). An `own_words` or `chose_option` answer, or acceptance of the recommendation to a single question that put the deciding point to the owner, has `owner_statement` provenance under P4. For imported decisions or an unsolicited reply accepting several recommendations at once, preserve `bulk_accepted` provenance. Ask about an individual deciding point only if its authority remains material under P4. For accepted-as-intended and rule decisions, record the owner's statement of intent with the date; later runs use it as an intent source at the provenance its `answered_as` gives.
 
 Write `<output-dir>/GLOSSARY-PROPOSAL.md` from every settled term whose outcome is not `keep`: the term, its definition, its is and is-not cases, its words in each locale, the mapping from old identifiers if any, and the target glossary file and section it belongs in. When the target has no glossary, name the file where one should live, following the target's documentation and instruction-file conventions. Run `validate-term-register.cjs` with `decisions.json` once more.
 

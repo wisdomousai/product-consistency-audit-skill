@@ -4,7 +4,7 @@
 
 The parent initializes `run-metadata.json`, applies the budget reservations in [FULL-AUDIT.md](FULL-AUDIT.md), then creates agent directories and the shared ledger before hunting. Reconnaissance reads source, documentation, instruction files and git history. It does not run the target, contact deployed services, or write files; agents return structured facts to the parent.
 
-Before launch, ask the owner whether agent memories or session transcripts for this repository are kept outside it (per-user project memory directories are common) and whether any may be read. Pass the paths the owner gives to agent 1b.
+Before launch, ask the owner, with the rules in [Ask the owner](VALIDATION-AND-OWNER-REVIEW.md#ask-the-owner), whether agent memories or session transcripts for this repository are kept outside it (per-user project memory directories are common) and whether any may be read. Pass the paths the owner gives to agent 1b.
 
 When the host already loads a memory index for this repository into the parent's session, the owner has made it part of the working context. Treat those memory paths as named: tell the owner which paths agent 1b will read, and do not ask again. They stay read only, and their rules are read for purpose and origin like any other written rule ([INSTRUCTIONS-AND-MEMORY.md](INSTRUCTIONS-AND-MEMORY.md)).
 
@@ -285,7 +285,7 @@ Run `node <skill-dir>/validate-state-machines.cjs <output-dir>/state-machines.js
 
 Every finding depends on who the actors are and how they relate. Reconnaissance builds that map from sources, code and memories, which can disagree or be out of date. A role the owner sees as a position inside an organisation can be modelled as a separate party, for example. Hunting on a wrong map produces findings that all have to be redone.
 
-After the intent register is written and validated, check the map against existing sources and owner decisions. Before hunting dependent units, put only material unresolved relations to the owner, one question at a time, in the format of Phase 6 ([VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md), Run the session):
+After the intent register is written and validated, check the map against existing sources and owner decisions. Before hunting dependent units, put only material unresolved relations to the owner, one question at a time, with the rules in [Ask the owner](VALIDATION-AND-OWNER-REVIEW.md#ask-the-owner):
 
 - Each unresolved actor role and task, with its organisation or group where relevant. For agents and services, include whom they act for, the interfaces they can use and their authority.
 - Each relation between kinds of organisation and actor that the gates depend on: who belongs to whom, who acts for whom, who leads a case or account, and who may read what another actor writes.
@@ -345,20 +345,22 @@ Run `node <skill-dir>/validate-term-register.cjs <output-dir>/term-register.json
 
 ## Owner term check
 
-Run this check in the same sitting as the Actors and organisation check, after it, and before hunting units that depend on a term. It follows the session format of Phase 6 ([VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md), Run the session).
+Run this check in the same sitting as the Actors and organisation check, after it, and before hunting units that depend on a term. Ask each question with the rules in [Ask the owner](VALIDATION-AND-OWNER-REVIEW.md#ask-the-owner), which use the structured question tool when the platform has one.
 
-- Ask one case per question, as a situation with ordinary people, what the product does with it now, and the file and line. Never ask the owner for a definition.
-- Word the question so "yes" accepts the recommendation. When the sources are silent, say so and give no recommendation.
+- Ask one case per call, as a situation with ordinary people. What the product does with it now, with the file and line, goes in the recommended option's description. Never ask the owner for a definition.
+- Put the recommended answer first. When the sources are silent, give no recommendation.
 - Ask one use-site case per sense, then boundary cases that change one attribute of an answered case, as described in [DOMAIN-TERMS.md](DOMAIN-TERMS.md), Example cases.
-- Accept answers in the owner's own words, including answers that reject every option offered. Record them verbatim in `words`.
+- Accept free-text answers, including answers that reject every option offered. Record them verbatim in `words`.
 - Stop a term at five cases, or when two answers in a row move no boundary.
-- Then read the definition back with its is and is-not lists, and ask the outcome as the final question for that term. For a term with no definition, the read-back is the proposed glossary entry.
+- Then ask the outcome as the final question for that term, with options such as keep, split or redefine. Put the definition with its is and is-not lists in the recommended option's `preview`, or in a short table before the question when the tool has no preview. For a term with no definition, this read-back is the proposed glossary entry.
 - When the answers show a situation no selected term covers, ask a case that names it and propose a word. A new word gets its own register entry with `glossary_status: "missing"` and the outcome `define`.
 
-```
-❓ **T1** - **visit**: A neighbour with no account drops in on Tuesday. The schedule cannot name her as the visitor and shows Needs cover (apps/web/lib/visit-status.ts:15). Is that a visit?
+With the question tool, this case is the example in [Ask the owner](VALIDATION-AND-OWNER-REVIEW.md#ask-the-owner). In plain text:
 
-➡️ Yes. A visit is anyone from the support network spending time with the person (PRODUCT.md:22), so she should be the visitor and nothing needs cover.
+```
+❓ **T1 - visit**: A neighbour with no account drops in on Tuesday. Is that a visit?
+
+➡️ Yes; today she can't be the visitor and the day shows Needs cover (visit-status.ts:15).
 ```
 
 Record each question in `decisions.json` with `id: "T<n>"`, the term ID, the case ID, the owner's answer in their words, `answered_as`, and the action `term_case`, or for the final question `term_kept`, `term_defined`, `term_redefined`, `term_renamed`, `term_split` or `term_merged`. Provenance follows Phase 6. A bulk reply leaves the term `open` and the cases it covered unanswered.

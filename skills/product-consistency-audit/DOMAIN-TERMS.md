@@ -57,7 +57,7 @@ The owner is never asked for a definition. Each question is one situation with o
 - **Undefined terms.** For a term with no definition, the cases build one. Start from the use sites, then test the edges the code assumes.
 - **Missing words.** When the answers show a thing the product has no word for, such as accompanying the person to their own appointment, ask a case that names it and propose a word.
 
-Ask one case per question, worded so "yes" accepts the recommendation. When the sources are silent, give no recommendation. Accept answers in the owner's own words, including answers that reject every option offered. Stop a term at five cases, or when two answers in a row move no boundary.
+Ask one case per call with the rules in [Ask the owner](VALIDATION-AND-OWNER-REVIEW.md#ask-the-owner): the structured question tool when the platform has one, a short question, the recommended answer first. When the sources are silent, give no recommendation. Accept free-text answers, including answers that reject every option offered. Stop a term at five cases, or when two answers in a row move no boundary.
 
 ## Outcomes
 
@@ -99,7 +99,7 @@ handler) and everyday words that carry no product meaning. Return per term:
 Then list existing glossaries and vocabulary sections, with their format.
 ```
 
-Save its report as `recon/inventory.md`. Rank the terms by the behaviour that depends on them: the number of signals, then the number of surfaces. Show the owner the ranked list with each term's glossary status, and let them drop terms, add terms and merge obvious duplicates before any case is asked. Roles go on the same list, since a glossary build has no separate actor check.
+Save its report as `recon/inventory.md`. Rank the terms by the behaviour that depends on them: the number of signals, then the number of surfaces. Show the owner the ranked list as a short table with each term's glossary status. Then ask with the question tool whether to keep the list as it is (recommended) or edit it, and take drops, additions and merges of obvious duplicates as free text. Roles go on the same list, since a glossary build has no separate actor check.
 
 **Senses.** Run agent 1f (RECONNAISSANCE.md) on the kept terms, in batches of about ten in ranked order, so that the first questions can start while later batches are read. Write each term to `term-register.json` with `status: "open"`, `glossary_inventory` in `selected_for`, and any other signal that holds. Validate the register after each batch.
 

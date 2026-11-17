@@ -44,7 +44,7 @@ Every finding needs a named actor and goal, intent grounded outside the implemen
 
 For a stuck task, check the supported exits. For overfit, establish both the unnecessary distinction and its cost, and look for technical or operational needs that justify it. Recommend the smallest change that restores the fit, including an instruction change when its wording caused the excess. Do not modify the target as part of the audit.
 
-Put decisions to the owner one at a time with a recommended answer and the evidence needed to decide. Use existing answers; never answer for the owner or record an unanswered recommendation as a decision. Full-audit recording lives in [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md).
+Put decisions to the owner one at a time with a recommended answer and the evidence needed to decide, using the platform's structured question tool when it has one and the rules in [Ask the owner](VALIDATION-AND-OWNER-REVIEW.md#ask-the-owner). Use existing answers; never answer for the owner or record an unanswered recommendation as a decision. Full-audit recording lives in [VALIDATION-AND-OWNER-REVIEW.md](VALIDATION-AND-OWNER-REVIEW.md).
 
 ## Execution boundary
 
